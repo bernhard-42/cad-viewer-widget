@@ -2,6 +2,7 @@
   "name": "cad-viewer-widget",
   "version": "0.1.0",
   "description": "A Jupyter widget to view cad objects",
+  "license": "MIT",
   "author": "Bernhard Walter",
   "main": "lib/index.js",
   "repository": {
@@ -39,7 +40,7 @@
     "js-base64": "^3.6.1",
     "lodash": "^4.17.4",
     "pako": "^2.0.3",
-    "three-cad-viewer": "^0.9.0-beta.9"
+    "three-cad-viewer": "^0.9.0-beta.12"
   },
   "jupyterlab": {
     "extension": "lib/labplugin",

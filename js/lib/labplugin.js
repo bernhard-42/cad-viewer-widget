@@ -10,7 +10,7 @@ module.exports = {
       version: plugin.version,
       exports: plugin
     });
-    console.log("JupyterLab widget 'cad-viewer-widget' is registered", plugin);
+    console.log("JupyterLab widget 'cad-viewer-widget' is registered");
   },
   autoStart: true
 };

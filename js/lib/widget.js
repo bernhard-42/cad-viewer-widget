@@ -3,6 +3,7 @@ import { extend } from 'lodash';
 import { Viewer, Display, Timer } from 'three-cad-viewer'
 import { decode } from './serializer.js'
 
+
 export var CadViewerModel = DOMWidgetModel.extend({
     defaults: extend(DOMWidgetModel.prototype.defaults(), {
         _model_name: 'CadViewerModel',
@@ -12,69 +13,53 @@ export var CadViewerModel = DOMWidgetModel.extend({
         _model_module_version: '0.1.0',
         _view_module_version: '0.1.0',
 
-        shapes: null,
-        states: null,
         options: null,
-        tracks: null,
+        shapes: null,
+        tracks: null
     })
 });
 
 export var CadViewerView = DOMWidgetView.extend({
 
     render: function () {
-        this.value_changed();
+        this.createDisplay();
+        this.model.on('change:shapes', this.addShapes, this);
+        this.model.on('change:tracks', this.value_changed, this);
+    },
 
-        const needsAnimationLoop = this.options.needsAnimationLoop;
-        const measure = this.options.measure;
-
-        if ((this.shapes == null) || (this.states == null)) {
-            return
-        }
-
-        const timer = new Timer("index", measure);
-
-        timer.split("loaded");
-
-        const theme = "light";
-        const displayOptions = {
-            theme: theme,
-            ortho: true,
-            normalLen: 0,
-            cadWidth: 800,
-            height: 600,
-            treeWidth: 240,
-            normalLen: 0,
-            ambientIntensity: 0.9,
-            directIntensity: 0.12,
-        }
-
+    createDisplay: function () {
+        this.options = this.model.get('options');
         const container = document.createElement('div');
         this.el.appendChild(container)
+        this.display = new Display(container, this.options);
+        this.display.setAnimationControl(false);
+    },
 
-        const display = new Display(container, theme);
-        console.log("display", display)
-        timer.split("display");
+    addShapes: function () {
+        const shapes = this.model.get('shapes');
+        this.shapes = decode(shapes.shapes);
+        this.states = shapes.states;
+        this.options = shapes.options;
 
-        const viewer = new Viewer(display, needsAnimationLoop, displayOptions);
+        const measure = this.options.measure;
+        delete this.options.measure;
 
-        viewer._measure = measure;
+        const timer = new Timer("addShapes", measure);
+
+        const viewer = new Viewer(this.display, this.options.needsAnimationLoop, this.options);
+        viewer._measure = measure
 
         timer.split("viewer");
 
         viewer.render(this.shapes, this.states);
         timer.split("renderer");
+
         timer.stop()
-        console.log(viewer)
-        this.model.on('change:value', this.value_changed, this);
+
+        window.cadViewer = viewer;
     },
 
-    value_changed: function () {
-        this.shapes = decode(this.model.get('shapes'), false);
-        this.states = this.model.get('states');
-        this.options = this.model.get('options');
-
-        console.log("shapes", this.shapes)
-        console.log("states", this.states)
-        console.log("options", this.options)
+    addTracks: function () {
+        this.tracks = this.model.get('tracks');
     }
 });

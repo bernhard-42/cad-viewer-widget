@@ -2,8 +2,6 @@
 import pako from 'pako';
 import { Base64 } from 'js-base64';
 
-console.log(pako, Base64);
-
 function reshape(arr, shape) {
     function chunk(arr, len) {
         var chunks = [];
