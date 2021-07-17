@@ -1,0 +1,13 @@
+*.egg-info/
+.ipynb_checkpoints/
+dist/
+build/
+*.py[cod]
+node_modules/
+
+# Compiled javascript
+cad_viewer_widget/nbextension/
+cad_viewer_widget/labextension/
+
+# OS X
+.DS_Store
