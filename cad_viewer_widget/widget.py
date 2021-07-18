@@ -1,4 +1,5 @@
 import json
+import time
 import ipywidgets as widgets
 from traitlets import Unicode, Dict, List, Tuple, Integer, Float, Any
 from .serializer import default
@@ -22,7 +23,7 @@ view_options = {
 
 
 @widgets.register
-class CadViewer(widgets.DOMWidget):
+class CadViewerWidget(widgets.Widget):
     """An example widget."""
 
     _view_name = Unicode("CadViewerView").tag(sync=True)
@@ -71,3 +72,45 @@ class CadViewer(widgets.DOMWidget):
 
     def add_tracks(self, tracks):
         self.tracks = tracks
+
+
+class CadViewer:
+    def __init__(self, options):
+        self.widget = CadViewerWidget(options=options)
+        self.widget.on_msg(self._on_message)
+        self.msg_id = 0
+        self.results = {}
+        display(self.widget)
+
+    def _on_message(self, widget, content, buffers):
+        if content["type"] == "cad_viewer_method_result":
+            self.results[content["id"]] = json.loads(content["result"])
+
+    def add_shapes(self, shapes, states, options=None):
+        self.widget.add_shapes(shapes, states, options=options)
+
+    def add_tracks(self, tracks):
+        self.widget.add_tracks(tracks)
+
+    def execute(self, object, method, args, threeType=None, update=False, **kwargs):
+        self.msg_id += 1
+
+        if not isinstance(args, (tuple, list)):
+            args = [args]
+
+        content = {
+            "type": "cad_viewer_method",
+            "id": self.msg_id,
+            "object": object,
+            "name": method,
+            "args": json.dumps(args),
+            "threeType": threeType,
+            "update": update,
+        }
+
+        self.widget.send(content=content, buffers=None)
+
+        return {"msg_id": self.msg_id, "result": self.results}
+
+    def _ipython_display_(self):
+        display(self.widget)

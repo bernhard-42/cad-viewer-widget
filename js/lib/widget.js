@@ -1,8 +1,8 @@
-import { DOMWidgetModel, DOMWidgetView } from '@jupyter-widgets/base';
+import { DOMWidgetModel, DOMWidgetView, serialize_state } from '@jupyter-widgets/base';
 import { extend } from 'lodash';
 import { Viewer, Display, Timer } from 'three-cad-viewer'
 import { decode } from './serializer.js'
-
+import * as THREE from 'three';
 
 export var CadViewerModel = DOMWidgetModel.extend({
     defaults: extend(DOMWidgetModel.prototype.defaults(), {
@@ -19,12 +19,28 @@ export var CadViewerModel = DOMWidgetModel.extend({
     })
 });
 
+function serialize(obj) {
+    try {
+        var result = JSON.stringify(obj);
+        return result
+    } catch (error) {
+        console.error(error)
+        return "Error"
+    }
+}
+
+function deserialize(str) {
+    return JSON.parse(str)
+}
+
 export var CadViewerView = DOMWidgetView.extend({
 
     render: function () {
         this.createDisplay();
         this.model.on('change:shapes', this.addShapes, this);
         this.model.on('change:tracks', this.value_changed, this);
+
+        this.listenTo(this.model, 'msg:custom', this.onCustomMessage.bind(this));
     },
 
     createDisplay: function () {
@@ -46,20 +62,91 @@ export var CadViewerView = DOMWidgetView.extend({
 
         const timer = new Timer("addShapes", measure);
 
-        const viewer = new Viewer(this.display, this.options.needsAnimationLoop, this.options);
-        viewer._measure = measure
+        this.viewer = new Viewer(this.display, this.options.needsAnimationLoop, this.options);
+        this.viewer._measure = measure
 
         timer.split("viewer");
 
-        viewer.render(this.shapes, this.states);
+        this.viewer.render(this.shapes, this.states);
         timer.split("renderer");
 
         timer.stop()
 
-        window.cadViewer = viewer;
+        window.cadViewer = this.viewer;
+        window.three = THREE
     },
 
     addTracks: function () {
         this.tracks = this.model.get('tracks');
+    },
+
+    onCustomMessage: function (msg, buffers) {
+        console.log(
+            "New message with msgType:", msg.type,
+            "msgId:", msg.id,
+            ", object:", msg.object,
+            ", name:", msg.name,
+            ", args:", msg.args,
+            ", type:", msg.threeType,
+            ", update:", msg.update,
+            ", buffers:", buffers,
+        );
+
+        var args = null;
+        try {
+            args = deserialize(msg.args);
+            if (msg.threeType) {
+                args = new THREE[msg.threeType](...args);
+            }
+        } catch (error) {
+            console.error(error)
+        }
+        // console.log("args:", args)
+
+        if (msg.object)
+            var path = msg.object.split(".");
+        var objName = path.pop()
+
+        var parent = null;
+        try {
+            parent = this;
+            path.forEach((o) => parent = parent[o])
+        } catch (error) {
+            console.error(error)
+        }
+        // console.log("parent:", parent, "object:", objName);
+
+        try {
+            var result = null;
+            if (msg.name === "=") {
+                result = parent[objName] = args;
+            } else {
+                if (msg.threeType) {
+                    result = parent[objName][msg.name](args)
+                } else {
+                    result = parent[objName][msg.name](...args)
+                }
+            }
+
+            if (msg.update) {
+                this.viewer.camera.updateProjectionMatrix()
+                this.viewer.controls.update();
+                this.viewer.update(true, false);
+            }
+
+            const returnMsg = {
+                type: 'cad_viewer_method_result',
+                id: msg.id,
+                result: serialize(result),
+            }
+
+            console.log("sending msg with id:", msg.id, "result:", result)
+
+            this.model.send(returnMsg, this.callbacks(), null);
+
+        } catch (error) {
+            console.log(error)
+        }
     }
 });
+
