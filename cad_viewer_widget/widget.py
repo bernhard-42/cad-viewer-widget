@@ -1,10 +1,8 @@
-import asyncio
-import asyncio
 import json
 import ipywidgets as widgets
 from traitlets import Unicode, Dict, List, Tuple, Integer, Float, Any
 from .serializer import default
-from IPython.display import HTML, display
+from IPython.display import display
 
 display_options = {
     "cadWidth": 800,
@@ -42,8 +40,6 @@ class CadViewerWidget(widgets.Widget):
 
     def __init__(self, options=None, **kwargs):
         super().__init__(**kwargs)
-        html = """<link rel="stylesheet" href="https://unpkg.com/three-cad-viewer@0.9.0-beta.11/dist/three-cad-viewer.css">"""
-        display(HTML(html))
         self.options = self._complete_options(options)
 
     def _complete_options(self, options):
@@ -128,8 +124,8 @@ class CadViewer:
     def get(self, object, callback=None):
         return self.execute(object, None, None, None, None, callback)
 
-    # def get_result(self):
-    #     return json.loads(self.widget.result)
+    def get_result(self):
+        return json.loads(self.widget.result)
 
     def _ipython_display_(self):
         display(self.widget)

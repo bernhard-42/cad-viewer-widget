@@ -1,8 +1,17 @@
-import { DOMWidgetModel, DOMWidgetView, serialize_state } from '@jupyter-widgets/base';
-import { extend } from 'lodash';
+import "../style/index.css";
+
+import { DOMWidgetModel, DOMWidgetView } from '@jupyter-widgets/base';
 import { Viewer, Display, Timer } from 'three-cad-viewer'
 import { decode } from './serializer.js'
 import * as THREE from 'three';
+
+// avoid loading lodash for extend function only
+function extend(a, b) {
+    for (var key in b)
+        if (b.hasOwnProperty(key))
+            a[key] = b[key];
+    return a;
+}
 
 export var CadViewerModel = DOMWidgetModel.extend({
     defaults: extend(DOMWidgetModel.prototype.defaults(), {
