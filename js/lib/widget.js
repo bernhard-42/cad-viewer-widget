@@ -15,7 +15,8 @@ export var CadViewerModel = DOMWidgetModel.extend({
 
         options: null,
         shapes: null,
-        tracks: null
+        tracks: null,
+        result: null
     })
 });
 
@@ -92,17 +93,6 @@ export var CadViewerView = DOMWidgetView.extend({
             ", buffers:", buffers,
         );
 
-        var args = null;
-        try {
-            args = deserialize(msg.args);
-            if (msg.threeType) {
-                args = new THREE[msg.threeType](...args);
-            }
-        } catch (error) {
-            console.error(error)
-        }
-        // console.log("args:", args)
-
         if (msg.object)
             var path = msg.object.split(".");
         var objName = path.pop()
@@ -116,34 +106,55 @@ export var CadViewerView = DOMWidgetView.extend({
         }
         // console.log("parent:", parent, "object:", objName);
 
-        try {
-            var result = null;
-            if (msg.name === "=") {
-                result = parent[objName] = args;
-            } else {
+        var result = null;
+        if (msg.name == null) {
+            result = parent[objName];
+        } else {
+            var args = null;
+            try {
+                args = deserialize(msg.args);
                 if (msg.threeType) {
-                    result = parent[objName][msg.name](args)
-                } else {
-                    result = parent[objName][msg.name](...args)
+                    args = new THREE[msg.threeType](...args);
                 }
+            } catch (error) {
+                console.error(error)
             }
+            // console.log("args:", args)
 
-            if (msg.update) {
-                this.viewer.camera.updateProjectionMatrix()
-                this.viewer.controls.update();
-                this.viewer.update(true, false);
+            try {
+                if (msg.name === "=") {
+                    result = parent[objName] = args;
+                } else {
+                    if (msg.threeType) {
+                        result = parent[objName][msg.name](args)
+                    } else {
+                        result = parent[objName][msg.name](...args)
+                    }
+                }
+
+                if (msg.update) {
+                    this.viewer.camera.updateProjectionMatrix()
+                    this.viewer.controls.update();
+                    this.viewer.update(true, false);
+                }
+
+                // const returnMsg = {
+                //     type: 'cad_viewer_method_result',
+                //     id: msg.id,
+                //     result: serialize(result),
+                // }
+
+                // console.log("sending msg with id:", msg.id, "result:", result)
+
+                // this.model.send(returnMsg, this.callbacks(), null);
+
+            } catch (error) {
+                console.log(error)
             }
-
-            const returnMsg = {
-                type: 'cad_viewer_method_result',
-                id: msg.id,
-                result: serialize(result),
-            }
-
-            console.log("sending msg with id:", msg.id, "result:", result)
-
-            this.model.send(returnMsg, this.callbacks(), null);
-
+        }
+        try {
+            this.model.set('result', serialize({ "msg_id": msg.id, "result": result }));
+            this.model.save_changes();
         } catch (error) {
             console.log(error)
         }

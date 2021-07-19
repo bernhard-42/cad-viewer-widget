@@ -1,5 +1,6 @@
+import asyncio
+import asyncio
 import json
-import time
 import ipywidgets as widgets
 from traitlets import Unicode, Dict, List, Tuple, Integer, Float, Any
 from .serializer import default
@@ -37,6 +38,7 @@ class CadViewerWidget(widgets.Widget):
     shapes = Dict(Any()).tag(sync=True)
     # dict(shapes=Unicode(), states=Dict(Tuple(Integer(), Integer())), options=Dict(Any()))).tag(sync=True)
     tracks = List(List(Float())).tag(sync=True)
+    result = Unicode().tag(sync=True)
 
     def __init__(self, options=None, **kwargs):
         super().__init__(**kwargs)
@@ -77,14 +79,14 @@ class CadViewerWidget(widgets.Widget):
 class CadViewer:
     def __init__(self, options):
         self.widget = CadViewerWidget(options=options)
-        self.widget.on_msg(self._on_message)
+        # self.widget.on_msg(self._on_message)
         self.msg_id = 0
-        self.results = {}
+        # self.results = {}
         display(self.widget)
 
-    def _on_message(self, widget, content, buffers):
-        if content["type"] == "cad_viewer_method_result":
-            self.results[content["id"]] = json.loads(content["result"])
+    # def _on_message(self, widget, content, buffers):
+    #     if content["type"] == "cad_viewer_method_result":
+    #         self.results[content["id"]] = json.loads(content["result"])
 
     def add_shapes(self, shapes, states, options=None):
         self.widget.add_shapes(shapes, states, options=options)
@@ -92,25 +94,42 @@ class CadViewer:
     def add_tracks(self, tracks):
         self.widget.add_tracks(tracks)
 
-    def execute(self, object, method, args, threeType=None, update=False, **kwargs):
-        self.msg_id += 1
+    def execute(self, object, method, args, threeType=None, update=False, callback=None):
+        def wrapper(change=None):
+            if change is None:
+                self.widget.observe(wrapper, "result")
+                self.msg_id += 1
+
+                content = {
+                    "type": "cad_viewer_method",
+                    "id": self.msg_id,
+                    "object": object,
+                    "name": method,
+                    "args": json.dumps(args),
+                    "threeType": threeType,
+                    "update": update,
+                }
+
+                self.widget.send(content=content, buffers=None)
+
+                return self.msg_id
+            else:
+                self.widget.unobserve(wrapper, "result")
+                if callback is not None:
+                    callback(change.new)
 
         if not isinstance(args, (tuple, list)):
             args = [args]
+        return wrapper()
 
-        content = {
-            "type": "cad_viewer_method",
-            "id": self.msg_id,
-            "object": object,
-            "name": method,
-            "args": json.dumps(args),
-            "threeType": threeType,
-            "update": update,
-        }
+    def set(self, object, args, threeType=None, update=False, callback=None):
+        return self.execute(object, "=", args, threeType, update, callback)
 
-        self.widget.send(content=content, buffers=None)
+    def get(self, object, callback=None):
+        return self.execute(object, None, None, None, None, callback)
 
-        return {"msg_id": self.msg_id, "result": self.results}
+    # def get_result(self):
+    #     return json.loads(self.widget.result)
 
     def _ipython_display_(self):
         display(self.widget)
