@@ -42,7 +42,7 @@
     "@jupyter-widgets/base": "^1.1 || ^2 || ^3 || ^4",
     "js-base64": "^3.6.1",
     "pako": "^2.0.3",
-    "three-cad-viewer": "^0.9.0-beta.12"
+    "three-cad-viewer": "^0.9.0"
   },
   "jupyterlab": {
     "extension": "lib/labplugin",
