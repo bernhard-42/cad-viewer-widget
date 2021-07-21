@@ -1,5 +1,6 @@
 import json
 import ipywidgets as widgets
+from pyparsing import Literal, Word, alphanums, nums, delimitedList, ZeroOrMore, Group
 from traitlets import Unicode, Dict, List, Tuple, Integer, Float, Any
 from .serializer import default
 from IPython.display import display
@@ -21,6 +22,16 @@ view_options = {
 }
 
 
+def get_parser():
+    dot = Literal(".").suppress()
+    lbrack = Literal("[").suppress()
+    rbrack = Literal("]").suppress()
+    integer = Word(nums)
+    index = lbrack + delimitedList(integer) + rbrack
+    object = Word(alphanums + "_$") + ZeroOrMore(index)
+    return object + ZeroOrMore(dot + object)
+
+
 @widgets.register
 class CadViewerWidget(widgets.Widget):
     """An example widget."""
@@ -33,8 +44,13 @@ class CadViewerWidget(widgets.Widget):
     _model_module_version = Unicode("^0.1.0").tag(sync=True)
 
     options = Dict(Any()).tag(sync=True)
-    shapes = Dict(Any()).tag(sync=True)
-    # dict(shapes=Unicode(), states=Dict(Tuple(Integer(), Integer())), options=Dict(Any()))).tag(sync=True)
+    shapes = Dict(
+        per_key_traits={
+            "shapes": Unicode(),
+            "states": Dict(Tuple(Integer(), Integer())),
+            "options": Dict(Any()),
+        }
+    ).tag(sync=True)
     tracks = List(List(Float())).tag(sync=True)
     result = Unicode().tag(sync=True)
 
@@ -75,14 +91,21 @@ class CadViewerWidget(widgets.Widget):
 class CadViewer:
     def __init__(self, options):
         self.widget = CadViewerWidget(options=options)
-        # self.widget.on_msg(self._on_message)
         self.msg_id = 0
-        # self.results = {}
+        self.parser = get_parser()
         display(self.widget)
+
+    #    self.widget.on_msg(self._on_message)
 
     # def _on_message(self, widget, content, buffers):
     #     if content["type"] == "cad_viewer_method_result":
     #         self.results[content["id"]] = json.loads(content["result"])
+
+    def _parse(self, string):
+        try:
+            return self.parser.parseString(string).asList()
+        except:
+            return None
 
     def add_shapes(self, shapes, states, options=None):
         self.widget.add_shapes(shapes, states, options=options)
@@ -96,10 +119,12 @@ class CadViewer:
                 self.widget.observe(wrapper, "result")
                 self.msg_id += 1
 
+                path = self._parse(object)
+
                 content = {
                     "type": "cad_viewer_method",
                     "id": self.msg_id,
-                    "object": object,
+                    "object": json.dumps(path),
                     "name": method,
                     "args": json.dumps(args),
                     "threeType": threeType,

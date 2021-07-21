@@ -30,6 +30,7 @@ export var CadViewerModel = DOMWidgetModel.extend({
 });
 
 function serialize(obj) {
+    console.log(obj)
     try {
         var result = JSON.stringify(obj);
         return result
@@ -103,7 +104,7 @@ export var CadViewerView = DOMWidgetView.extend({
         );
 
         if (msg.object)
-            var path = msg.object.split(".");
+            var path = JSON.parse(msg.object);
         var objName = path.pop()
 
         var parent = null;
@@ -113,7 +114,7 @@ export var CadViewerView = DOMWidgetView.extend({
         } catch (error) {
             console.error(error)
         }
-        // console.log("parent:", parent, "object:", objName);
+        console.log("parent:", parent, "object:", objName);
 
         var result = null;
         if (msg.name == null) {
