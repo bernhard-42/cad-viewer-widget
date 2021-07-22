@@ -1,17 +1,19 @@
-var plugin = require('./index');
-var base = require('@jupyter-widgets/base');
+// eslint-disable-next-line no-undef
+var plugin = require("./index"); 
+// eslint-disable-next-line no-undef
+var base = require("@jupyter-widgets/base");
 
+// eslint-disable-next-line no-undef
 module.exports = {
-  id: 'cad-viewer-widget:plugin',
+  id: "cad-viewer-widget:plugin",
   requires: [base.IJupyterWidgetRegistry],
-  activate: function (app, widgets) {
+  activate: function(app, widgets) {
     widgets.registerWidget({
-      name: 'cad-viewer-widget',
+      name: "cad-viewer-widget",
       version: plugin.version,
       exports: plugin
     });
-    console.log("JupyterLab widget 'cad-viewer-widget' is registered");
+    console.log("Widget 'cad-viewer-widget' is registered");
   },
   autoStart: true
 };
-
