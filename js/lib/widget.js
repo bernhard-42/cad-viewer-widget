@@ -7,7 +7,9 @@ import * as THREE from "three";
 
 // avoid loading lodash for "extend" function only
 function extend(a, b) {
-  Object.keys(b).forEach(key => {a[key] = b[key];});
+  Object.keys(b).forEach((key) => {
+    a[key] = b[key];
+  });
   return a;
 }
 
@@ -23,8 +25,8 @@ export var CadViewerModel = DOMWidgetModel.extend({
     options: null,
     shapes: null,
     tracks: null,
-    result: null,
-  }),
+    result: null
+  })
 });
 
 function serialize(obj) {
@@ -73,7 +75,7 @@ export var CadViewerView = DOMWidgetView.extend({
     this.viewer = new Viewer(
       this.display,
       this.options.needsAnimationLoop,
-      this.options,
+      this.options
     );
     this.viewer._measure = measure;
 
@@ -109,7 +111,7 @@ export var CadViewerView = DOMWidgetView.extend({
       ", update:",
       msg.update,
       ", buffers:",
-      buffers,
+      buffers
     );
 
     if (msg.object) var path = JSON.parse(msg.object);
@@ -175,5 +177,5 @@ export var CadViewerView = DOMWidgetView.extend({
     } catch (error) {
       console.log(error);
     }
-  },
+  }
 });

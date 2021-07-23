@@ -1,5 +1,5 @@
 // eslint-disable-next-line no-undef
-var plugin = require("./index"); 
+var plugin = require("./index");
 // eslint-disable-next-line no-undef
 var base = require("@jupyter-widgets/base");
 
@@ -7,7 +7,7 @@ var base = require("@jupyter-widgets/base");
 module.exports = {
   id: "cad-viewer-widget:plugin",
   requires: [base.IJupyterWidgetRegistry],
-  activate: function(app, widgets) {
+  activate: function (app, widgets) {
     widgets.registerWidget({
       name: "cad-viewer-widget",
       version: plugin.version,

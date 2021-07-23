@@ -23,4 +23,4 @@ if (window.require) {
 }
 
 // Export the required load_ipython_extension
-export function load_ipython_extension() { }
+export function load_ipython_extension() {}
