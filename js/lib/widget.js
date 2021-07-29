@@ -25,12 +25,35 @@ export var CadViewerModel = DOMWidgetModel.extend({
     options: null,
     shapes: null,
     tracks: null,
-    result: null
+
+    camera_position: null,
+    camera_zoom: null,
+
+    tab: null,
+    ortho: null,
+    axes: null,
+    grid: null,
+    axes0: null,
+    transparent: null,
+    black_edges: null,
+
+    clip_intersection: null,
+    clip_planes: null,
+    clip_normal_0: null,
+    clip_normal_1: null,
+    clip_normal_2: null,
+    clip_slider_0: null,
+    clip_slider_1: null,
+    clip_slider_2: null,
+
+    states: null,
+    lastPick: null,
+
+    result: ""
   })
 });
 
 function serialize(obj) {
-  console.log(obj);
   try {
     var result = JSON.stringify(obj);
     return result;
@@ -49,6 +72,8 @@ export var CadViewerView = DOMWidgetView.extend({
     this.createDisplay();
     this.model.on("change:shapes", this.addShapes, this);
     this.model.on("change:tracks", this.value_changed, this);
+    this.model.on("change:camera_position", this.change_camera.bind(this));
+    this.model.on("change:camera_zoom", this.change_camera.bind(this));
 
     this.listenTo(this.model, "msg:custom", this.onCustomMessage.bind(this));
   },
@@ -61,6 +86,14 @@ export var CadViewerView = DOMWidgetView.extend({
     this.display.setAnimationControl(false);
   },
 
+  notificationCallback(change) {
+    Object.keys(change).forEach((key) => {
+      console.log(key, ":", change[key]["old"], "  ==>  ", change[key]["new"]);
+      this.model.set(key, change[key]["new"]);
+    });
+    this.model.save_changes();
+  },
+
   addShapes: function () {
     const shapes = this.model.get("shapes");
     this.shapes = decode(shapes.shapes);
@@ -71,12 +104,13 @@ export var CadViewerView = DOMWidgetView.extend({
     delete this.options.measure;
 
     const timer = new Timer("addShapes", measure);
-
     this.viewer = new Viewer(
       this.display,
       this.options.needsAnimationLoop,
-      this.options
+      this.options,
+      this.notificationCallback.bind(this)
     );
+
     this.viewer._measure = measure;
 
     timer.split("viewer");
@@ -86,12 +120,26 @@ export var CadViewerView = DOMWidgetView.extend({
 
     timer.stop();
 
-    window.cadViewer = this.viewer;
+    window.cadViewer = this;
     window.three = THREE;
   },
 
   addTracks: function () {
     this.tracks = this.model.get("tracks");
+  },
+
+  change_camera(change) {
+    const key = Object.keys(change.changed)[0];
+    switch (key) {
+      case "camera_zoom":
+        // notify=true since OrbitControls.change does not send notification
+        this.viewer.setCameraZoom(change.changed[key], true);
+        break;
+      case "camera_position":
+        // notify=false since OrbitControls.change sends notification
+        this.viewer.setCameraPosition(...change.changed[key], false);
+        break;
+    }
   },
 
   onCustomMessage: function (msg, buffers) {
@@ -139,11 +187,11 @@ export var CadViewerView = DOMWidgetView.extend({
       } catch (error) {
         console.error(error);
       }
-      // console.log("args:", args)
+      console.log("args:", args);
 
       try {
         if (msg.name === "=") {
-          result = parent[objName] = args;
+          result = parent[objName] = args[0];
         } else {
           if (msg.threeType) {
             result = parent[objName][msg.name](args);

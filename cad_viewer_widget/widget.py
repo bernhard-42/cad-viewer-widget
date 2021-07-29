@@ -1,7 +1,7 @@
 import json
 import ipywidgets as widgets
 from pyparsing import Literal, Word, alphanums, nums, delimitedList, ZeroOrMore, Group
-from traitlets import Unicode, Dict, List, Tuple, Integer, Float, Any
+from traitlets import Unicode, Dict, List, Tuple, Integer, Float, Any, Bool
 from .serializer import default
 from IPython.display import display
 
@@ -43,7 +43,12 @@ class CadViewerWidget(widgets.Widget):
     _view_module_version = Unicode("^0.1.0").tag(sync=True)
     _model_module_version = Unicode("^0.1.0").tag(sync=True)
 
+    #
+    # model traits
+    #
+
     options = Dict(Any()).tag(sync=True)
+
     shapes = Dict(
         per_key_traits={
             "shapes": Unicode(),
@@ -51,8 +56,133 @@ class CadViewerWidget(widgets.Widget):
             "options": Dict(Any()),
         }
     ).tag(sync=True)
-    tracks = List(List(Float())).tag(sync=True)
-    result = Unicode().tag(sync=True)
+
+    tracks = List(
+        List(Float()),
+        default_value=[],
+        allow_none=True,
+    ).tag(sync=True)
+
+    camera_position = Tuple(
+        Float(),
+        Float(),
+        Float(),
+        default_value=[0.0, 0.0, 0.0],
+        allow_none=True,
+    ).tag(sync=True)
+
+    camera_zoom = Float(
+        allow_none=True,
+        default_value=1.0,
+    ).tag(sync=True)
+
+    tab = Unicode(
+        allow_none=True,
+        default_value="tree",
+    ).tag(sync=True)
+
+    ortho = Bool(
+        allow_none=True,
+        default_value=False,
+    ).tag(sync=True)
+
+    axes = Bool(
+        allow_none=True,
+        default_value=False,
+    ).tag(sync=True)
+
+    grid = Tuple(
+        Bool(),
+        Bool(),
+        Bool(),
+        default_value=[False, False, False],
+        allow_none=True,
+    ).tag(sync=True)
+
+    axes0 = Bool(
+        allow_none=True,
+        default_value=False,
+    ).tag(sync=True)
+
+    transparent = Bool(
+        allow_none=True,
+        default_value=False,
+    ).tag(sync=True)
+
+    black_edges = Bool(
+        allow_none=True,
+        default_value=False,
+    ).tag(sync=True)
+
+    clip_intersection = Bool(
+        allow_none=True,
+        default_value=False,
+    ).tag(sync=True)
+
+    clip_planes = Bool(
+        allow_none=True,
+        default_value=False,
+    ).tag(sync=True)
+
+    clip_normal_0 = Tuple(
+        Float(),
+        Float(),
+        Float(),
+        allow_none=True,
+        default_value=[0.0, 0.0, 0.0],
+    ).tag(sync=True)
+
+    clip_normal_1 = Tuple(
+        Float(),
+        Float(),
+        Float(),
+        allow_none=True,
+        default_value=[0.0, 0.0, 0.0],
+    ).tag(sync=True)
+
+    clip_normal_2 = Tuple(
+        Float(),
+        Float(),
+        Float(),
+        allow_none=True,
+        default_value=[0.0, 0.0, 0.0],
+    ).tag(sync=True)
+
+    clip_slider_0 = Float(
+        allow_none=True,
+        default_value=0.0,
+    ).tag(sync=True)
+
+    clip_slider_1 = Float(
+        allow_none=True,
+        default_value=0.0,
+    ).tag(sync=True)
+
+    clip_slider_2 = Float(
+        allow_none=True,
+        default_value=0.0,
+    ).tag(sync=True)
+
+    states = Dict(
+        Any(),
+        allow_none=True,
+        default_value={},
+    ).tag(sync=True)
+
+    lastPick = Dict(
+        Any(),
+        allow_none=True,
+        default_value={},
+    ).tag(sync=True)
+
+    result = Unicode(
+        allow_none=True,
+        default_value="",
+    ).tag(sync=True)
+
+    #
+    # methods
+    #
 
     def __init__(self, options=None, **kwargs):
         super().__init__(**kwargs)
@@ -154,3 +284,14 @@ class CadViewer:
 
     def _ipython_display_(self):
         display(self.widget)
+
+
+def show_msg():
+    def inner_show(msg):
+        with out:
+            print(msg)
+
+    out = widgets.Output()
+    display(out)
+
+    return inner_show
