@@ -134,8 +134,8 @@ class CadViewer:
         black_edges=False,
         bb_factor=1.0,
         default_edgecolor="#707070",
-        ambient_intensity=0.5,
-        direct_intensity=0.3,
+        ambient_intensity=0.9,
+        direct_intensity=0.12,
         tools=True,
     ):
         self.bb_factor = bb_factor
