@@ -22,12 +22,18 @@ export var CadViewerModel = DOMWidgetModel.extend({
     _model_module_version: "0.1.0",
     _view_module_version: "0.1.0",
 
-    options: null,
-    shapes: null,
-    tracks: null,
+    // Display parameters
+    cadWidth: null,
+    height: null,
+    treeWidth: null,
+    theme: null,
 
-    camera_position: null,
-    camera_zoom: null,
+    // View parameters
+    shapes: null,
+    states: null,
+
+    timeit: null,
+    needsAnimationLoop: null,
 
     tab: null,
     ortho: null,
@@ -36,6 +42,10 @@ export var CadViewerModel = DOMWidgetModel.extend({
     axes0: null,
     transparent: null,
     black_edges: null,
+
+    zoom_speed: null,
+    pan_speed: null,
+    rotate_speed: null,
 
     clip_intersection: null,
     clip_planes: null,
@@ -46,7 +56,17 @@ export var CadViewerModel = DOMWidgetModel.extend({
     clip_slider_1: null,
     clip_slider_2: null,
 
-    states: null,
+    tracks: null,
+
+    position: null,
+    zoom: null,
+
+    bb_factor: null,
+    tools: null,
+    default_edgecolor: null,
+    ambient_intensity: null,
+    direct_intensity: null,
+
     lastPick: null,
 
     result: ""
@@ -71,47 +91,88 @@ export var CadViewerView = DOMWidgetView.extend({
   render: function () {
     this.createDisplay();
     this.model.on("change:shapes", this.addShapes, this);
-    this.model.on("change:tracks", this.value_changed, this);
-    this.model.on("change:camera_position", this.change_camera.bind(this));
-    this.model.on("change:camera_zoom", this.change_camera.bind(this));
+    this.model.on("change:tracks", this.handle_change, this);
+    this.model.on("change:position", this.handle_change.bind(this));
+    this.model.on("change:zoom", this.handle_change.bind(this));
+    this.model.on("change:axes", this.handle_change.bind(this));
+    this.model.on("change:grid", this.handle_change.bind(this));
+    this.model.on("change:axes0", this.handle_change.bind(this));
+    this.model.on("change:ortho", this.handle_change.bind(this));
+    this.model.on("change:transparent", this.handle_change.bind(this));
+    this.model.on("change:black_edges", this.handle_change.bind(this));
+    this.model.on("change:bb_factor", this.handle_change.bind(this));
+    this.model.on("change:tools", this.handle_change.bind(this));
+    this.model.on("change:default_edgecolor", this.handle_change.bind(this));
+    this.model.on("change:ambient_intensity", this.handle_change.bind(this));
+    this.model.on("change:direct_intensity", this.handle_change.bind(this));
+    this.model.on("change:zoom_speed", this.handle_change.bind(this));
+    this.model.on("change:pan_speed", this.handle_change.bind(this));
+    this.model.on("change:rotate_speed", this.handle_change.bind(this));
 
     this.listenTo(this.model, "msg:custom", this.onCustomMessage.bind(this));
   },
 
   createDisplay: function () {
-    this.options = this.model.get("options");
+    this.options = {
+      cadWidth: this.model.get("cadWidth"),
+      height: this.model.get("height"),
+      treeWidth: this.model.get("treeWidth"),
+      theme: this.model.get("theme"),
+      timeit: this.model.get("timeit"),
+      needsAnimationLoop: this.model.get("needsAnimationLoop"),
+      tools: this.model.get("tools")
+    };
     const container = document.createElement("div");
     this.el.appendChild(container);
     this.display = new Display(container, this.options);
     this.display.setAnimationControl(false);
+    console.log("tools", this.options.tools);
+    this.display.setTools(this.options.tools);
+    this.hasShapes = false;
   },
 
   notificationCallback(change) {
     Object.keys(change).forEach((key) => {
       console.log(key, ":", change[key]["old"], "  ==>  ", change[key]["new"]);
-      this.model.set(key, change[key]["new"]);
+      if (key === "camera_position" || key == "camera_zoom") {
+        // remove the prefix to be compliant with traitlets
+        this.model.set(key.slice(7), change[key]["new"]);
+      } else {
+        this.model.set(key, change[key]["new"]);
+      }
     });
     this.model.save_changes();
   },
 
   addShapes: function () {
     const shapes = this.model.get("shapes");
-    this.shapes = decode(shapes.shapes);
-    this.states = shapes.states;
-    this.options = shapes.options;
+    this.shapes = decode(shapes);
+    this.states = this.model.get("states");
+    this.options = {
+      axes: this.model.get("axes"),
+      grid: this.model.get("grid"),
+      axes0: this.model.get("axes0"),
+      ortho: this.model.get("ortho"),
+      ticks: this.model.get("ticks"),
+      transparent: this.model.get("transparent"),
+      blackEdges: this.model.get("black_edges"),
+      bbFactor: this.model.get("bb_factor"),
+      defaultEdgecolor: this.model.get("default_edgecolor"),
+      ambientIntensity: this.model.get("ambient_intensity"),
+      directIntensity: this.model.get("direct_intensity")
+    };
 
-    const measure = this.options.measure;
-    delete this.options.measure;
+    const timeit = this.model.get("timeit");
 
-    const timer = new Timer("addShapes", measure);
+    const timer = new Timer("addShapes", timeit);
     this.viewer = new Viewer(
       this.display,
-      this.options.needsAnimationLoop,
+      this.model.get("needsAnimationLoop"),
       this.options,
       this.notificationCallback.bind(this)
     );
 
-    this.viewer._measure = measure;
+    this.viewer._timeit = timeit;
 
     timer.split("viewer");
 
@@ -122,22 +183,71 @@ export var CadViewerView = DOMWidgetView.extend({
 
     window.cadViewer = this;
     window.three = THREE;
+    this.hasShapes = true;
   },
 
   addTracks: function () {
     this.tracks = this.model.get("tracks");
   },
 
-  change_camera(change) {
+  handle_change(change) {
+    if (!this.hasShapes) {
+      return;
+    }
     const key = Object.keys(change.changed)[0];
     switch (key) {
-      case "camera_zoom":
+      case "wait":
+        this.wait = change.changed[key];
+        break;
+      case "zoom":
         // notify=true since OrbitControls.change does not send notification
         this.viewer.setCameraZoom(change.changed[key], true);
         break;
-      case "camera_position":
+      case "position":
         // notify=false since OrbitControls.change sends notification
         this.viewer.setCameraPosition(...change.changed[key], false);
+        break;
+      case "axes":
+        this.viewer.setAxes(change.changed[key], false);
+        break;
+      case "grid":
+        this.viewer.setGrids(...change.changed[key], false);
+        break;
+      case "axes0":
+        this.viewer.setAxes0(change.changed[key], false);
+        break;
+      case "ortho":
+        this.viewer.switchCamera(change.changed[key], false, false);
+        break;
+      case "transparent":
+        this.viewer.setTransparent(change.changed[key], false);
+        break;
+      case "black_edges":
+        this.viewer.setBlackEdges(change.changed[key], false);
+        break;
+      case "bb_factor":
+        this.viewer.bb_factor = change.changed[key];
+        break;
+      case "tools":
+        this.viewer.display.setTools(change.changed[key], false);
+        break;
+      case "default_edgecolor":
+        this.viewer.defaultEdgecolor = change.changed[key];
+        break;
+      case "ambient_intensity":
+        this.viewer.ambientIntensity = change.changed[key];
+        break;
+      case "direct_intensity":
+        this.viewer.directIntensity = change.changed[key];
+        break;
+      case "zoom_speed":
+        this.viewer.setZoomSpeed(change.changed[key]);
+        break;
+      case "pan_speed":
+        this.viewer.setPanSpeed(change.changed[key]);
+        break;
+      case "rotate_speed":
+        this.viewer.setRotateSpeed(change.changed[key]);
         break;
     }
   },

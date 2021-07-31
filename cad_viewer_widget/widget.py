@@ -1,25 +1,9 @@
 import json
 import ipywidgets as widgets
-from pyparsing import Literal, Word, alphanums, nums, delimitedList, ZeroOrMore, Group
+from pyparsing import Literal, Word, alphanums, nums, delimitedList, ZeroOrMore
 from traitlets import Unicode, Dict, List, Tuple, Integer, Float, Any, Bool
 from .serializer import default
 from IPython.display import display
-
-display_options = {
-    "cadWidth": 800,
-    "height": 600,
-    "treeWidth": 240,
-    "theme": "light",
-}
-
-view_options = {
-    "needsAnimationLoop": False,
-    "measure": False,
-    "ortho": True,
-    "normalLen": 0,
-    "ambientIntensity": 0.9,
-    "directIntensity": 0.12,
-}
 
 
 def get_parser():
@@ -47,180 +31,78 @@ class CadViewerWidget(widgets.Widget):
     # model traits
     #
 
-    options = Dict(Any()).tag(sync=True)
+    # Display traits
 
-    shapes = Dict(
-        per_key_traits={
-            "shapes": Unicode(),
-            "states": Dict(Tuple(Integer(), Integer())),
-            "options": Dict(Any()),
-        }
-    ).tag(sync=True)
+    cadWidth = Integer(default_value=800).tag(sync=True)
+    height = Integer(default_value=600).tag(sync=True)
+    treeWidth = Integer(default_vlue=240).tag(sync=True)
+    theme = Unicode(default_value="light").tag(sync=True)
+    tools = Bool(allow_none=True, default_value=True).tag(sync=True)
 
-    tracks = List(
-        List(Float()),
-        default_value=[],
-        allow_none=True,
-    ).tag(sync=True)
+    # Viewer traits
 
-    camera_position = Tuple(
-        Float(),
-        Float(),
-        Float(),
-        default_value=[0.0, 0.0, 0.0],
-        allow_none=True,
-    ).tag(sync=True)
+    shapes = Unicode(allow_none=True).tag(sync=True)
+    states = Dict(Tuple(Integer(), Integer()), allow_none=True).tag(sync=True)
 
-    camera_zoom = Float(
-        allow_none=True,
-        default_value=1.0,
-    ).tag(sync=True)
+    timeit = Bool(default_value=False, allow_None=True).tag(sync=True)
+    needsAnimationLoop = Bool(default_value=False, allow_None=True).tag(sync=True)
 
-    tab = Unicode(
-        allow_none=True,
-        default_value="tree",
-    ).tag(sync=True)
+    tracks = List(List(Float()), default_value=[], allow_none=True).tag(sync=True)
 
-    ortho = Bool(
-        allow_none=True,
-        default_value=False,
-    ).tag(sync=True)
+    position = Tuple(Float(), Float(), Float(), default_value=None, allow_none=True).tag(sync=True)
+    zoom = Float(allow_none=True, default_value=None).tag(sync=True)
 
-    axes = Bool(
-        allow_none=True,
-        default_value=False,
-    ).tag(sync=True)
+    ortho = Bool(allow_none=True, default_value=False).tag(sync=True)
+    axes = Bool(allow_none=True, default_value=False).tag(sync=True)
+    grid = Tuple(Bool(), Bool(), Bool(), default_value=[False, False, False], allow_none=True).tag(sync=True)
+    ticks = Integer(default_value=10, allow_none=True).tag(sync=True)
+    axes0 = Bool(allow_none=True, default_value=False).tag(sync=True)
+    transparent = Bool(allow_none=True, default_value=False).tag(sync=True)
+    black_edges = Bool(allow_none=True, default_value=False).tag(sync=True)
 
-    grid = Tuple(
-        Bool(),
-        Bool(),
-        Bool(),
-        default_value=[False, False, False],
-        allow_none=True,
-    ).tag(sync=True)
+    bb_factor = Float(allow_none=True, default_value=1.0).tag(sync=True)
+    default_edgecolor = Unicode(allow_none=True, default_value="#707070").tag(sync=True)
+    ambient_intensity = Float(allow_none=True, default_value=0.9).tag(sync=True)
+    direct_intensity = Float(allow_none=True, default_value=0.12).tag(sync=True)
 
-    axes0 = Bool(
-        allow_none=True,
-        default_value=False,
-    ).tag(sync=True)
+    zoom_speed = Float(allow_none=True, default_value=0.5).tag(sync=True)
+    pan_speed = Float(allow_none=True, default_value=0.5).tag(sync=True)
+    rotate_speed = Float(allow_none=True, default_value=1.0).tag(sync=True)
 
-    transparent = Bool(
-        allow_none=True,
-        default_value=False,
-    ).tag(sync=True)
+    # UI traits
 
-    black_edges = Bool(
-        allow_none=True,
-        default_value=False,
-    ).tag(sync=True)
+    clip_intersection = Bool(allow_none=True, default_value=False).tag(sync=True)
+    clip_planes = Bool(allow_none=True, default_value=False).tag(sync=True)
+    clip_normal_0 = Tuple(Float(), Float(), Float(), allow_none=True, default_value=[0.0, 0.0, 0.0]).tag(sync=True)
+    clip_normal_1 = Tuple(Float(), Float(), Float(), allow_none=True, default_value=[0.0, 0.0, 0.0]).tag(sync=True)
+    clip_normal_2 = Tuple(Float(), Float(), Float(), allow_none=True, default_value=[0.0, 0.0, 0.0]).tag(sync=True)
+    clip_slider_0 = Float(allow_none=True, default_value=0.0).tag(sync=True)
+    clip_slider_1 = Float(allow_none=True, default_value=0.0).tag(sync=True)
+    clip_slider_2 = Float(allow_none=True, default_value=0.0).tag(sync=True)
 
-    clip_intersection = Bool(
-        allow_none=True,
-        default_value=False,
-    ).tag(sync=True)
+    tab = Unicode(allow_none=True, default_value="tree").tag(sync=True)
 
-    clip_planes = Bool(
-        allow_none=True,
-        default_value=False,
-    ).tag(sync=True)
+    lastPick = Dict(Any(), allow_none=True, default_value={}).tag(sync=True)
 
-    clip_normal_0 = Tuple(
-        Float(),
-        Float(),
-        Float(),
-        allow_none=True,
-        default_value=[0.0, 0.0, 0.0],
-    ).tag(sync=True)
-
-    clip_normal_1 = Tuple(
-        Float(),
-        Float(),
-        Float(),
-        allow_none=True,
-        default_value=[0.0, 0.0, 0.0],
-    ).tag(sync=True)
-
-    clip_normal_2 = Tuple(
-        Float(),
-        Float(),
-        Float(),
-        allow_none=True,
-        default_value=[0.0, 0.0, 0.0],
-    ).tag(sync=True)
-
-    clip_slider_0 = Float(
-        allow_none=True,
-        default_value=0.0,
-    ).tag(sync=True)
-
-    clip_slider_1 = Float(
-        allow_none=True,
-        default_value=0.0,
-    ).tag(sync=True)
-
-    clip_slider_2 = Float(
-        allow_none=True,
-        default_value=0.0,
-    ).tag(sync=True)
-
-    states = Dict(
-        Any(),
-        allow_none=True,
-        default_value={},
-    ).tag(sync=True)
-
-    lastPick = Dict(
-        Any(),
-        allow_none=True,
-        default_value={},
-    ).tag(sync=True)
-
-    result = Unicode(
-        allow_none=True,
-        default_value="",
-    ).tag(sync=True)
-
-    #
-    # methods
-    #
-
-    def __init__(self, options=None, **kwargs):
-        super().__init__(**kwargs)
-        self.options = self._complete_options(options)
-
-    def _complete_options(self, options):
-        all_options = {}
-
-        # add existing options ...
-        if self.options is not None:
-            all_options.update(self.options)
-
-        # ... overwrite with newer options ...
-        if options is not None:
-            all_options.update(options)
-
-        # ... and update all missing defaults
-        for opts in (display_options, view_options):
-            for k, v in opts.items():
-                if all_options.get(k) is None:
-                    all_options[k] = v
-
-        return all_options
-
-    def add_shapes(self, shapes, states, options=None):
-        self.shapes = {
-            "options": self._complete_options(options),
-            "shapes": json.dumps(shapes, default=default),
-            "states": states,
-        }
-
-    def add_tracks(self, tracks):
-        self.tracks = tracks
+    result = Unicode(allow_none=True, default_value="").tag(sync=True)
 
 
 class CadViewer:
-    def __init__(self, options):
-        self.widget = CadViewerWidget(options=options)
+    def __init__(
+        self,
+        cadWidth=800,
+        height=600,
+        treeWidth=240,
+        theme="light",
+        tools=True,
+    ):
+        self.widget = CadViewerWidget(
+            cadWidth=cadWidth,
+            height=height,
+            treeWidth=treeWidth,
+            theme=theme,
+            tools=tools,
+        )
         self.msg_id = 0
         self.parser = get_parser()
         display(self.widget)
@@ -237,11 +119,47 @@ class CadViewer:
         except:
             return None
 
-    def add_shapes(self, shapes, states, options=None):
-        self.widget.add_shapes(shapes, states, options=options)
+    def add_shapes(
+        self,
+        shapes,
+        states,
+        timeit=False,
+        needsAnimationLoop=False,
+        ortho=True,
+        axes=False,
+        grid=[False, False, False],
+        axes0=False,
+        ticks=10,
+        transparent=False,
+        black_edges=False,
+        bb_factor=1.0,
+        default_edgecolor="#707070",
+        ambient_intensity=0.5,
+        direct_intensity=0.3,
+        tools=True,
+    ):
+        self.bb_factor = bb_factor
+        self.default_edgecolor = default_edgecolor
+        self.ambient_intensity = ambient_intensity
+        self.direct_intensity = direct_intensity
+        self.widget.axes = axes
+        self.widget.axes0 = axes0
+        self.widget.grid = grid
+        self.widget.ticks = ticks
+        self.widget.ortho = ortho
+        self.widget.transparent = transparent
+        self.widget.black_edges = black_edges
+        self.widget.tools = tools
+        self.widget.timeit = timeit
+        self.widget.needsAnimationLoop = needsAnimationLoop
+        self.widget.states = states
+        self.widget.zoom = 1.0  # keep, else setting zoom later to 1 might fail
+
+        # send shapes as the last traitlet to trigger rendering
+        self.widget.shapes = json.dumps(shapes, default=default)
 
     def add_tracks(self, tracks):
-        self.widget.add_tracks(tracks)
+        self.widget.tracks = tracks
 
     def execute(self, object, method, args, threeType=None, update=False, callback=None):
         def wrapper(change=None):
