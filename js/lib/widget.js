@@ -37,6 +37,7 @@ export var CadViewerModel = DOMWidgetModel.extend({
 
     tab: null,
     ortho: null,
+    control: null,
     axes: null,
     grid: null,
     axes0: null,
@@ -63,11 +64,12 @@ export var CadViewerModel = DOMWidgetModel.extend({
 
     bb_factor: null,
     tools: null,
-    default_edgecolor: null,
+    edge_color: null,
     ambient_intensity: null,
     direct_intensity: null,
 
     lastPick: null,
+    target: null,
 
     result: ""
   })
@@ -87,27 +89,44 @@ function deserialize(str) {
   return JSON.parse(str);
 }
 
+function encode_states(states) {
+  var result = {};
+  for (var i in states) {
+    result[i] = (states[i][0] << 4) + states[i][1];
+  }
+  return result;
+}
+
+function decode_states(states) {
+  var result = {};
+  for (var i in states) {
+    result[i] = [states[i] >> 4, states[i] & 15];
+  }
+  return result;
+}
+
 export var CadViewerView = DOMWidgetView.extend({
   render: function () {
     this.createDisplay();
     this.model.on("change:shapes", this.addShapes, this);
-    this.model.on("change:tracks", this.handle_change, this);
-    this.model.on("change:position", this.handle_change.bind(this));
-    this.model.on("change:zoom", this.handle_change.bind(this));
-    this.model.on("change:axes", this.handle_change.bind(this));
-    this.model.on("change:grid", this.handle_change.bind(this));
-    this.model.on("change:axes0", this.handle_change.bind(this));
-    this.model.on("change:ortho", this.handle_change.bind(this));
-    this.model.on("change:transparent", this.handle_change.bind(this));
-    this.model.on("change:black_edges", this.handle_change.bind(this));
-    this.model.on("change:bb_factor", this.handle_change.bind(this));
-    this.model.on("change:tools", this.handle_change.bind(this));
-    this.model.on("change:default_edgecolor", this.handle_change.bind(this));
-    this.model.on("change:ambient_intensity", this.handle_change.bind(this));
-    this.model.on("change:direct_intensity", this.handle_change.bind(this));
-    this.model.on("change:zoom_speed", this.handle_change.bind(this));
-    this.model.on("change:pan_speed", this.handle_change.bind(this));
-    this.model.on("change:rotate_speed", this.handle_change.bind(this));
+    this.model.on("change:tracks", this.addTracks, this);
+    this.model.on("change:states", this.handle_change, this);
+    this.model.on("change:position", this.handle_change, this);
+    this.model.on("change:zoom", this.handle_change, this);
+    this.model.on("change:axes", this.handle_change, this);
+    this.model.on("change:grid", this.handle_change, this);
+    this.model.on("change:axes0", this.handle_change, this);
+    this.model.on("change:ortho", this.handle_change, this);
+    this.model.on("change:transparent", this.handle_change, this);
+    this.model.on("change:black_edges", this.handle_change, this);
+    this.model.on("change:bb_factor", this.handle_change, this);
+    this.model.on("change:tools", this.handle_change, this);
+    this.model.on("change:edge_color", this.handle_change, this);
+    this.model.on("change:ambient_intensity", this.handle_change, this);
+    this.model.on("change:direct_intensity", this.handle_change, this);
+    this.model.on("change:zoom_speed", this.handle_change, this);
+    this.model.on("change:pan_speed", this.handle_change, this);
+    this.model.on("change:rotate_speed", this.handle_change, this);
 
     this.listenTo(this.model, "msg:custom", this.onCustomMessage.bind(this));
   },
@@ -126,38 +145,44 @@ export var CadViewerView = DOMWidgetView.extend({
     this.el.appendChild(container);
     this.display = new Display(container, this.options);
     this.display.setAnimationControl(false);
-    console.log("tools", this.options.tools);
     this.display.setTools(this.options.tools);
     this.hasShapes = false;
+    this.ignoreNext = false;
   },
 
   notificationCallback(change) {
+    this.ignoreNext = true; // change comes from python, so do not set traitlet back
     Object.keys(change).forEach((key) => {
-      console.log(key, ":", change[key]["old"], "  ==>  ", change[key]["new"]);
+      console.log(key);
       if (key === "camera_position" || key == "camera_zoom") {
         // remove the prefix to be compliant with traitlets
         this.model.set(key.slice(7), change[key]["new"]);
+      } else if (key == "states") {
+        this.model.set(key, encode_states(change[key]["new"]));
       } else {
+        console.log(key, change[key]["new"]);
         this.model.set(key, change[key]["new"]);
       }
     });
+    this.ignoreNext = false;
     this.model.save_changes();
   },
 
   addShapes: function () {
     const shapes = this.model.get("shapes");
     this.shapes = decode(shapes);
-    this.states = this.model.get("states");
+    this.states = decode_states(this.model.get("states"));
     this.options = {
       axes: this.model.get("axes"),
       grid: this.model.get("grid"),
       axes0: this.model.get("axes0"),
       ortho: this.model.get("ortho"),
+      control: this.model.get("control"),
       ticks: this.model.get("ticks"),
       transparent: this.model.get("transparent"),
       blackEdges: this.model.get("black_edges"),
       bbFactor: this.model.get("bb_factor"),
-      defaultEdgecolor: this.model.get("default_edgecolor"),
+      edgeColor: this.model.get("edge_color"),
       ambientIntensity: this.model.get("ambient_intensity"),
       directIntensity: this.model.get("direct_intensity")
     };
@@ -179,33 +204,43 @@ export var CadViewerView = DOMWidgetView.extend({
     this.viewer.render(this.shapes, this.states);
     timer.split("renderer");
 
+    this.hasShapes = true;
+
+    // console.log("target", this.viewer.controls.target.toArray());
+    this.model.set("target", this.viewer.controls.target);
+    this.model.save_changes();
+
     timer.stop();
 
     window.cadViewer = this;
-    window.three = THREE;
-    this.hasShapes = true;
   },
 
   addTracks: function () {
     this.tracks = this.model.get("tracks");
+    for (var track of this.tracks) {
+      this.viewer.addTracks(...track);
+    }
+    // TODO
   },
 
   handle_change(change) {
     if (!this.hasShapes) {
       return;
     }
+
+    // Do not set traitlet if the change already comes from python
+    if (this.ignoreNext) {
+      return;
+    }
+
     const key = Object.keys(change.changed)[0];
+    console.log("handle_change", key);
     switch (key) {
-      case "wait":
-        this.wait = change.changed[key];
-        break;
       case "zoom":
-        // notify=true since OrbitControls.change does not send notification
-        this.viewer.setCameraZoom(change.changed[key], true);
+        this.viewer.setCameraZoom(change.changed[key], false);
         break;
       case "position":
-        // notify=false since OrbitControls.change sends notification
-        this.viewer.setCameraPosition(...change.changed[key], false);
+        this.viewer.setCameraPosition(change.changed[key], false, false);
         break;
       case "axes":
         this.viewer.setAxes(change.changed[key], false);
@@ -229,25 +264,31 @@ export var CadViewerView = DOMWidgetView.extend({
         this.viewer.bb_factor = change.changed[key];
         break;
       case "tools":
-        this.viewer.display.setTools(change.changed[key], false);
+        this.display.setTools(change.changed[key], false);
         break;
-      case "default_edgecolor":
-        this.viewer.defaultEdgecolor = change.changed[key];
+      case "edge_color":
+        this.viewer.setEdgeColor(change.changed[key], false);
         break;
       case "ambient_intensity":
-        this.viewer.ambientIntensity = change.changed[key];
+        this.viewer.setAmbientLight(change.changed[key], false);
         break;
       case "direct_intensity":
-        this.viewer.directIntensity = change.changed[key];
+        this.viewer.setDirectLight(change.changed[key], false);
         break;
       case "zoom_speed":
-        this.viewer.setZoomSpeed(change.changed[key]);
+        this.viewer.setZoomSpeed(change.changed[key], false);
         break;
       case "pan_speed":
-        this.viewer.setPanSpeed(change.changed[key]);
+        this.viewer.setPanSpeed(change.changed[key], false);
         break;
       case "rotate_speed":
-        this.viewer.setRotateSpeed(change.changed[key]);
+        this.viewer.setRotateSpeed(change.changed[key], false);
+        break;
+      case "states":
+        console.log(change.changed[key]);
+        var states = decode_states(change.changed[key]);
+        console.log(states);
+        this.viewer.setStates(states, false);
         break;
     }
   },

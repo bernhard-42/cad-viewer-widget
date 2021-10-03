@@ -2,8 +2,9 @@ import json
 import ipywidgets as widgets
 from pyparsing import Literal, Word, alphanums, nums, delimitedList, ZeroOrMore
 from traitlets import Unicode, Dict, List, Tuple, Integer, Float, Any, Bool
-from .serializer import default
+from .utils import serializer, rotate_x, rotate_y, rotate_z
 from IPython.display import display
+import numpy as np
 
 
 def get_parser():
@@ -42,17 +43,15 @@ class CadViewerWidget(widgets.Widget):
     # Viewer traits
 
     shapes = Unicode(allow_none=True).tag(sync=True)
-    states = Dict(Tuple(Integer(), Integer()), allow_none=True).tag(sync=True)
+    states = Dict(Integer(), allow_none=True).tag(sync=True)
 
     timeit = Bool(default_value=False, allow_None=True).tag(sync=True)
     needsAnimationLoop = Bool(default_value=False, allow_None=True).tag(sync=True)
 
     tracks = List(List(Float()), default_value=[], allow_none=True).tag(sync=True)
 
-    position = Tuple(Float(), Float(), Float(), default_value=None, allow_none=True).tag(sync=True)
-    zoom = Float(allow_none=True, default_value=None).tag(sync=True)
-
     ortho = Bool(allow_none=True, default_value=False).tag(sync=True)
+    control = Unicode(default_value="trackball").tag(sync=True)
     axes = Bool(allow_none=True, default_value=False).tag(sync=True)
     grid = Tuple(Bool(), Bool(), Bool(), default_value=[False, False, False], allow_none=True).tag(sync=True)
     ticks = Integer(default_value=10, allow_none=True).tag(sync=True)
@@ -61,15 +60,18 @@ class CadViewerWidget(widgets.Widget):
     black_edges = Bool(allow_none=True, default_value=False).tag(sync=True)
 
     bb_factor = Float(allow_none=True, default_value=1.0).tag(sync=True)
-    default_edgecolor = Unicode(allow_none=True, default_value="#707070").tag(sync=True)
+    edge_color = Unicode(allow_none=True, default_value="#707070").tag(sync=True)
     ambient_intensity = Float(allow_none=True, default_value=0.9).tag(sync=True)
     direct_intensity = Float(allow_none=True, default_value=0.12).tag(sync=True)
+
+    # Generic UI traits
+
+    position = Tuple(Float(), Float(), Float(), default_value=None, allow_none=True).tag(sync=True)
+    zoom = Float(allow_none=True, default_value=None).tag(sync=True)
 
     zoom_speed = Float(allow_none=True, default_value=0.5).tag(sync=True)
     pan_speed = Float(allow_none=True, default_value=0.5).tag(sync=True)
     rotate_speed = Float(allow_none=True, default_value=1.0).tag(sync=True)
-
-    # UI traits
 
     clip_intersection = Bool(allow_none=True, default_value=False).tag(sync=True)
     clip_planes = Bool(allow_none=True, default_value=False).tag(sync=True)
@@ -82,9 +84,12 @@ class CadViewerWidget(widgets.Widget):
 
     tab = Unicode(allow_none=True, default_value="tree").tag(sync=True)
 
-    lastPick = Dict(Any(), allow_none=True, default_value={}).tag(sync=True)
+    # Read only traitlets
 
-    result = Unicode(allow_none=True, default_value="").tag(sync=True)
+    lastPick = Dict(Any(), allow_none=True, default_value={}, read_only=True).tag(sync=True)
+    target = Tuple(Float(), Float(), Float(), allow_none=True, read_only=True).tag(sync=True)
+
+    result = Unicode(allow_none=True, default_value="", read_only=True).tag(sync=True)
 
 
 class CadViewer:
@@ -126,6 +131,7 @@ class CadViewer:
         timeit=False,
         needsAnimationLoop=False,
         ortho=True,
+        control="trackball",
         axes=False,
         grid=[False, False, False],
         axes0=False,
@@ -133,33 +139,65 @@ class CadViewer:
         transparent=False,
         black_edges=False,
         bb_factor=1.0,
-        default_edgecolor="#707070",
+        edge_color="#707070",
         ambient_intensity=0.9,
         direct_intensity=0.12,
         tools=True,
     ):
-        self.bb_factor = bb_factor
-        self.default_edgecolor = default_edgecolor
-        self.ambient_intensity = ambient_intensity
-        self.direct_intensity = direct_intensity
+        self.widget.bb_factor = bb_factor
+        self.widget.edge_color = edge_color
+        self.widget.ambient_intensity = ambient_intensity
+        self.widget.direct_intensity = direct_intensity
         self.widget.axes = axes
         self.widget.axes0 = axes0
         self.widget.grid = grid
         self.widget.ticks = ticks
         self.widget.ortho = ortho
+        self.widget.control = control
         self.widget.transparent = transparent
         self.widget.black_edges = black_edges
         self.widget.tools = tools
         self.widget.timeit = timeit
         self.widget.needsAnimationLoop = needsAnimationLoop
-        self.widget.states = states
+        self.widget.states = self._encode_states(states)
         self.widget.zoom = 1.0  # keep, else setting zoom later to 1 might fail
 
         # send shapes as the last traitlet to trigger rendering
-        self.widget.shapes = json.dumps(shapes, default=default)
+        self.widget.shapes = json.dumps(shapes, default=serializer)
+
+    def _encode_states(self, states):
+        result = {}
+        for i, s in states.items():
+            result[i] = (s[0] << 4) + s[1]
+        return result
 
     def add_tracks(self, tracks):
         self.widget.tracks = tracks
+
+    def set_states(self, states):
+        new_states = self.widget.states.copy()
+        new_states.update(self._encode_states(states))
+        for i, s in new_states.items():
+            print(i, s)
+
+        self.widget.states = new_states
+
+    def _rotate(self, dir, angle):
+        rot = {"x": rotate_x, "y": rotate_y, "z": rotate_z}
+        new_pos = (
+            rot[dir](np.asarray(self.widget.position) - np.asarray(self.widget.target), angle)
+            + np.asarray(self.widget.target)
+        ).tolist()
+        self.widget.position = new_pos
+
+    def rotate_x(self, angle):
+        self._rotate("x", angle)
+
+    def rotate_y(self, angle):
+        self._rotate("y", angle)
+
+    def rotate_z(self, angle):
+        self._rotate("z", angle)
 
     def execute(self, object, method, args, threeType=None, update=False, callback=None):
         def wrapper(change=None):
