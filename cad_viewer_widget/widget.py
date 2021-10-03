@@ -43,7 +43,7 @@ class CadViewerWidget(widgets.Widget):
     # Viewer traits
 
     shapes = Unicode(allow_none=True).tag(sync=True)
-    states = Dict(Integer(), allow_none=True).tag(sync=True)
+    states = Dict(Tuple(Integer(), Integer()), allow_none=True).tag(sync=True)
 
     timeit = Bool(default_value=False, allow_None=True).tag(sync=True)
     needsAnimationLoop = Bool(default_value=False, allow_None=True).tag(sync=True)
@@ -159,27 +159,18 @@ class CadViewer:
         self.widget.tools = tools
         self.widget.timeit = timeit
         self.widget.needsAnimationLoop = needsAnimationLoop
-        self.widget.states = self._encode_states(states)
+        self.widget.states = states
         self.widget.zoom = 1.0  # keep, else setting zoom later to 1 might fail
 
         # send shapes as the last traitlet to trigger rendering
         self.widget.shapes = json.dumps(shapes, default=serializer)
-
-    def _encode_states(self, states):
-        result = {}
-        for i, s in states.items():
-            result[i] = (s[0] << 4) + s[1]
-        return result
 
     def add_tracks(self, tracks):
         self.widget.tracks = tracks
 
     def set_states(self, states):
         new_states = self.widget.states.copy()
-        new_states.update(self._encode_states(states))
-        for i, s in new_states.items():
-            print(i, s)
-
+        new_states.update(states)
         self.widget.states = new_states
 
     def _rotate(self, dir, angle):

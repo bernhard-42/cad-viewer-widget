@@ -89,22 +89,6 @@ function deserialize(str) {
   return JSON.parse(str);
 }
 
-function encode_states(states) {
-  var result = {};
-  for (var i in states) {
-    result[i] = (states[i][0] << 4) + states[i][1];
-  }
-  return result;
-}
-
-function decode_states(states) {
-  var result = {};
-  for (var i in states) {
-    result[i] = [states[i] >> 4, states[i] & 15];
-  }
-  return result;
-}
-
 export var CadViewerView = DOMWidgetView.extend({
   render: function () {
     this.createDisplay();
@@ -153,14 +137,10 @@ export var CadViewerView = DOMWidgetView.extend({
   notificationCallback(change) {
     this.ignoreNext = true; // change comes from python, so do not set traitlet back
     Object.keys(change).forEach((key) => {
-      console.log(key);
       if (key === "camera_position" || key == "camera_zoom") {
         // remove the prefix to be compliant with traitlets
         this.model.set(key.slice(7), change[key]["new"]);
-      } else if (key == "states") {
-        this.model.set(key, encode_states(change[key]["new"]));
       } else {
-        console.log(key, change[key]["new"]);
         this.model.set(key, change[key]["new"]);
       }
     });
@@ -171,7 +151,7 @@ export var CadViewerView = DOMWidgetView.extend({
   addShapes: function () {
     const shapes = this.model.get("shapes");
     this.shapes = decode(shapes);
-    this.states = decode_states(this.model.get("states"));
+    this.states = this.model.get("states");
     this.options = {
       axes: this.model.get("axes"),
       grid: this.model.get("grid"),
@@ -285,10 +265,7 @@ export var CadViewerView = DOMWidgetView.extend({
         this.viewer.setRotateSpeed(change.changed[key], false);
         break;
       case "states":
-        console.log(change.changed[key]);
-        var states = decode_states(change.changed[key]);
-        console.log(states);
-        this.viewer.setStates(states, false);
+        this.viewer.setStates(change.changed[key], false);
         break;
     }
   },
