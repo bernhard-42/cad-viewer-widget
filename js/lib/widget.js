@@ -214,7 +214,7 @@ export var CadViewerView = DOMWidgetView.extend({
     }
 
     const key = Object.keys(change.changed)[0];
-    console.log("handle_change", key);
+
     switch (key) {
       case "zoom":
         this.viewer.setCameraZoom(change.changed[key], false);
