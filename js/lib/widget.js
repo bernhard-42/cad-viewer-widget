@@ -13,6 +13,32 @@ function extend(a, b) {
   return a;
 }
 
+function isTolEqual(obj1, obj2, tol = 1e-9) {
+  if (Array.isArray(obj1) && Array.isArray(obj2)) {
+    return (
+      obj1.length === obj2.length &&
+      obj1.every((v, i) => isTolEqual(v, obj2[i]))
+    );
+  } else if (typeof obj1 === "object" && typeof obj2 === "object") {
+    var keys1 = Object.keys(obj1);
+    var keys2 = Object.keys(obj2);
+
+    if (
+      keys1.length == keys2.length &&
+      keys1.every((key) => Object.prototype.hasOwnProperty.call(obj2, key))
+    ) {
+      return keys1.every((key) => isTolEqual(obj1[key], obj2[key]));
+    } else {
+      return false;
+    }
+  } else {
+    if (Number(obj1) === obj1 && Number(obj2) === obj2) {
+      return Math.abs(obj1 - obj2) < tol;
+    }
+    return obj1 === obj2;
+  }
+}
+
 export var CadViewerModel = DOMWidgetModel.extend({
   defaults: extend(DOMWidgetModel.prototype.defaults(), {
     _model_name: "CadViewerModel",
@@ -131,11 +157,9 @@ export var CadViewerView = DOMWidgetView.extend({
     this.display.setAnimationControl(false);
     this.display.setTools(this.options.tools);
     this.hasShapes = false;
-    this.ignoreNext = false;
   },
 
   notificationCallback(change) {
-    this.ignoreNext = true; // change comes from python, so do not set traitlet back
     Object.keys(change).forEach((key) => {
       if (key === "camera_position" || key == "camera_zoom") {
         // remove the prefix to be compliant with traitlets
@@ -143,8 +167,8 @@ export var CadViewerView = DOMWidgetView.extend({
       } else {
         this.model.set(key, change[key]["new"]);
       }
+      console.log("==> Python: setting", key, "to", change[key]["new"]);
     });
-    this.ignoreNext = false;
     this.model.save_changes();
   },
 
@@ -208,64 +232,149 @@ export var CadViewerView = DOMWidgetView.extend({
       return;
     }
 
-    // Do not set traitlet if the change already comes from python
-    if (this.ignoreNext) {
-      return;
-    }
-
     const key = Object.keys(change.changed)[0];
 
     switch (key) {
       case "zoom":
-        this.viewer.setCameraZoom(change.changed[key], false);
+        if (!isTolEqual(this.viewer.getCameraZoom(), change.changed[key])) {
+          console.log(
+            "==> Javascript: setting camera_zoom to ",
+            change.changed[key]
+          );
+          this.viewer.setCameraZoom(change.changed[key], false);
+        }
         break;
       case "position":
-        this.viewer.setCameraPosition(change.changed[key], false, false);
+        if (
+          !isTolEqual(
+            this.viewer.getCameraPosition().toArray(),
+            change.changed[key]
+          )
+        ) {
+          console.log(
+            "==> Javascript: setting camera_position to ",
+            change.changed[key]
+          );
+          this.viewer.setCameraPosition(change.changed[key], false, false);
+        }
         break;
       case "axes":
-        this.viewer.setAxes(change.changed[key], false);
+        if (!isTolEqual(this.viewer.getAxes(), change.changed[key])) {
+          console.log("==> Javascript: setting axes to ", change.changed[key]);
+          this.viewer.setAxes(change.changed[key], false);
+        }
         break;
       case "grid":
-        this.viewer.setGrids(...change.changed[key], false);
+        if (!isTolEqual(this.viewer.getGrids(), change.changed[key])) {
+          console.log("==> Javascript: setting grid to ", change.changed[key]);
+          this.viewer.setGrids(...change.changed[key], false);
+        }
         break;
       case "axes0":
-        this.viewer.setAxes0(change.changed[key], false);
+        if (!isTolEqual(this.viewer.getAxes0(), change.changed[key])) {
+          console.log("==> Javascript: setting axes0 to ", change.changed[key]);
+          this.viewer.setAxes0(change.changed[key], false);
+        }
         break;
       case "ortho":
-        this.viewer.switchCamera(change.changed[key], false, false);
+        if (!isTolEqual(this.viewer.getOrtho(), change.changed[key])) {
+          console.log("==> Javascript: setting ortho to ", change.changed[key]);
+          this.viewer.switchCamera(change.changed[key], false, false);
+        }
         break;
       case "transparent":
-        this.viewer.setTransparent(change.changed[key], false);
+        if (!isTolEqual(this.viewer.getTransparent(), change.changed[key])) {
+          console.log(
+            "==> Javascript: setting transparent to ",
+            change.changed[key]
+          );
+          this.viewer.setTransparent(change.changed[key], false);
+        }
         break;
       case "black_edges":
-        this.viewer.setBlackEdges(change.changed[key], false);
+        if (!isTolEqual(this.viewer.getBlackEdges(), change.changed[key])) {
+          console.log(
+            "==> Javascript: setting black_edges to ",
+            change.changed[key]
+          );
+          this.viewer.setBlackEdges(change.changed[key], false);
+        }
         break;
-      case "bb_factor":
-        this.viewer.bb_factor = change.changed[key];
-        break;
+      // case "bb_factor":
+      //   if (!isEqual(this.viewer.getBb_factor(), change.changed[key])) {
+      //     console.log("==> Javascript: setting bb_factor to ", change.changed[key]);
+      //     this.viewer.bb_factor = change.changed[key];
+      //   }
+      //   break;
       case "tools":
-        this.display.setTools(change.changed[key], false);
+        console.log(this.viewer.getTools(), change.changed[key]);
+        if (!isTolEqual(this.viewer.getTools(), change.changed[key])) {
+          console.log("==> Javascript: setting tools to ", change.changed[key]);
+          this.viewer.setTools(change.changed[key], false);
+        }
         break;
       case "edge_color":
-        this.viewer.setEdgeColor(change.changed[key], false);
+        if (!isTolEqual(this.viewer.getEdgeColor(), change.changed[key])) {
+          console.log(
+            "==> Javascript: setting edge_color to ",
+            change.changed[key]
+          );
+          this.viewer.setEdgeColor(change.changed[key], false);
+        }
         break;
       case "ambient_intensity":
-        this.viewer.setAmbientLight(change.changed[key], false);
+        if (!isTolEqual(this.viewer.getAmbientLight(), change.changed[key])) {
+          console.log(
+            "==> Javascript: setting ambient_intensity to ",
+            change.changed[key]
+          );
+          this.viewer.setAmbientLight(change.changed[key], false);
+        }
         break;
       case "direct_intensity":
-        this.viewer.setDirectLight(change.changed[key], false);
+        if (!isTolEqual(this.viewer.getDirectLight(), change.changed[key])) {
+          console.log(
+            "==> Javascript: setting direct_intensity to ",
+            change.changed[key]
+          );
+          this.viewer.setDirectLight(change.changed[key], false);
+        }
         break;
       case "zoom_speed":
-        this.viewer.setZoomSpeed(change.changed[key], false);
+        if (!isTolEqual(this.viewer.getZoomSpeed(), change.changed[key])) {
+          console.log(
+            "==> Javascript: setting zoom_speed to ",
+            change.changed[key]
+          );
+          this.viewer.setZoomSpeed(change.changed[key], false);
+        }
         break;
       case "pan_speed":
-        this.viewer.setPanSpeed(change.changed[key], false);
+        if (!isTolEqual(this.viewer.getPanSpeed(), change.changed[key])) {
+          console.log(
+            "==> Javascript: setting pan_speed to ",
+            change.changed[key]
+          );
+          this.viewer.setPanSpeed(change.changed[key], false);
+        }
         break;
       case "rotate_speed":
-        this.viewer.setRotateSpeed(change.changed[key], false);
+        if (!isTolEqual(this.viewer.getRotateSpeed(), change.changed[key])) {
+          console.log(
+            "==> Javascript: setting rotate_speed to ",
+            change.changed[key]
+          );
+          this.viewer.setRotateSpeed(change.changed[key], false);
+        }
         break;
       case "states":
-        this.viewer.setStates(change.changed[key], false);
+        if (!isTolEqual(this.viewer.getStates(), change.changed[key])) {
+          console.log(
+            "==> Javascript: setting states to ",
+            change.changed[key]
+          );
+          this.viewer.setStates(change.changed[key], false);
+        }
         break;
     }
   },
