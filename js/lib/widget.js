@@ -3,7 +3,7 @@ import "../style/index.css";
 import { DOMWidgetModel, DOMWidgetView } from "@jupyter-widgets/base";
 import { Viewer, Display, Timer } from "three-cad-viewer";
 import { decode } from "./serializer.js";
-import * as THREE from "three";
+// import * as THREE from "three";
 
 // avoid loading lodash for "extend" function only
 function extend(a, b) {
@@ -14,6 +14,23 @@ function extend(a, b) {
 }
 
 function isTolEqual(obj1, obj2, tol = 1e-9) {
+  // Convert three's Vector3 to arrays
+  if (
+    (typeof obj1 === "object") &
+    (obj1.constructor != null) &
+    (obj1.constructor.name == "Vector3")
+  ) {
+    obj1 = obj1.toArray();
+  }
+  if (
+    (typeof obj2 === "object") &
+    (obj2.constructor != null) &
+    (obj2.constructor.name == "Vector3")
+  ) {
+    obj2 = obj2.toArray();
+  }
+
+  // tolerant comparison
   if (Array.isArray(obj1) && Array.isArray(obj2)) {
     return (
       obj1.length === obj2.length &&
@@ -48,32 +65,40 @@ export var CadViewerModel = DOMWidgetModel.extend({
     _model_module_version: "0.1.0",
     _view_module_version: "0.1.0",
 
-    // Display parameters
+    // Display traits
+
     cadWidth: null,
     height: null,
     treeWidth: null,
     theme: null,
 
-    // View parameters
+    // View traits
+
     shapes: null,
     states: null,
-
-    timeit: null,
+    tracks: null,
     needsAnimationLoop: null,
+    timeit: null,
+    tools: null,
 
-    tab: null,
     ortho: null,
     control: null,
     axes: null,
-    grid: null,
     axes0: null,
+    grid: null,
+    ticks: null,
     transparent: null,
     black_edges: null,
 
-    zoom_speed: null,
-    pan_speed: null,
-    rotate_speed: null,
+    edge_color: null,
+    ambient_intensity: null,
+    direct_intensity: null,
 
+    // bb_factor: null,
+
+    // Generic UI traits
+
+    tab: null,
     clip_intersection: null,
     clip_planes: null,
     clip_normal_0: null,
@@ -83,44 +108,44 @@ export var CadViewerModel = DOMWidgetModel.extend({
     clip_slider_1: null,
     clip_slider_2: null,
 
-    tracks: null,
-
     position: null,
     zoom: null,
 
-    bb_factor: null,
-    tools: null,
-    edge_color: null,
-    ambient_intensity: null,
-    direct_intensity: null,
+    zoom_speed: null,
+    pan_speed: null,
+    rotate_speed: null,
+
+    // Read only traitlets
 
     lastPick: null,
     target: null,
 
+    initialize: null,
     result: ""
   })
 });
 
-function serialize(obj) {
-  try {
-    var result = JSON.stringify(obj);
-    return result;
-  } catch (error) {
-    console.error(error);
-    return "Error";
-  }
-}
+// function serialize(obj) {
+//   try {
+//     var result = JSON.stringify(obj);
+//     return result;
+//   } catch (error) {
+//     console.error(error);
+//     return "Error";
+//   }
+// }
 
-function deserialize(str) {
-  return JSON.parse(str);
-}
+// function deserialize(str) {
+//   return JSON.parse(str);
+// }
 
 export var CadViewerView = DOMWidgetView.extend({
   render: function () {
     this.createDisplay();
-    this.model.on("change:shapes", this.addShapes, this);
-    this.model.on("change:tracks", this.addTracks, this);
+
+    this.model.on("change:shapes", this.handle_change, this);
     this.model.on("change:states", this.handle_change, this);
+    this.model.on("change:tracks", this.handle_change, this);
     this.model.on("change:position", this.handle_change, this);
     this.model.on("change:zoom", this.handle_change, this);
     this.model.on("change:axes", this.handle_change, this);
@@ -129,7 +154,6 @@ export var CadViewerView = DOMWidgetView.extend({
     this.model.on("change:ortho", this.handle_change, this);
     this.model.on("change:transparent", this.handle_change, this);
     this.model.on("change:black_edges", this.handle_change, this);
-    this.model.on("change:bb_factor", this.handle_change, this);
     this.model.on("change:tools", this.handle_change, this);
     this.model.on("change:edge_color", this.handle_change, this);
     this.model.on("change:ambient_intensity", this.handle_change, this);
@@ -138,17 +162,21 @@ export var CadViewerView = DOMWidgetView.extend({
     this.model.on("change:pan_speed", this.handle_change, this);
     this.model.on("change:rotate_speed", this.handle_change, this);
 
-    this.listenTo(this.model, "msg:custom", this.onCustomMessage.bind(this));
+    this.model.on("change:initialize", this.initialize, this);
+
+    // this.model.on("change:bb_factor", this.handle_change, this);
+
+    // this.listenTo(this.model, "msg:custom", this.onCustomMessage.bind(this));
+    console.log(this);
+    this.init = false;
   },
 
   createDisplay: function () {
     this.options = {
-      cadWidth: this.model.get("cadWidth"),
+      cadWidth: this.model.get("cad_width"),
       height: this.model.get("height"),
-      treeWidth: this.model.get("treeWidth"),
+      treeWidth: this.model.get("tree_width"),
       theme: this.model.get("theme"),
-      timeit: this.model.get("timeit"),
-      needsAnimationLoop: this.model.get("needsAnimationLoop"),
       tools: this.model.get("tools")
     };
     const container = document.createElement("div");
@@ -172,28 +200,44 @@ export var CadViewerView = DOMWidgetView.extend({
     this.model.save_changes();
   },
 
+  initialize: function () {
+    this.init = this.model.get("initialize");
+    if (this.init && this.viewer != null) {
+      console.log("Dispose CAD object");
+      this.viewer.dispose();
+    }
+
+    if (
+      !this.init &&
+      Object.keys(this.model.get("shapes")).length > 0 &&
+      Object.keys(this.model.get("states")).length > 0
+    ) {
+      this.addShapes();
+    }
+  },
+
   addShapes: function () {
     const shapes = this.model.get("shapes");
     this.shapes = decode(shapes);
     this.states = this.model.get("states");
     this.options = {
-      axes: this.model.get("axes"),
-      grid: this.model.get("grid"),
-      axes0: this.model.get("axes0"),
       ortho: this.model.get("ortho"),
       control: this.model.get("control"),
+      axes: this.model.get("axes"),
+      axes0: this.model.get("axes0"),
+      grid: this.model.get("grid"),
       ticks: this.model.get("ticks"),
       transparent: this.model.get("transparent"),
       blackEdges: this.model.get("black_edges"),
-      bbFactor: this.model.get("bb_factor"),
       edgeColor: this.model.get("edge_color"),
       ambientIntensity: this.model.get("ambient_intensity"),
-      directIntensity: this.model.get("direct_intensity")
+      directIntensity: this.model.get("direct_intensity"),
+      timeit: this.model.get("timeit")
+      // bbFactor: this.model.get("bb_factor"),
     };
 
-    const timeit = this.model.get("timeit");
+    // TODO: add tracks
 
-    const timer = new Timer("addShapes", timeit);
     this.viewer = new Viewer(
       this.display,
       this.model.get("needsAnimationLoop"),
@@ -201,7 +245,7 @@ export var CadViewerView = DOMWidgetView.extend({
       this.notificationCallback.bind(this)
     );
 
-    this.viewer._timeit = timeit;
+    const timer = new Timer("addShapes", this.options.timeit);
 
     timer.split("viewer");
 
@@ -210,13 +254,14 @@ export var CadViewerView = DOMWidgetView.extend({
 
     this.hasShapes = true;
 
-    // console.log("target", this.viewer.controls.target.toArray());
     this.model.set("target", this.viewer.controls.target);
     this.model.save_changes();
 
     timer.stop();
 
     window.cadViewer = this;
+
+    return true;
   },
 
   addTracks: function () {
@@ -228,239 +273,134 @@ export var CadViewerView = DOMWidgetView.extend({
   },
 
   handle_change(change) {
-    if (!this.hasShapes) {
+    const setKey = (getter, setter, key) => {
+      const value = change.changed[key];
+      if (!isTolEqual(this.viewer[getter](), value)) {
+        console.log(`==> Javascript: setting ${key} to ${value}`);
+        this.viewer[setter](value, false);
+      }
+    };
+
+    const key = Object.keys(change.changed)[0];
+    // console.log("key", key, change.changed[key]);
+
+    if (this.init) {
+      // console.log("Ignore message");
       return;
     }
 
-    const key = Object.keys(change.changed)[0];
-
     switch (key) {
       case "zoom":
-        if (!isTolEqual(this.viewer.getCameraZoom(), change.changed[key])) {
-          console.log(
-            "==> Javascript: setting camera_zoom to ",
-            change.changed[key]
-          );
-          this.viewer.setCameraZoom(change.changed[key], false);
-        }
+        setKey("getCameraZoom", "setCameraZoom", key);
         break;
       case "position":
-        if (
-          !isTolEqual(
-            this.viewer.getCameraPosition().toArray(),
-            change.changed[key]
-          )
-        ) {
-          console.log(
-            "==> Javascript: setting camera_position to ",
-            change.changed[key]
-          );
-          this.viewer.setCameraPosition(change.changed[key], false, false);
-        }
+        setKey("getCameraPosition", "setCameraPosition", key);
         break;
       case "axes":
-        if (!isTolEqual(this.viewer.getAxes(), change.changed[key])) {
-          console.log("==> Javascript: setting axes to ", change.changed[key]);
-          this.viewer.setAxes(change.changed[key], false);
-        }
+        setKey("getAxes", "setAxes", key);
         break;
       case "grid":
-        if (!isTolEqual(this.viewer.getGrids(), change.changed[key])) {
-          console.log("==> Javascript: setting grid to ", change.changed[key]);
-          this.viewer.setGrids(...change.changed[key], false);
-        }
+        setKey("getGrids", "setGrids", key);
         break;
       case "axes0":
-        if (!isTolEqual(this.viewer.getAxes0(), change.changed[key])) {
-          console.log("==> Javascript: setting axes0 to ", change.changed[key]);
-          this.viewer.setAxes0(change.changed[key], false);
-        }
+        setKey("getAxes0", "setAxes0", key);
         break;
       case "ortho":
-        if (!isTolEqual(this.viewer.getOrtho(), change.changed[key])) {
-          console.log("==> Javascript: setting ortho to ", change.changed[key]);
-          this.viewer.switchCamera(change.changed[key], false, false);
-        }
+        setKey("getOrtho", "switchCamera", key);
         break;
       case "transparent":
-        if (!isTolEqual(this.viewer.getTransparent(), change.changed[key])) {
-          console.log(
-            "==> Javascript: setting transparent to ",
-            change.changed[key]
-          );
-          this.viewer.setTransparent(change.changed[key], false);
-        }
+        setKey("getTransparent", "setTransparent", key);
         break;
       case "black_edges":
-        if (!isTolEqual(this.viewer.getBlackEdges(), change.changed[key])) {
-          console.log(
-            "==> Javascript: setting black_edges to ",
-            change.changed[key]
-          );
-          this.viewer.setBlackEdges(change.changed[key], false);
-        }
+        setKey("getBlackEdges", "setBlackEdges", key);
         break;
-      // case "bb_factor":
-      //   if (!isEqual(this.viewer.getBb_factor(), change.changed[key])) {
-      //     console.log("==> Javascript: setting bb_factor to ", change.changed[key]);
-      //     this.viewer.bb_factor = change.changed[key];
-      //   }
-      //   break;
       case "tools":
-        console.log(this.viewer.getTools(), change.changed[key]);
-        if (!isTolEqual(this.viewer.getTools(), change.changed[key])) {
-          console.log("==> Javascript: setting tools to ", change.changed[key]);
-          this.viewer.setTools(change.changed[key], false);
-        }
+        setKey("getTools", "setTools", key);
         break;
       case "edge_color":
-        if (!isTolEqual(this.viewer.getEdgeColor(), change.changed[key])) {
-          console.log(
-            "==> Javascript: setting edge_color to ",
-            change.changed[key]
-          );
-          this.viewer.setEdgeColor(change.changed[key], false);
-        }
+        setKey("getEdgeColor", "setEdgeColor", key);
         break;
       case "ambient_intensity":
-        if (!isTolEqual(this.viewer.getAmbientLight(), change.changed[key])) {
-          console.log(
-            "==> Javascript: setting ambient_intensity to ",
-            change.changed[key]
-          );
-          this.viewer.setAmbientLight(change.changed[key], false);
-        }
+        setKey("getAmbientLight", "setAmbientLight", key);
         break;
       case "direct_intensity":
-        if (!isTolEqual(this.viewer.getDirectLight(), change.changed[key])) {
-          console.log(
-            "==> Javascript: setting direct_intensity to ",
-            change.changed[key]
-          );
-          this.viewer.setDirectLight(change.changed[key], false);
-        }
+        setKey("getDirectLight", "setDirectLight", key);
         break;
       case "zoom_speed":
-        if (!isTolEqual(this.viewer.getZoomSpeed(), change.changed[key])) {
-          console.log(
-            "==> Javascript: setting zoom_speed to ",
-            change.changed[key]
-          );
-          this.viewer.setZoomSpeed(change.changed[key], false);
-        }
+        setKey("getZoomSpeed", "setZoomSpeed", key);
         break;
       case "pan_speed":
-        if (!isTolEqual(this.viewer.getPanSpeed(), change.changed[key])) {
-          console.log(
-            "==> Javascript: setting pan_speed to ",
-            change.changed[key]
-          );
-          this.viewer.setPanSpeed(change.changed[key], false);
-        }
+        setKey("getPanSpeed", "setPanSpeed", key);
         break;
       case "rotate_speed":
-        if (!isTolEqual(this.viewer.getRotateSpeed(), change.changed[key])) {
-          console.log(
-            "==> Javascript: setting rotate_speed to ",
-            change.changed[key]
-          );
-          this.viewer.setRotateSpeed(change.changed[key], false);
-        }
+        setKey("getRotateSpeed", "setRotateSpeed", key);
         break;
       case "states":
-        if (!isTolEqual(this.viewer.getStates(), change.changed[key])) {
-          console.log(
-            "==> Javascript: setting states to ",
-            change.changed[key]
-          );
-          this.viewer.setStates(change.changed[key], false);
-        }
+        setKey("getStates", "setStates", key, change.changed[key]);
         break;
     }
-  },
-
-  onCustomMessage: function (msg, buffers) {
-    console.log(
-      "New message with msgType:",
-      msg.type,
-      "msgId:",
-      msg.id,
-      ", object:",
-      msg.object,
-      ", name:",
-      msg.name,
-      ", args:",
-      msg.args,
-      ", type:",
-      msg.threeType,
-      ", update:",
-      msg.update,
-      ", buffers:",
-      buffers
-    );
-
-    if (msg.object) var path = JSON.parse(msg.object);
-    var objName = path.pop();
-
-    var parent = null;
-    try {
-      parent = this;
-      path.forEach((o) => (parent = parent[o]));
-    } catch (error) {
-      console.error(error);
-    }
-    console.log("parent:", parent, "object:", objName);
-
-    var result = null;
-    if (msg.name == null) {
-      result = parent[objName];
-    } else {
-      var args = null;
-      try {
-        args = deserialize(msg.args);
-        if (msg.threeType) {
-          args = new THREE[msg.threeType](...args);
-        }
-      } catch (error) {
-        console.error(error);
-      }
-      console.log("args:", args);
-
-      try {
-        if (msg.name === "=") {
-          result = parent[objName] = args[0];
-        } else {
-          if (msg.threeType) {
-            result = parent[objName][msg.name](args);
-          } else {
-            result = parent[objName][msg.name](...args);
-          }
-        }
-
-        if (msg.update) {
-          this.viewer.camera.updateProjectionMatrix();
-          this.viewer.controls.update();
-          this.viewer.update(true, false);
-        }
-
-        // const returnMsg = {
-        //     type: 'cad_viewer_method_result',
-        //     id: msg.id,
-        //     result: serialize(result),
-        // }
-
-        // console.log("sending msg with id:", msg.id, "result:", result)
-
-        // this.model.send(returnMsg, this.callbacks(), null);
-      } catch (error) {
-        console.log(error);
-      }
-    }
-    try {
-      this.model.set("result", serialize({ msg_id: msg.id, result: result }));
-      this.model.save_changes();
-    } catch (error) {
-      console.log(error);
-    }
   }
+
+  // onCustomMessage: function (msg, buffers) {
+  //   console.log(
+  //     "New message with msgType:",
+  //     msg.type,
+  //     "msgId:",
+  //     msg.id,
+  //     ", method:",
+  //     msg.method,
+  //     ", args:",
+  //     msg.args,
+  //     ", buffers:",
+  //     buffers
+  //   );
+
+  //   var object = this;
+  //   var path = JSON.parse(msg.method);
+  //   var method = path.pop();
+
+  //   try {
+  //     path.forEach((o) => (object = object[o]));
+  //   } catch (error) {
+  //     console.error(error);
+  //     return;
+  //   }
+  //   console.log("object:", object, "method:", method);
+
+  //   var args = null;
+  //   try {
+  //     args = deserialize(msg.args);
+  //   } catch (error) {
+  //     console.error(error);
+  //   }
+  //   console.log("args:", args);
+
+  //   var result = null;
+  //   try {
+  //     if (args == null) {
+  //       result = object[method]();
+  //     } else {
+  //       result = object[method](...args);
+  //     }
+  //     console.log("method executed, result: ", result);
+
+  //     const returnMsg = {
+  //       type: "cad_viewer_method_result",
+  //       id: msg.id,
+  //       result: serialize(result)
+  //     };
+  //     console.log("sending msg with id:", msg.id, "result:", result);
+
+  //     this.model.send(returnMsg, this.callbacks(), null);
+  //   } catch (error) {
+  //     console.log(error);
+  //   }
+
+  //   try {
+  //     this.model.set("result", serialize({ msg_id: msg.id, result: result }));
+  //     this.model.save_changes();
+  //   } catch (error) {
+  //     console.log(error);
+  //   }
+  // }
 });
