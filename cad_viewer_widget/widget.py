@@ -86,6 +86,8 @@ class CadViewerWidget(widgets.Widget):  # pylint: disable-msg=too-many-instance-
     pan_speed = Float(allow_none=True, default_value=0.5).tag(sync=True)
     rotate_speed = Float(allow_none=True, default_value=1.0).tag(sync=True)
 
+    state_updates = Dict(Tuple(Integer(), Integer()), allow_none=True).tag(sync=True)
+
     # Read only traitlets
 
     lastPick = Dict(Any(), allow_none=True, default_value={}, read_only=True).tag(sync=True)
@@ -188,12 +190,10 @@ class CadViewer:
 
         self.widget.tracks = tracks
 
-    def set_states(self, states):
+    def update_states(self, states):
         """Set navigation tree states for a CAD view"""
 
-        new_states = self.widget.states.copy()
-        new_states.update(states)
-        self.widget.states = new_states
+        self.widget.state_updates = states
 
     def _rotate(self, direction, angle):
         rot = {"x": rotate_x, "y": rotate_y, "z": rotate_z}

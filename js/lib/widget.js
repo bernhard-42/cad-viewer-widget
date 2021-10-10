@@ -13,30 +13,37 @@ function extend(a, b) {
   return a;
 }
 
+function isThreeType(obj, type) {
+  return (
+    obj != null &&
+    typeof obj === "object" &&
+    obj.constructor != null &&
+    obj.constructor.name === type
+  );
+}
+
 function isTolEqual(obj1, obj2, tol = 1e-9) {
+  // tolerant comparison
+
   // Convert three's Vector3 to arrays
-  if (
-    (typeof obj1 === "object") &
-    (obj1.constructor != null) &
-    (obj1.constructor.name == "Vector3")
-  ) {
+  if (isThreeType(obj1, "Vector3")) {
     obj1 = obj1.toArray();
   }
-  if (
-    (typeof obj2 === "object") &
-    (obj2.constructor != null) &
-    (obj2.constructor.name == "Vector3")
-  ) {
+  if (isThreeType(obj2, "Vector3")) {
     obj2 = obj2.toArray();
   }
 
-  // tolerant comparison
   if (Array.isArray(obj1) && Array.isArray(obj2)) {
     return (
       obj1.length === obj2.length &&
       obj1.every((v, i) => isTolEqual(v, obj2[i]))
     );
-  } else if (typeof obj1 === "object" && typeof obj2 === "object") {
+  } else if (
+    obj1 != null &&
+    obj2 != null &&
+    typeof obj1 === "object" &&
+    typeof obj2 === "object"
+  ) {
     var keys1 = Object.keys(obj1);
     var keys2 = Object.keys(obj2);
 
@@ -143,8 +150,6 @@ export var CadViewerView = DOMWidgetView.extend({
   render: function () {
     this.createDisplay();
 
-    this.model.on("change:shapes", this.handle_change, this);
-    this.model.on("change:states", this.handle_change, this);
     this.model.on("change:tracks", this.handle_change, this);
     this.model.on("change:position", this.handle_change, this);
     this.model.on("change:zoom", this.handle_change, this);
@@ -161,14 +166,16 @@ export var CadViewerView = DOMWidgetView.extend({
     this.model.on("change:zoom_speed", this.handle_change, this);
     this.model.on("change:pan_speed", this.handle_change, this);
     this.model.on("change:rotate_speed", this.handle_change, this);
+    this.model.on("change:state_updates", this.handle_change, this);
 
     this.model.on("change:initialize", this.initialize, this);
 
     // this.model.on("change:bb_factor", this.handle_change, this);
 
     // this.listenTo(this.model, "msg:custom", this.onCustomMessage.bind(this));
-    console.log(this);
+
     this.init = false;
+    this.is_empty = true;
   },
 
   createDisplay: function () {
@@ -184,20 +191,28 @@ export var CadViewerView = DOMWidgetView.extend({
     this.display = new Display(container, this.options);
     this.display.setAnimationControl(false);
     this.display.setTools(this.options.tools);
-    this.hasShapes = false;
   },
 
   notificationCallback(change) {
+    var changed = false;
     Object.keys(change).forEach((key) => {
-      if (key === "camera_position" || key == "camera_zoom") {
-        // remove the prefix to be compliant with traitlets
-        this.model.set(key.slice(7), change[key]["new"]);
-      } else {
-        this.model.set(key, change[key]["new"]);
+      const old_value = this.model.get(key);
+      const new_value = change[key]["new"];
+      if (!isTolEqual(old_value, new_value)) {
+        this.model.set(key, new_value);
+        changed = true;
+        console.log(
+          `Setting Python attribute ${key} to ${JSON.stringify(
+            new_value,
+            null,
+            2
+          )}`
+        );
       }
-      console.log("==> Python: setting", key, "to", change[key]["new"]);
     });
-    this.model.save_changes();
+    if (changed) {
+      this.model.save_changes();
+    }
   },
 
   initialize: function () {
@@ -205,13 +220,10 @@ export var CadViewerView = DOMWidgetView.extend({
     if (this.init && this.viewer != null) {
       console.log("Dispose CAD object");
       this.viewer.dispose();
+      this.is_empty = true;
     }
 
-    if (
-      !this.init &&
-      Object.keys(this.model.get("shapes")).length > 0 &&
-      Object.keys(this.model.get("states")).length > 0
-    ) {
+    if (!this.init && this.is_empty) {
       this.addShapes();
     }
   },
@@ -252,7 +264,7 @@ export var CadViewerView = DOMWidgetView.extend({
     this.viewer.render(this.shapes, this.states);
     timer.split("renderer");
 
-    this.hasShapes = true;
+    this.is_empty = false;
 
     this.model.set("target", this.viewer.controls.target);
     this.model.save_changes();
@@ -276,7 +288,13 @@ export var CadViewerView = DOMWidgetView.extend({
     const setKey = (getter, setter, key) => {
       const value = change.changed[key];
       if (!isTolEqual(this.viewer[getter](), value)) {
-        console.log(`==> Javascript: setting ${key} to ${value}`);
+        console.log(
+          `Setting Javascript attribute ${key} to ${JSON.stringify(
+            value,
+            null,
+            2
+          )}`
+        );
         this.viewer[setter](value, false);
       }
     };
@@ -335,7 +353,7 @@ export var CadViewerView = DOMWidgetView.extend({
       case "rotate_speed":
         setKey("getRotateSpeed", "setRotateSpeed", key);
         break;
-      case "states":
+      case "state_updates":
         setKey("getStates", "setStates", key, change.changed[key]);
         break;
     }
