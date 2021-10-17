@@ -116,6 +116,7 @@ export var CadViewerModel = DOMWidgetModel.extend({
     clip_slider_2: null,
 
     position: null,
+    quaternion: null,
     zoom: null,
 
     zoom_speed: null,
@@ -152,6 +153,7 @@ export var CadViewerView = DOMWidgetView.extend({
 
     this.model.on("change:tracks", this.handle_change, this);
     this.model.on("change:position", this.handle_change, this);
+    this.model.on("change:quaternion", this.handle_change, this);
     this.model.on("change:zoom", this.handle_change, this);
     this.model.on("change:axes", this.handle_change, this);
     this.model.on("change:grid", this.handle_change, this);
@@ -261,7 +263,11 @@ export var CadViewerView = DOMWidgetView.extend({
 
     timer.split("viewer");
 
-    this.viewer.render(this.shapes, this.states);
+    const position = this.model.get("position");
+    const quaternion = this.model.get("quaternion");
+    const zoom = this.model.get("zoom");
+    console.log(position, zoom);
+    this.viewer.render(this.shapes, this.states, position, quaternion, zoom);
     timer.split("renderer");
 
     this.is_empty = false;
@@ -313,6 +319,9 @@ export var CadViewerView = DOMWidgetView.extend({
         break;
       case "position":
         setKey("getCameraPosition", "setCameraPosition", key);
+        break;
+      case "quaternion":
+        setKey("getCameraQuaternion", "setCameraQuaternion", key);
         break;
       case "axes":
         setKey("getAxes", "setAxes", key);

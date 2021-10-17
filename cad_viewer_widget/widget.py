@@ -80,6 +80,7 @@ class CadViewerWidget(widgets.Widget):  # pylint: disable-msg=too-many-instance-
     clip_slider_2 = Float(allow_none=True, default_value=0.0).tag(sync=True)
 
     position = Tuple(Float(), Float(), Float(), default_value=None, allow_none=True).tag(sync=True)
+    quaternion = Tuple(Float(), Float(), Float(), Float(), default_value=None, allow_none=True).tag(sync=True)
     zoom = Float(allow_none=True, default_value=None).tag(sync=True)
 
     zoom_speed = Float(allow_none=True, default_value=0.5).tag(sync=True)
@@ -152,6 +153,10 @@ class CadViewer:
         edge_color="#707070",
         ambient_intensity=0.9,
         direct_intensity=0.12,
+        position=None,
+        quaternion=None,
+        zoom=None,
+        reset_camera=True,
         timeit=False,
         # bb_factor=1.0,
     ):
@@ -161,6 +166,15 @@ class CadViewer:
             grid = [False, False, False]
 
         self.widget.initialize = True
+
+        # If one changes the control type, override reset_camera with "True"
+        if self.widget.control != control:
+            reset_camera = True
+            print("Camera control changed, so camera was resetted")
+
+        if control == "orbit" and quaternion is not None:
+            quaternion = None
+            print("Camera quaternion cannot be used with Orbit camera control")
 
         with self.widget.hold_trait_notifications():
             self.widget.shapes = json.dumps(shapes, default=serializer)
@@ -179,9 +193,20 @@ class CadViewer:
             self.widget.timeit = timeit
             self.add_tracks(tracks)
             self.widget.needs_animation_loop = tracks is not None
-            # self.widget.bb_factor = bb_factor
+            # reset camera if requested
+            if reset_camera:
+                self.widget.position = position
+                self.widget.quaternion = quaternion
+                self.widget.zoom = zoom
+            else:
+                if position is not None:
+                    print("Parameter 'position' needs 'reset_camera=True'")
+                if quaternion is not None:
+                    print("Parameter 'quaternion' needs 'reset_camera=True'")
+                if zoom is not None:
+                    print("Parameter 'zoom' needs 'reset_camera=True'")
 
-            self.widget.zoom = 1.0  # keep, else setting zoom later to 1 might fail
+            # self.widget.bb_factor = bb_factor
 
         self.widget.initialize = False
 
