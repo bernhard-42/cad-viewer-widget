@@ -84,7 +84,7 @@ export var CadViewerModel = DOMWidgetModel.extend({
     shapes: null,
     states: null,
     tracks: null,
-    needsAnimationLoop: null,
+    animationLoop: null,
     timeit: null,
     tools: null,
 
@@ -254,7 +254,7 @@ export var CadViewerView = DOMWidgetView.extend({
 
     this.viewer = new Viewer(
       this.display,
-      this.model.get("needsAnimationLoop"),
+      this.model.get("animation_loop"),
       this.options,
       this.notificationCallback.bind(this)
     );

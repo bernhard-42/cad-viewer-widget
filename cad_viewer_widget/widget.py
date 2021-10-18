@@ -48,7 +48,7 @@ class CadViewerWidget(widgets.Widget):  # pylint: disable-msg=too-many-instance-
     shapes = Unicode(allow_none=True).tag(sync=True)
     states = Dict(Tuple(Integer(), Integer()), allow_none=True).tag(sync=True)
     tracks = List(List(Float()), default_value=[], allow_none=True).tag(sync=True)
-    needs_animation_loop = Bool(default_value=False, allow_None=True).tag(sync=True)
+    animation_loop = Bool(default_value=True, allow_None=True).tag(sync=True)
     timeit = Bool(default_value=False, allow_None=True).tag(sync=True)
     tools = Bool(allow_none=True, default_value=True).tag(sync=True)
 
@@ -158,6 +158,7 @@ class CadViewer:
         zoom=None,
         reset_camera=True,
         timeit=False,
+        animation_loop=True,
         # bb_factor=1.0,
     ):
         """Adding shapes to the CAD view"""
@@ -192,7 +193,7 @@ class CadViewer:
             self.widget.black_edges = black_edges
             self.widget.timeit = timeit
             self.add_tracks(tracks)
-            self.widget.needs_animation_loop = tracks is not None
+            self.widget.animation_loop = animation_loop
             # reset camera if requested
             if reset_camera:
                 self.widget.position = position
