@@ -226,6 +226,11 @@ class CadViewer:
 
         self.widget.initialize = False
 
+    def update_states(self, states):
+        """Set navigation tree states for a CAD view"""
+
+        self.widget.state_updates = states
+
     #
     # Animation handling
     #
@@ -267,11 +272,6 @@ class CadViewer:
         """Pause animation"""
 
         self.execute("viewer.controlAnimation", ["pause"])
-
-    def update_states(self, states):
-        """Set navigation tree states for a CAD view"""
-
-        self.widget.state_updates = states
 
     #
     # Rotations
