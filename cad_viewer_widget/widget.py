@@ -21,6 +21,22 @@ def get_parser():
     return obj + ZeroOrMore(dot + obj)
 
 
+class AnimationTrack:
+    """A three.js animation track"""
+
+    def __init__(self, path, action, times, values):
+        if len(times) != len(values):
+            raise ValueError("Parameters 'times' and 'values' need to have same length")
+        self.path = path
+        self.action = action
+        self.times = times
+        self.values = values
+        self.length = len(times)
+
+    def to_array(self):
+        return [self.path, self.action, self.times, self.values]
+
+
 @widgets.register
 class CadViewerWidget(widgets.Widget):  # pylint: disable-msg=too-many-instance-attributes
     """An example widget."""
@@ -47,8 +63,10 @@ class CadViewerWidget(widgets.Widget):  # pylint: disable-msg=too-many-instance-
 
     shapes = Unicode(allow_none=True).tag(sync=True)
     states = Dict(Tuple(Integer(), Integer()), allow_none=True).tag(sync=True)
-    tracks = List(List(Float()), default_value=[], allow_none=True).tag(sync=True)
+
+    tracks = Unicode(allow_none=True).tag(sync=True)
     animation_loop = Bool(default_value=True, allow_None=True).tag(sync=True)
+
     timeit = Bool(default_value=False, allow_None=True).tag(sync=True)
     tools = Bool(allow_none=True, default_value=True).tag(sync=True)
 
@@ -123,13 +141,10 @@ class CadViewer:
         )
         self.msg_id = 0
         self.parser = get_parser()
+
+        self.tracks = []
+
         display(self.widget)
-
-    #    self.widget.on_msg(self._on_message)
-
-    # def _on_message(self, widget, content, buffers):
-    #     if content["type"] == "cad_viewer_method_result":
-    #         self.results[content["id"]] = json.loads(content["result"])
 
     def _parse(self, string):
         try:
@@ -211,71 +226,102 @@ class CadViewer:
 
         self.widget.initialize = False
 
-    def add_tracks(self, tracks):
-        """Add animation tracks to a CAD view"""
+    #
+    # Animation handling
+    #
 
-        self.widget.tracks = tracks
+    def clear_tracks(self):
+        """Remove animation tracks from CAD view"""
+
+        self.tracks = []
+        self.widget.tracks = ""
+
+    def add_track(self, track):
+        """Add an animation track to CAD view"""
+
+        self.tracks.append(track)
+
+    def add_tracks(self, tracks):
+        """Add animation tracks to CAD view"""
+
+        self.tracks = [] if tracks is None else [track for track in tracks]  # enforce a new array
+
+    def animate(self, speed=1):
+        """Send animation tracks to CAD view"""
+
+        self.widget.tracks = json.dumps([track.to_array() for track in self.tracks])
+        self.execute("animate", (speed,))
+        self.play()
+
+    def play(self):
+        """Start animation"""
+
+        self.execute("viewer.controlAnimation", ["play"])
+
+    def stop(self):
+        """Stop animation"""
+
+        self.execute("viewer.controlAnimation", ["stop"])
+
+    def pause(self):
+        """Pause animation"""
+
+        self.execute("viewer.controlAnimation", ["pause"])
 
     def update_states(self, states):
         """Set navigation tree states for a CAD view"""
 
         self.widget.state_updates = states
 
-    def _rotate(self, direction, angle):
-        rot = {"x": rotate_x, "y": rotate_y, "z": rotate_z}
-        new_pos = (
-            rot[direction](np.asarray(self.widget.position) - np.asarray(self.widget.target), angle)
-            + np.asarray(self.widget.target)
-        ).tolist()
-        self.widget.position = new_pos
+    #
+    # Rotations
+    #
 
-    def rotate_x(self, angle):
-        """Rotate CAD object around x axis"""
-        self._rotate("x", angle)
+    # def _rotate(self, direction, angle):
+    #     rot = {"x": rotate_x, "y": rotate_y, "z": rotate_z}
+    #     new_pos = (
+    #         rot[direction](np.asarray(self.widget.position) - np.asarray(self.widget.target), angle)
+    #         + np.asarray(self.widget.target)
+    #     ).tolist()
+    #     self.widget.position = new_pos
 
-    def rotate_y(self, angle):
-        """Rotate CAD object around y axis"""
-        self._rotate("y", angle)
+    # def rotate_x(self, angle):
+    #     """Rotate CAD object around x axis"""
+    #     self._rotate("x", angle)
 
-    def rotate_z(self, angle):
-        """Rotate CAD object around z axis"""
-        self._rotate("z", angle)
+    # def rotate_y(self, angle):
+    #     """Rotate CAD object around y axis"""
+    #     self._rotate("y", angle)
 
-    # def execute(self, method, args, callback=None):
-    #     def wrapper(change=None):
-    #         if change is None:
-    #             self.widget.observe(wrapper, "result")
-    #             self.msg_id += 1
+    # def rotate_z(self, angle):
+    #     """Rotate CAD object around z axis"""
+    #     self._rotate("z", angle)
 
-    #             path = self._parse(method)
+    #
+    # Custom message handling
+    #
 
-    #             content = {
-    #                 "type": "cad_viewer_method",
-    #                 "id": self.msg_id,
-    #                 "method": json.dumps(path),
-    #                 "args": json.dumps(args),
-    #             }
+    def execute(self, method, args):
+        def wrapper(change=None):
+            if change is None:
+                self.msg_id += 1
 
-    #             self.widget.send(content=content, buffers=None)
+                path = self._parse(method)
 
-    #             return self.msg_id
-    #         else:
-    #             self.widget.unobserve(wrapper, "result")
-    #             if callback is not None:
-    #                 callback(change.new)
+                content = {
+                    "type": "cad_viewer_method",
+                    "id": self.msg_id,
+                    "method": json.dumps(path),
+                    "args": json.dumps(args),
+                }
 
-    #     if args is not None and not isinstance(args, (tuple, list)):
-    #         args = [args]
-    #     return wrapper()
+                self.widget.send(content=content, buffers=None)
 
-    # def set(self, obj, args, three_type=None, update=False, callback=None):
-    #     return self.execute(obj, "=", args, three_type, update, callback)
+                return self.msg_id
 
-    # def get(self, obj, callback=None):
-    #     return self.execute(obj, None, None, None, None, callback)
-
-    # def get_result(self):
-    #     return json.loads(self.widget.result)
+        if args is not None and not isinstance(args, (tuple, list)):
+            args = [args]
+        return wrapper()
 
     def _ipython_display_(self):
         display(self.widget)

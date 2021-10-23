@@ -3,7 +3,6 @@ import "../style/index.css";
 import { DOMWidgetModel, DOMWidgetView } from "@jupyter-widgets/base";
 import { Viewer, Display, Timer } from "three-cad-viewer";
 import { decode } from "./serializer.js";
-// import * as THREE from "three";
 
 // avoid loading lodash for "extend" function only
 function extend(a, b) {
@@ -133,20 +132,6 @@ export var CadViewerModel = DOMWidgetModel.extend({
   })
 });
 
-// function serialize(obj) {
-//   try {
-//     var result = JSON.stringify(obj);
-//     return result;
-//   } catch (error) {
-//     console.error(error);
-//     return "Error";
-//   }
-// }
-
-// function deserialize(str) {
-//   return JSON.parse(str);
-// }
-
 export var CadViewerView = DOMWidgetView.extend({
   render: function () {
     this.createDisplay();
@@ -174,10 +159,11 @@ export var CadViewerView = DOMWidgetView.extend({
 
     // this.model.on("change:bb_factor", this.handle_change, this);
 
-    // this.listenTo(this.model, "msg:custom", this.onCustomMessage.bind(this));
+    this.listenTo(this.model, "msg:custom", this.onCustomMessage.bind(this));
 
     this.init = false;
     this.is_empty = true;
+    this.debug = false;
   },
 
   createDisplay: function () {
@@ -203,13 +189,15 @@ export var CadViewerView = DOMWidgetView.extend({
       if (!isTolEqual(old_value, new_value)) {
         this.model.set(key, new_value);
         changed = true;
-        console.log(
-          `Setting Python attribute ${key} to ${JSON.stringify(
-            new_value,
-            null,
-            2
-          )}`
-        );
+        if (this.debug) {
+          console.log(
+            `Setting Python attribute ${key} to ${JSON.stringify(
+              new_value,
+              null,
+              2
+            )}`
+          );
+        }
       }
     });
     if (changed) {
@@ -231,10 +219,21 @@ export var CadViewerView = DOMWidgetView.extend({
   },
 
   addShapes: function () {
-    const shapes = this.model.get("shapes");
-    this.shapes = decode(shapes);
+    this.shapes = decode(this.model.get("shapes"));
+
+    var tracks = null;
+    this.tracks = [];
+    var animationLoop = this.model.get("animation_loop");
+    if (this.model.get("tracks")) {
+      tracks = decode(this.model.get("tracks"));
+      animationLoop = true;
+    }
+
     this.states = this.model.get("states");
     this.options = {
+      cadWidth: this.model.get("cad_width"),
+      height: this.model.get("height"),
+      treeWidth: this.model.get("tree_width"),
       ortho: this.model.get("ortho"),
       control: this.model.get("control"),
       axes: this.model.get("axes"),
@@ -250,11 +249,9 @@ export var CadViewerView = DOMWidgetView.extend({
       // bbFactor: this.model.get("bb_factor"),
     };
 
-    // TODO: add tracks
-
     this.viewer = new Viewer(
       this.display,
-      this.model.get("animation_loop"),
+      animationLoop,
       this.options,
       this.notificationCallback.bind(this)
     );
@@ -266,7 +263,7 @@ export var CadViewerView = DOMWidgetView.extend({
     const position = this.model.get("position");
     const quaternion = this.model.get("quaternion");
     const zoom = this.model.get("zoom");
-    console.log(position, zoom);
+
     this.viewer.render(this.shapes, this.states, position, quaternion, zoom);
     timer.split("renderer");
 
@@ -275,6 +272,9 @@ export var CadViewerView = DOMWidgetView.extend({
     this.model.set("target", this.viewer.controls.target);
     this.model.save_changes();
 
+    // add animation tracks if exists
+    this.addTracks(tracks);
+
     timer.stop();
 
     window.cadViewer = this;
@@ -282,36 +282,67 @@ export var CadViewerView = DOMWidgetView.extend({
     return true;
   },
 
-  addTracks: function () {
-    this.tracks = this.model.get("tracks");
-    for (var track of this.tracks) {
-      this.viewer.addTracks(...track);
+  addTracks: function (tracks) {
+    this.tracks = decode(tracks);
+    if (Array.isArray(this.tracks) && this.tracks.length > 0) {
+      for (var track of this.tracks) {
+        this.viewer.addAnimationTrack(...track);
+      }
     }
-    // TODO
+  },
+
+  animate: function (speed) {
+    const duration = Math.max(
+      ...this.tracks.map((track) => Math.max(...track[2]))
+    );
+    if (speed > 0) {
+      this.viewer.initAnimation(duration, speed);
+    }
+  },
+
+  clearAnimation: function () {
+    // TODO: add clear to animation of three-cad-viewer
+    if (this.viewer.clipAction) {
+      this.viewer.controlAnimation("stop");
+    }
+    if (this.viewer.animation) {
+      this.viewer.animation.mixer = null;
+      this.viewer.animation.clipAction = null;
+      this.viewer.animation.tracks = [];
+      this.viewer.animation.root = null;
+      this.viewer.animation = null;
+    }
+    this.tracks = [];
+    this.display.setAnimationControl(false);
   },
 
   handle_change(change) {
     const setKey = (getter, setter, key) => {
       const value = change.changed[key];
       if (!isTolEqual(this.viewer[getter](), value)) {
-        console.log(
-          `Setting Javascript attribute ${key} to ${JSON.stringify(
-            value,
-            null,
-            2
-          )}`
-        );
+        if (this.debug) {
+          console.log(
+            `Setting Javascript attribute ${key} to ${JSON.stringify(
+              value,
+              null,
+              2
+            )}`
+          );
+        }
         this.viewer[setter](value, false);
       }
     };
 
     const key = Object.keys(change.changed)[0];
-    // console.log("key", key, change.changed[key]);
 
     if (this.init) {
-      // console.log("Ignore message");
+      if (this.debug) {
+        console.log("Ignore message");
+      }
       return;
     }
+
+    var tracks = "";
 
     switch (key) {
       case "zoom":
@@ -365,69 +396,69 @@ export var CadViewerView = DOMWidgetView.extend({
       case "state_updates":
         setKey("getStates", "setStates", key, change.changed[key]);
         break;
+      case "tracks":
+        tracks = this.model.get("tracks");
+        if (tracks == "") {
+          this.clearAnimation();
+        } else {
+          this.addTracks(tracks);
+        }
+        break;
+    }
+  },
+
+  onCustomMessage: function (msg, buffers) {
+    if (this.debug) {
+      console.log(
+        "New message with msgType:",
+        msg.type,
+        "msgId:",
+        msg.id,
+        ", method:",
+        msg.method,
+        ", args:",
+        msg.args,
+        ", buffers:",
+        buffers
+      );
+    }
+
+    var object = this;
+    var path = JSON.parse(msg.method);
+    var method = path.pop();
+
+    try {
+      path.forEach((o) => (object = object[o]));
+      if (this.debug) {
+        console.log("object:", object, "method:", method);
+      }
+    } catch (error) {
+      console.error(error);
+      return;
+    }
+
+    var args = null;
+    try {
+      args = JSON.parse(msg.args);
+      if (this.debug) {
+        console.log("args:", args);
+      }
+    } catch (error) {
+      console.error(error);
+    }
+
+    var result = null;
+    try {
+      if (args == null) {
+        result = object[method]();
+      } else {
+        result = object[method](...args);
+      }
+      if (this.debug) {
+        console.log("method executed, result: ", result);
+      }
+    } catch (error) {
+      console.log(error);
     }
   }
-
-  // onCustomMessage: function (msg, buffers) {
-  //   console.log(
-  //     "New message with msgType:",
-  //     msg.type,
-  //     "msgId:",
-  //     msg.id,
-  //     ", method:",
-  //     msg.method,
-  //     ", args:",
-  //     msg.args,
-  //     ", buffers:",
-  //     buffers
-  //   );
-
-  //   var object = this;
-  //   var path = JSON.parse(msg.method);
-  //   var method = path.pop();
-
-  //   try {
-  //     path.forEach((o) => (object = object[o]));
-  //   } catch (error) {
-  //     console.error(error);
-  //     return;
-  //   }
-  //   console.log("object:", object, "method:", method);
-
-  //   var args = null;
-  //   try {
-  //     args = deserialize(msg.args);
-  //   } catch (error) {
-  //     console.error(error);
-  //   }
-  //   console.log("args:", args);
-
-  //   var result = null;
-  //   try {
-  //     if (args == null) {
-  //       result = object[method]();
-  //     } else {
-  //       result = object[method](...args);
-  //     }
-  //     console.log("method executed, result: ", result);
-
-  //     const returnMsg = {
-  //       type: "cad_viewer_method_result",
-  //       id: msg.id,
-  //       result: serialize(result)
-  //     };
-  //     console.log("sending msg with id:", msg.id, "result:", result);
-
-  //     this.model.send(returnMsg, this.callbacks(), null);
-  //   } catch (error) {
-  //     console.log(error);
-  //   }
-
-  //   try {
-  //     this.model.set("result", serialize({ msg_id: msg.id, result: result }));
-  //     this.model.save_changes();
-  //   } catch (error) {
-  //     console.log(error);
-  //   }
-  // }
 });
