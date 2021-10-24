@@ -154,8 +154,17 @@ export var CadViewerView = DOMWidgetView.extend({
     this.model.on("change:pan_speed", this.handle_change, this);
     this.model.on("change:rotate_speed", this.handle_change, this);
     this.model.on("change:state_updates", this.handle_change, this);
-
+    this.model.on("change:tab", this.handle_change, this);
+    this.model.on("change:clip_intersection", this.handle_change, this);
+    this.model.on("change:clip_planes", this.handle_change, this);
+    this.model.on("change:clip_normal_0", this.handle_change, this);
+    this.model.on("change:clip_normal_1", this.handle_change, this);
+    this.model.on("change:clip_normal_2", this.handle_change, this);
+    this.model.on("change:clip_slider_0", this.handle_change, this);
+    this.model.on("change:clip_slider_1", this.handle_change, this);
+    this.model.on("change:clip_slider_2", this.handle_change, this);
     this.model.on("change:initialize", this.initialize, this);
+    this.model.on("change:js_debug", this.handle_change, this);
 
     // this.model.on("change:bb_factor", this.handle_change, this);
 
@@ -163,7 +172,7 @@ export var CadViewerView = DOMWidgetView.extend({
 
     this.init = false;
     this.is_empty = true;
-    this.debug = false;
+    this.debug = this.model.get("js_debug");
   },
 
   createDisplay: function () {
@@ -310,9 +319,11 @@ export var CadViewerView = DOMWidgetView.extend({
   },
 
   handle_change(change) {
-    const setKey = (getter, setter, key) => {
+    const setKey = (getter, setter, key, arg = null) => {
       const value = change.changed[key];
-      if (!isTolEqual(this.viewer[getter](), value)) {
+      const oldValue =
+        arg == null ? this.viewer[getter]() : this.viewer[getter](arg);
+      if (!isTolEqual(oldValue, value)) {
         if (this.debug) {
           console.log(
             `Setting Javascript attribute ${key} to ${JSON.stringify(
@@ -322,7 +333,11 @@ export var CadViewerView = DOMWidgetView.extend({
             )}`
           );
         }
-        this.viewer[setter](value, false);
+        if (arg == null) {
+          this.viewer[setter](value, false);
+        } else {
+          this.viewer[setter](arg, value, false);
+        }
       }
     };
 
@@ -336,6 +351,7 @@ export var CadViewerView = DOMWidgetView.extend({
     }
 
     var tracks = "";
+    var value = null;
 
     switch (key) {
       case "zoom":
@@ -387,7 +403,7 @@ export var CadViewerView = DOMWidgetView.extend({
         setKey("getRotateSpeed", "setRotateSpeed", key);
         break;
       case "state_updates":
-        setKey("getStates", "setStates", key, change.changed[key]);
+        setKey("getStates", "setStates", key);
         break;
       case "tracks":
         tracks = this.model.get("tracks");
@@ -396,6 +412,41 @@ export var CadViewerView = DOMWidgetView.extend({
         } else {
           this.addTracks(tracks);
         }
+        break;
+      case "tab":
+        value = change.changed[key];
+        if (value === "tree" || value == "clip") {
+          this.viewer.display.selectTabByName(value);
+        } else {
+          console.error(`unkonwn tab name ${value}`);
+        }
+        break;
+      case "clip_intersection":
+        setKey("getClipIntersection", "setClipIntersection", key);
+        break;
+      case "clip_planes":
+        setKey("getClipPlaneHelpers", "setClipPlaneHelpers", key);
+        break;
+      case "clip_normal_0":
+        setKey("getClipNormal", "setClipNormal", key, 0);
+        break;
+      case "clip_normal_1":
+        setKey("getClipNormal", "setClipNormal", key, 1);
+        break;
+      case "clip_normal_2":
+        setKey("getClipNormal", "setClipNormal", key, 2);
+        break;
+      case "clip_slider_0":
+        setKey("getClipSlider", "setClipSlider", key, 0);
+        break;
+      case "clip_slider_1":
+        setKey("getClipSlider", "setClipSlider", key, 1);
+        break;
+      case "clip_slider_2":
+        setKey("getClipSlider", "setClipSlider", key, 2);
+        break;
+      case "js_debug":
+        this.debug = change.changed[key];
         break;
     }
   },

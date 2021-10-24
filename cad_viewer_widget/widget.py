@@ -113,7 +113,8 @@ class CadViewerWidget(widgets.Widget):  # pylint: disable-msg=too-many-instance-
     target = Tuple(Float(), Float(), Float(), allow_none=True, read_only=True).tag(sync=True)
 
     initialize = Bool(allow_none=True, default_value=False).tag(sync=True)
-    result = Unicode(allow_none=True, default_value="", read_only=True).tag(sync=True)
+    js_debug = Bool(allow_none=True, default_value=False).tag(sync=True)
+    # result = Unicode(allow_none=True, default_value="", read_only=True).tag(sync=True)
 
 
 class CadViewer:
@@ -274,6 +275,18 @@ class CadViewer:
         self.execute("viewer.controlAnimation", ["pause"])
 
     #
+    # Tab handling
+    #
+
+    def select_tree(self):
+        """Select Navigation tree tab"""
+        self.widget.tab = "tree"
+
+    def select_clipping(self):
+        """Select Clipping tab"""
+        self.widget.tab = "clip"
+
+    #
     # Rotations
     #
 
@@ -302,6 +315,8 @@ class CadViewer:
     #
 
     def execute(self, method, args):
+        """Execute a method of a Javascript object"""
+
         def wrapper(change=None):
             if change is None:
                 self.msg_id += 1
