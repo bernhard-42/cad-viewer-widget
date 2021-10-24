@@ -305,15 +305,8 @@ export var CadViewerView = DOMWidgetView.extend({
     if (this.viewer.clipAction) {
       this.viewer.controlAnimation("stop");
     }
-    if (this.viewer.animation) {
-      this.viewer.animation.mixer = null;
-      this.viewer.animation.clipAction = null;
-      this.viewer.animation.tracks = [];
-      this.viewer.animation.root = null;
-      this.viewer.animation = null;
-    }
+    this.viewer.clearAnimation();
     this.tracks = [];
-    this.display.setAnimationControl(false);
   },
 
   handle_change(change) {
