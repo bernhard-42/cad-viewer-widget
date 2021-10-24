@@ -35,18 +35,18 @@
   },
   "dependencies": {
     "@jupyter-widgets/base": "^1.1 || ^2 || ^3 || ^4",
-    "js-base64": "^3.6.1",
-    "pako": "^2.0.3",
-    "three-cad-viewer": "^0.9.18"
+    "js-base64": "^3.7.2",
+    "pako": "^2.0.4",
+    "three-cad-viewer": "^0.9.19"
   },
   "devDependencies": {
     "@jupyterlab/builder": "^3.0.0",
-    "css-loader": "^6.1.0",
+    "css-loader": "^6.4.0",
     "eslint": "^7.31.0",
     "eslint-config-prettier": "^8.3.0",
     "prettier": "2.3.2",
     "rimraf": "^2.6.1",
-    "style-loader": "^3.1.0",
+    "style-loader": "^3.3.1",
     "webpack": "^5"
   },
   "jupyterlab": {
