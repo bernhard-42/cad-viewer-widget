@@ -10,6 +10,20 @@ from IPython.display import display
 from .utils import serializer, rotate_x, rotate_y, rotate_z
 
 
+def _check(name, var, types):
+    if isinstance(var, types):
+        return var
+    else:
+        raise ValueError(f"Variable {name} should be of type {types}, but is {type(var)}")
+
+
+def _check_list(name, var, types, length):
+    if isinstance(var, (list, tuple)) and len(var) == length and all(isinstance(v, types) for v in var):
+        return var
+    else:
+        raise ValueError(f"Variable {name} should be a {length} dim list of type {types}, but is {var}")
+
+
 def get_parser():
     """A parser for nested json objects"""
     dot = Literal(".").suppress()
@@ -90,9 +104,9 @@ class CadViewerWidget(widgets.Widget):  # pylint: disable-msg=too-many-instance-
     tab = Unicode(allow_none=True, default_value="tree").tag(sync=True)
     clip_intersection = Bool(allow_none=True, default_value=False).tag(sync=True)
     clip_planes = Bool(allow_none=True, default_value=False).tag(sync=True)
-    clip_normal_0 = Tuple(Float(), Float(), Float(), allow_none=True, default_value=[0.0, 0.0, 0.0]).tag(sync=True)
-    clip_normal_1 = Tuple(Float(), Float(), Float(), allow_none=True, default_value=[0.0, 0.0, 0.0]).tag(sync=True)
-    clip_normal_2 = Tuple(Float(), Float(), Float(), allow_none=True, default_value=[0.0, 0.0, 0.0]).tag(sync=True)
+    clip_normal_0 = Tuple(Float(), Float(), Float(), allow_none=True, default_value=[-1.0, 0.0, 0.0]).tag(sync=True)
+    clip_normal_1 = Tuple(Float(), Float(), Float(), allow_none=True, default_value=[0.0, -1.0, 0.0]).tag(sync=True)
+    clip_normal_2 = Tuple(Float(), Float(), Float(), allow_none=True, default_value=[0.0, 0.0, -1.0]).tag(sync=True)
     clip_slider_0 = Float(allow_none=True, default_value=0.0).tag(sync=True)
     clip_slider_1 = Float(allow_none=True, default_value=0.0).tag(sync=True)
     clip_slider_2 = Float(allow_none=True, default_value=0.0).tag(sync=True)
@@ -233,6 +247,242 @@ class CadViewer:
         """Set navigation tree states for a CAD view"""
 
         self.widget.state_updates = states
+
+    #
+    # UI and scene accessors
+    #
+
+    @property
+    def ambient_intensity(self):
+        return self.widget.ambient_intensity
+
+    @ambient_intensity.setter
+    def ambient_intensity(self, value):
+        self.widget.ambient_intensity = _check("ambient_intensity", value, (int, float))
+
+    @property
+    def direct_intensity(self):
+        return self.widget.direct_intensity
+
+    @direct_intensity.setter
+    def direct_intensity(self, value):
+        self.widget.direct_intensity = _check("direct_intensity", value, (int, float))
+
+    @property
+    def axes(self):
+        return self.widget.axes
+
+    @axes.setter
+    def axes(self, value):
+        self.widget.axes = _check("axes", value, bool)
+
+    @property
+    def axes0(self):
+        return self.widget.axes0
+
+    @axes0.setter
+    def axes0(self, value):
+        self.widget.axes0 = _check("axes0", value, bool)
+
+    @property
+    def grid(self):
+        return self.widget.grid
+
+    @grid.setter
+    def grid(self, value):
+        self.widget.grid = _check_list("grid", value, bool, 3)
+
+    @property
+    def ortho(self):
+        return self.widget.ortho
+
+    @ortho.setter
+    def ortho(self, value):
+        self.widget.ortho = _check("ortho", value, bool)
+
+    @property
+    def transparent(self):
+        return self.widget.transparent
+
+    @transparent.setter
+    def transparent(self, value):
+        self.widget.transparent = _check("transparent", value, bool)
+
+    @property
+    def black_edges(self):
+        return self.widget.black_edges
+
+    @black_edges.setter
+    def black_edges(self, value):
+        self.widget.black_edges = _check("black_edges", value, bool)
+
+    @property
+    def edge_color(self):
+        return self.widget.edge_color
+
+    @edge_color.setter
+    def edge_color(self, value):
+        _check("edge_color", value, str)
+        if value.startswith("#"):
+            self.widget.edge_color = value
+        else:
+            self.widget.edge_color = f"#{value}"
+
+    @property
+    def clip_intersection(self):
+        return self.widget.clip_intersection
+
+    @clip_intersection.setter
+    def clip_intersection(self, value):
+        self.widget.clip_intersection = _check("clip_intersection", value, bool)
+
+    @property
+    def clip_normal_0(self):
+        return self.widget.clip_normal_0
+
+    @clip_normal_0.setter
+    def clip_normal_0(self, value):
+        self.widget.clip_normal_0 = _check_list("clip_normal_0", value, (int, float), 3)
+
+    @property
+    def clip_normal_1(self):
+        return self.widget.clip_normal_1
+
+    @clip_normal_1.setter
+    def clip_normal_1(self, value):
+        self.widget.clip_normal_1 = _check_list("clip_normal_1", value, (int, float), 3)
+
+    @property
+    def clip_normal_2(self):
+        return self.widget.clip_normal_2
+
+    @clip_normal_2.setter
+    def clip_normal_2(self, value):
+        self.widget.clip_normal_2 = _check_list("clip_normal_2", value, (int, float), 3)
+
+    @property
+    def clip_value_0(self):
+        return self.widget.clip_slider_0
+
+    @clip_value_0.setter
+    def clip_value_0(self, value):
+        self.widget.clip_slider_0 = _check("clip_value_0", value, (int, float))
+
+    @property
+    def clip_value_1(self):
+        return self.widget.clip_slider_1
+
+    @clip_value_1.setter
+    def clip_value_1(self, value):
+        self.widget.clip_slider_1 = _check("clip_value_1", value, (int, float))
+
+    @property
+    def clip_value_2(self):
+        return self.widget.clip_slider_2
+
+    @clip_value_2.setter
+    def clip_value_2(self, value):
+        self.widget.clip_slider_2 = _check("clip_value_2", value, (int, float))
+
+    @property
+    def clip_planes(self):
+        return self.widget.clip_planes
+
+    @clip_planes.setter
+    def clip_planes(self, value):
+        self.widget.clip_planes = _check("clip_planes", value, bool)
+
+    @property
+    def js_debug(self):
+        return self.widget.js_debug
+
+    @js_debug.setter
+    def js_debug(self, value):
+        self.widget.js_debug = _check("js_debug", value, bool)
+
+    @property
+    def tools(self):
+        return self.widget.tools
+
+    @tools.setter
+    def tools(self, value):
+        self.widget.tools = _check("tools", value, bool)
+
+    @property
+    def pan_speed(self):
+        return self.widget.pan_speed
+
+    @pan_speed.setter
+    def pan_speed(self, value):
+        self.widget.pan_speed = _check("pan_speed", value, (int, float))
+
+    @property
+    def rotate_speed(self):
+        return self.widget.rotate_speed
+
+    @rotate_speed.setter
+    def rotate_speed(self, value):
+        self.widget.rotate_speed = _check("rotate_speed", value, (int, float))
+
+    @property
+    def zoom_speed(self):
+        return self.widget.zoom_speed
+
+    @zoom_speed.setter
+    def zoom_speed(self, value):
+        self.widget.zoom_speed = _check("zoom_speed", value, (int, float))
+
+    #
+    # Camera position handling
+    #
+
+    @property
+    def zoom(self):
+        return self.widget.zoom
+
+    @zoom.setter
+    def zoom(self, value):
+        self.widget.zoom = _check("zoom", value, (int, float))
+
+    @property
+    def position(self):
+        return self.widget.position
+
+    @position.setter
+    def position(self, value):
+        self.widget.position = _check_list("position", value, (int, float), 3)
+
+    @property
+    def quaternion(self):
+        return self.widget.quaternion
+
+    def set_camera(self, position, quaternion=None):
+        if self.widget.control == "trackball":
+            if quaternion is None:
+                raise ValueError("TrackballControls need both position and quaternion")
+            else:
+                _check_list("position", position, (int, float), 3)
+                _check_list("quaternion", quaternion, (int, float), 4)
+                self.widget.quaternion = quaternion
+                self.widget.position = position
+
+        if self.widget.control == "orbit":
+            if quaternion is not None:
+                raise ValueError("OrbitControls does not support setting quaternion")
+            else:
+                self.widget.position = _check_list("position", position, (int, float), 3)
+
+    @quaternion.setter
+    def quaternion(self, value):
+        self.widget.quaternion = _check_list("quaternion", value, (int, float), 4)
+
+    @property
+    def last_pick(self):
+        return self.widget.lastPick
+
+    @property
+    def control(self):
+        return self.widget.control
 
     #
     # Animation handling
