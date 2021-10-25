@@ -255,6 +255,9 @@ class CadViewer:
     def animate(self, speed=1):
         """Send animation tracks to CAD view"""
 
+        if not self.widget.animation_loop:
+            raise ValueError("For animations call 'add_shapes' with 'animation_Loop=True'")
+
         self.widget.tracks = json.dumps([track.to_array() for track in self.tracks])
         self.execute("animate", (speed,))
         self.play()
