@@ -279,6 +279,9 @@ export var CadViewerView = DOMWidgetView.extend({
     this.is_empty = false;
 
     this.model.set("target", this.viewer.controls.target);
+    this.model.set("clip_slider_0", this.viewer.getClipSlider(0));
+    this.model.set("clip_slider_1", this.viewer.getClipSlider(1));
+    this.model.set("clip_slider_2", this.viewer.getClipSlider(2));
     this.model.save_changes();
 
     // add animation tracks if exists
