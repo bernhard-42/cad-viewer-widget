@@ -2,37 +2,10 @@
 
 import json
 import ipywidgets as widgets
-import numpy as np
 
-from pyparsing import Literal, Word, alphanums, nums, delimitedList, ZeroOrMore, ParseException
-from traitlets import Unicode, Dict, List, Tuple, Integer, Float, Any, Bool
+from traitlets import Unicode, Dict, Tuple, Integer, Float, Any, Bool
 from IPython.display import display
-from .utils import serializer, rotate_x, rotate_y, rotate_z
-
-
-def _check(name, var, types):
-    if isinstance(var, types):
-        return var
-    else:
-        raise ValueError(f"Variable {name} should be of type {types}, but is {type(var)}")
-
-
-def _check_list(name, var, types, length):
-    if isinstance(var, (list, tuple)) and len(var) == length and all(isinstance(v, types) for v in var):
-        return var
-    else:
-        raise ValueError(f"Variable {name} should be a {length} dim list of type {types}, but is {var}")
-
-
-def get_parser():
-    """A parser for nested json objects"""
-    dot = Literal(".").suppress()
-    lbrack = Literal("[").suppress()
-    rbrack = Literal("]").suppress()
-    integer = Word(nums)
-    index = lbrack + delimitedList(integer) + rbrack
-    obj = Word(alphanums + "_$") + ZeroOrMore(index)
-    return obj + ZeroOrMore(dot + obj)
+from .utils import serializer, check, check_list, get_parser
 
 
 class AnimationTrack:
@@ -53,7 +26,7 @@ class AnimationTrack:
 
 @widgets.register
 class CadViewerWidget(widgets.Widget):  # pylint: disable-msg=too-many-instance-attributes
-    """An example widget."""
+    """The CAD Viewer widget."""
 
     _view_name = Unicode("CadViewerView").tag(sync=True)
     _model_name = Unicode("CadViewerModel").tag(sync=True)
@@ -63,17 +36,17 @@ class CadViewerWidget(widgets.Widget):  # pylint: disable-msg=too-many-instance-
     _model_module_version = Unicode("^0.1.0").tag(sync=True)
 
     #
-    # model traits
-    #
-
     # Display traits
+    #
 
     cad_width = Integer(default_value=800).tag(sync=True)
     height = Integer(default_value=600).tag(sync=True)
     tree_width = Integer(default_vlue=240).tag(sync=True)
     theme = Unicode(default_value="light").tag(sync=True)
 
+    #
     # Viewer traits
+    #
 
     shapes = Unicode(allow_none=True).tag(sync=True)
     states = Dict(Tuple(Integer(), Integer()), allow_none=True).tag(sync=True)
@@ -99,7 +72,9 @@ class CadViewerWidget(widgets.Widget):  # pylint: disable-msg=too-many-instance-
 
     # bb_factor = Float(allow_none=True, default_value=1.0).tag(sync=True)
 
+    #
     # Generic UI traits
+    #
 
     tab = Unicode(allow_none=True, default_value="tree").tag(sync=True)
     clip_intersection = Bool(allow_none=True, default_value=False).tag(sync=True)
@@ -121,7 +96,9 @@ class CadViewerWidget(widgets.Widget):  # pylint: disable-msg=too-many-instance-
 
     state_updates = Dict(Tuple(Integer(), Integer()), allow_none=True).tag(sync=True)
 
+    #
     # Read only traitlets
+    #
 
     lastPick = Dict(Any(), allow_none=True, default_value={}, read_only=True).tag(sync=True)
     target = Tuple(Float(), Float(), Float(), allow_none=True, read_only=True).tag(sync=True)
@@ -255,7 +232,7 @@ class CadViewer:
 
     @ambient_intensity.setter
     def ambient_intensity(self, value):
-        self.widget.ambient_intensity = _check("ambient_intensity", value, (int, float))
+        self.widget.ambient_intensity = check("ambient_intensity", value, (int, float))
 
     @property
     def direct_intensity(self):
@@ -263,7 +240,7 @@ class CadViewer:
 
     @direct_intensity.setter
     def direct_intensity(self, value):
-        self.widget.direct_intensity = _check("direct_intensity", value, (int, float))
+        self.widget.direct_intensity = check("direct_intensity", value, (int, float))
 
     @property
     def axes(self):
@@ -271,7 +248,7 @@ class CadViewer:
 
     @axes.setter
     def axes(self, value):
-        self.widget.axes = _check("axes", value, bool)
+        self.widget.axes = check("axes", value, bool)
 
     @property
     def axes0(self):
@@ -279,7 +256,7 @@ class CadViewer:
 
     @axes0.setter
     def axes0(self, value):
-        self.widget.axes0 = _check("axes0", value, bool)
+        self.widget.axes0 = check("axes0", value, bool)
 
     @property
     def grid(self):
@@ -287,7 +264,7 @@ class CadViewer:
 
     @grid.setter
     def grid(self, value):
-        self.widget.grid = _check_list("grid", value, bool, 3)
+        self.widget.grid = check_list("grid", value, bool, 3)
 
     @property
     def ortho(self):
@@ -295,7 +272,7 @@ class CadViewer:
 
     @ortho.setter
     def ortho(self, value):
-        self.widget.ortho = _check("ortho", value, bool)
+        self.widget.ortho = check("ortho", value, bool)
 
     @property
     def transparent(self):
@@ -303,7 +280,7 @@ class CadViewer:
 
     @transparent.setter
     def transparent(self, value):
-        self.widget.transparent = _check("transparent", value, bool)
+        self.widget.transparent = check("transparent", value, bool)
 
     @property
     def black_edges(self):
@@ -311,7 +288,7 @@ class CadViewer:
 
     @black_edges.setter
     def black_edges(self, value):
-        self.widget.black_edges = _check("black_edges", value, bool)
+        self.widget.black_edges = check("black_edges", value, bool)
 
     @property
     def edge_color(self):
@@ -319,7 +296,7 @@ class CadViewer:
 
     @edge_color.setter
     def edge_color(self, value):
-        _check("edge_color", value, str)
+        check("edge_color", value, str)
         if value.startswith("#"):
             self.widget.edge_color = value
         else:
@@ -331,7 +308,7 @@ class CadViewer:
 
     @clip_intersection.setter
     def clip_intersection(self, value):
-        self.widget.clip_intersection = _check("clip_intersection", value, bool)
+        self.widget.clip_intersection = check("clip_intersection", value, bool)
 
     @property
     def clip_normal_0(self):
@@ -339,7 +316,7 @@ class CadViewer:
 
     @clip_normal_0.setter
     def clip_normal_0(self, value):
-        self.widget.clip_normal_0 = _check_list("clip_normal_0", value, (int, float), 3)
+        self.widget.clip_normal_0 = check_list("clip_normal_0", value, (int, float), 3)
 
     @property
     def clip_normal_1(self):
@@ -347,7 +324,7 @@ class CadViewer:
 
     @clip_normal_1.setter
     def clip_normal_1(self, value):
-        self.widget.clip_normal_1 = _check_list("clip_normal_1", value, (int, float), 3)
+        self.widget.clip_normal_1 = check_list("clip_normal_1", value, (int, float), 3)
 
     @property
     def clip_normal_2(self):
@@ -355,7 +332,7 @@ class CadViewer:
 
     @clip_normal_2.setter
     def clip_normal_2(self, value):
-        self.widget.clip_normal_2 = _check_list("clip_normal_2", value, (int, float), 3)
+        self.widget.clip_normal_2 = check_list("clip_normal_2", value, (int, float), 3)
 
     @property
     def clip_value_0(self):
@@ -363,7 +340,7 @@ class CadViewer:
 
     @clip_value_0.setter
     def clip_value_0(self, value):
-        self.widget.clip_slider_0 = _check("clip_value_0", value, (int, float))
+        self.widget.clip_slider_0 = check("clip_value_0", value, (int, float))
 
     @property
     def clip_value_1(self):
@@ -371,7 +348,7 @@ class CadViewer:
 
     @clip_value_1.setter
     def clip_value_1(self, value):
-        self.widget.clip_slider_1 = _check("clip_value_1", value, (int, float))
+        self.widget.clip_slider_1 = check("clip_value_1", value, (int, float))
 
     @property
     def clip_value_2(self):
@@ -379,7 +356,7 @@ class CadViewer:
 
     @clip_value_2.setter
     def clip_value_2(self, value):
-        self.widget.clip_slider_2 = _check("clip_value_2", value, (int, float))
+        self.widget.clip_slider_2 = check("clip_value_2", value, (int, float))
 
     @property
     def clip_planes(self):
@@ -387,7 +364,7 @@ class CadViewer:
 
     @clip_planes.setter
     def clip_planes(self, value):
-        self.widget.clip_planes = _check("clip_planes", value, bool)
+        self.widget.clip_planes = check("clip_planes", value, bool)
 
     @property
     def js_debug(self):
@@ -395,7 +372,7 @@ class CadViewer:
 
     @js_debug.setter
     def js_debug(self, value):
-        self.widget.js_debug = _check("js_debug", value, bool)
+        self.widget.js_debug = check("js_debug", value, bool)
 
     @property
     def tools(self):
@@ -403,7 +380,7 @@ class CadViewer:
 
     @tools.setter
     def tools(self, value):
-        self.widget.tools = _check("tools", value, bool)
+        self.widget.tools = check("tools", value, bool)
 
     @property
     def pan_speed(self):
@@ -411,7 +388,7 @@ class CadViewer:
 
     @pan_speed.setter
     def pan_speed(self, value):
-        self.widget.pan_speed = _check("pan_speed", value, (int, float))
+        self.widget.pan_speed = check("pan_speed", value, (int, float))
 
     @property
     def rotate_speed(self):
@@ -419,7 +396,7 @@ class CadViewer:
 
     @rotate_speed.setter
     def rotate_speed(self, value):
-        self.widget.rotate_speed = _check("rotate_speed", value, (int, float))
+        self.widget.rotate_speed = check("rotate_speed", value, (int, float))
 
     @property
     def zoom_speed(self):
@@ -427,7 +404,7 @@ class CadViewer:
 
     @zoom_speed.setter
     def zoom_speed(self, value):
-        self.widget.zoom_speed = _check("zoom_speed", value, (int, float))
+        self.widget.zoom_speed = check("zoom_speed", value, (int, float))
 
     #
     # Camera position handling
@@ -439,7 +416,7 @@ class CadViewer:
 
     @zoom.setter
     def zoom(self, value):
-        self.widget.zoom = _check("zoom", value, (int, float))
+        self.widget.zoom = check("zoom", value, (int, float))
 
     @property
     def position(self):
@@ -447,7 +424,7 @@ class CadViewer:
 
     @position.setter
     def position(self, value):
-        self.widget.position = _check_list("position", value, (int, float), 3)
+        self.widget.position = check_list("position", value, (int, float), 3)
 
     @property
     def quaternion(self):
@@ -455,7 +432,7 @@ class CadViewer:
 
     @quaternion.setter
     def quaternion(self, value):
-        self.widget.quaternion = _check_list("quaternion", value, (int, float), 4)
+        self.widget.quaternion = check_list("quaternion", value, (int, float), 4)
 
     @property
     def last_pick(self):

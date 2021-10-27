@@ -1,7 +1,7 @@
-import math
 import zlib
 from base64 import b64encode
 import numpy as np
+from pyparsing import Literal, Word, alphanums, nums, delimitedList, ZeroOrMore
 
 
 def serializer(obj):
@@ -22,52 +22,26 @@ def serializer(obj):
     raise TypeError("Unknown type:", type(obj))
 
 
-def rotate_x(vector, angle):
-    angle = rad(angle)
-    mat = np.array(
-        [
-            [1, 0, 0],
-            [0, math.cos(angle), -math.sin(angle)],
-            [0, math.sin(angle), math.cos(angle)],
-        ]
-    )
-    return tuple(np.matmul(mat, vector))
+def check(name, var, types):
+    if isinstance(var, types):
+        return var
+    else:
+        raise ValueError(f"Variable {name} should be of type {types}, but is {type(var)}")
 
 
-def rad(deg):
-    return deg / 180.0 * math.pi
+def check_list(name, var, types, length):
+    if isinstance(var, (list, tuple)) and len(var) == length and all(isinstance(v, types) for v in var):
+        return var
+    else:
+        raise ValueError(f"Variable {name} should be a {length} dim list of type {types}, but is {var}")
 
 
-def rotate_y(vector, angle):
-    angle = rad(angle)
-    mat = np.array(
-        [
-            [math.cos(angle), 0, math.sin(angle)],
-            [0, 1, 0],
-            [-math.sin(angle), 0, math.cos(angle)],
-        ]
-    )
-    return tuple(np.matmul(mat, vector))
-
-
-def rotate_z(vector, angle):
-    angle = rad(angle)
-    mat = np.array(
-        [
-            [math.cos(angle), -math.sin(angle), 0],
-            [math.sin(angle), math.cos(angle), 0],
-            [0, 0, 1],
-        ]
-    )
-    return tuple(np.matmul(mat, vector))
-
-
-def rotate(vector, angle_x=0, angle_y=0, angle_z=0):
-    v = tuple(vector)
-    if angle_z != 0:
-        v = rotate_z(v, angle_z)
-    if angle_y != 0:
-        v = rotate_y(v, angle_y)
-    if angle_x != 0:
-        v = rotate_x(v, angle_x)
-    return v
+def get_parser():
+    """A parser for nested json objects"""
+    dot = Literal(".").suppress()
+    lbrack = Literal("[").suppress()
+    rbrack = Literal("]").suppress()
+    integer = Word(nums)
+    index = lbrack + delimitedList(integer) + rbrack
+    obj = Word(alphanums + "_$") + ZeroOrMore(index)
+    return obj + ZeroOrMore(dot + obj)
