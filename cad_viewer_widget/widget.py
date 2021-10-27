@@ -526,25 +526,30 @@ class CadViewer:
     # Rotations
     #
 
-    # def _rotate(self, direction, angle):
-    #     rot = {"x": rotate_x, "y": rotate_y, "z": rotate_z}
-    #     new_pos = (
-    #         rot[direction](np.asarray(self.widget.position) - np.asarray(self.widget.target), angle)
-    #         + np.asarray(self.widget.target)
-    #     ).tolist()
-    #     self.widget.position = new_pos
+    def rotateX(self, angle):
+        if self.control != "trackball":
+            raise NameError("rotateX only works for trackball control")
+        self.execute("viewer.controls.rotateX", (angle,))
 
-    # def rotate_x(self, angle):
-    #     """Rotate CAD object around x axis"""
-    #     self._rotate("x", angle)
+    def rotateY(self, angle):
+        if self.control != "trackball":
+            raise NameError("rotateY only works for trackball control")
+        self.execute("viewer.controls.rotateY", (angle,))
 
-    # def rotate_y(self, angle):
-    #     """Rotate CAD object around y axis"""
-    #     self._rotate("y", angle)
+    def rotateZ(self, angle):
+        if self.control != "trackball":
+            raise NameError("rotateZ only works for trackball control")
+        self.execute("viewer.controls.rotateZ", (angle,))
 
-    # def rotate_z(self, angle):
-    #     """Rotate CAD object around z axis"""
-    #     self._rotate("z", angle)
+    def rotateUp(self, angle):
+        if self.control != "orbit":
+            raise NameError("rotateUp only works for orbit control")
+        self.execute("viewer.controls.rotateUp", (angle,))
+
+    def rotateLeft(self, angle):
+        if self.control != "orbit":
+            raise NameError("rotateLeft only works for orbit control")
+        self.execute("viewer.controls.rotateLeft", (angle,))
 
     #
     # Custom message handling
