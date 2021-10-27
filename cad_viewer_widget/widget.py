@@ -128,7 +128,6 @@ class CadViewerWidget(widgets.Widget):  # pylint: disable-msg=too-many-instance-
 
     initialize = Bool(allow_none=True, default_value=False).tag(sync=True)
     js_debug = Bool(allow_none=True, default_value=False).tag(sync=True)
-    # result = Unicode(allow_none=True, default_value="", read_only=True).tag(sync=True)
 
 
 class CadViewer:
@@ -158,6 +157,8 @@ class CadViewer:
         self.parser = get_parser()
 
         self.tracks = []
+
+        # self.last_clip_planes = False
 
         display(self.widget)
 
@@ -454,22 +455,6 @@ class CadViewer:
     def quaternion(self):
         return self.widget.quaternion
 
-    def set_camera(self, position, quaternion=None):
-        if self.widget.control == "trackball":
-            if quaternion is None:
-                raise ValueError("TrackballControls need both position and quaternion")
-            else:
-                _check_list("position", position, (int, float), 3)
-                _check_list("quaternion", quaternion, (int, float), 4)
-                self.widget.quaternion = quaternion
-                self.widget.position = position
-
-        if self.widget.control == "orbit":
-            if quaternion is not None:
-                raise ValueError("OrbitControls does not support setting quaternion")
-            else:
-                self.widget.position = _check_list("position", position, (int, float), 3)
-
     @quaternion.setter
     def quaternion(self, value):
         self.widget.quaternion = _check_list("quaternion", value, (int, float), 4)
@@ -533,11 +518,14 @@ class CadViewer:
 
     def select_tree(self):
         """Select Navigation tree tab"""
+        # self.last_clip_planes = self.widget.clip_planes  # move to three_cad_viewer
+        # self.widget.clip_planes = False  # move to three_cad_viewer
         self.widget.tab = "tree"
 
     def select_clipping(self):
         """Select Clipping tab"""
         self.widget.tab = "clip"
+        # self.widget.clip_planes = self.last_clip_planes  # move to three_cad_viewer
 
     #
     # Rotations
