@@ -159,8 +159,6 @@ class CadViewer:
 
         self.tracks = []
 
-        self.last_clip_planes = False
-
         display(self.widget)
 
     def _parse(self, string):
@@ -535,14 +533,11 @@ class CadViewer:
 
     def select_tree(self):
         """Select Navigation tree tab"""
-        self.last_clip_planes = self.widget.clip_planes  # move to three_cad_viewer
-        self.widget.clip_planes = False  # move to three_cad_viewer
         self.widget.tab = "tree"
 
     def select_clipping(self):
         """Select Clipping tab"""
         self.widget.tab = "clip"
-        self.widget.clip_planes = self.last_clip_planes  # move to three_cad_viewer
 
     #
     # Rotations
