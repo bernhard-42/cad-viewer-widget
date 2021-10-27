@@ -273,7 +273,13 @@ export var CadViewerView = DOMWidgetView.extend({
     const quaternion = this.model.get("quaternion");
     const zoom = this.model.get("zoom");
 
-    this.viewer.render(this.shapes, this.states, position, quaternion, zoom);
+    this.viewer.render(
+      ...this.viewer.renderTessellatedShapes(this.shapes, this.states),
+      this.states,
+      position,
+      quaternion,
+      zoom
+    );
     timer.split("renderer");
 
     this.is_empty = false;
