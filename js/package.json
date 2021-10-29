@@ -23,9 +23,9 @@
   ],
   "scripts": {
     "clean": "rimraf dist/ && rimraf ../cad_viewer_widget/labextension/ && rimraf ../cad_viewer_widget/nbextension",
-    "prepublish": "yarn run clean && yarn run build:prod",
-    "build": "webpack --mode=development && yarn run build:labextension:dev",
-    "build:prod": "webpack --mode=production && yarn run build:labextension",
+    "prepublish": "npm run clean && npm run build:prod",
+    "build": "webpack --mode=development && npm run build:labextension:dev",
+    "build:prod": "webpack --mode=production && npm run build:labextension",
     "build:labextension": "jupyter labextension build .",
     "build:labextension:dev": "jupyter labextension build --development True .",
     "watch": "webpack --watch --mode=development",
@@ -37,7 +37,7 @@
     "@jupyter-widgets/base": "^1.1 || ^2 || ^3 || ^4",
     "js-base64": "^3.7.2",
     "pako": "^2.0.4",
-    "three-cad-viewer": "^0.9.20"
+    "three-cad-viewer": "^0.9.21"
   },
   "devDependencies": {
     "@jupyterlab/builder": "^3.0.0",
