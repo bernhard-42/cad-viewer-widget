@@ -5,6 +5,8 @@ import ipywidgets as widgets
 
 from traitlets import Unicode, Dict, Tuple, Integer, Float, Any, Bool
 from IPython.display import display
+from pyparsing import ParseException
+
 from .utils import serializer, check, check_list, get_parser
 
 
