@@ -23,6 +23,7 @@ class AnimationTrack:
         self.length = len(times)
 
     def to_array(self):
+        """return track as 4 dim array"""
         return [self.path, self.action, self.times, self.values]
 
 
@@ -227,6 +228,8 @@ class CadViewer:
 
     @property
     def ambient_intensity(self):
+        """Get value of viewer attribute ambient_intensity"""
+
         return self.widget.ambient_intensity
 
     @ambient_intensity.setter
@@ -235,6 +238,8 @@ class CadViewer:
 
     @property
     def direct_intensity(self):
+        """Get value of viewer attribute direct_intensity"""
+
         return self.widget.direct_intensity
 
     @direct_intensity.setter
@@ -243,6 +248,8 @@ class CadViewer:
 
     @property
     def axes(self):
+        """Get value of viewer attribute axes"""
+
         return self.widget.axes
 
     @axes.setter
@@ -251,6 +258,8 @@ class CadViewer:
 
     @property
     def axes0(self):
+        """Get value of viewer attribute axes0"""
+
         return self.widget.axes0
 
     @axes0.setter
@@ -259,6 +268,8 @@ class CadViewer:
 
     @property
     def grid(self):
+        """Get value of viewer attribute grid"""
+
         return self.widget.grid
 
     @grid.setter
@@ -267,6 +278,8 @@ class CadViewer:
 
     @property
     def ortho(self):
+        """Get value of viewer attribute ortho"""
+
         return self.widget.ortho
 
     @ortho.setter
@@ -275,6 +288,8 @@ class CadViewer:
 
     @property
     def transparent(self):
+        """Get value of viewer attribute transparent"""
+
         return self.widget.transparent
 
     @transparent.setter
@@ -283,6 +298,8 @@ class CadViewer:
 
     @property
     def black_edges(self):
+        """Get value of viewer attribute black_edges"""
+
         return self.widget.black_edges
 
     @black_edges.setter
@@ -291,6 +308,8 @@ class CadViewer:
 
     @property
     def edge_color(self):
+        """Get value of viewer attribute edge_color"""
+
         return self.widget.edge_color
 
     @edge_color.setter
@@ -303,6 +322,8 @@ class CadViewer:
 
     @property
     def clip_intersection(self):
+        """Get value of viewer attribute clip_intersection"""
+
         return self.widget.clip_intersection
 
     @clip_intersection.setter
@@ -311,6 +332,8 @@ class CadViewer:
 
     @property
     def clip_normal_0(self):
+        """Get value of viewer attribute clip_normal_0"""
+
         return self.widget.clip_normal_0
 
     @clip_normal_0.setter
@@ -319,6 +342,8 @@ class CadViewer:
 
     @property
     def clip_normal_1(self):
+        """Get value of viewer attribute clip_normal_1"""
+
         return self.widget.clip_normal_1
 
     @clip_normal_1.setter
@@ -327,6 +352,8 @@ class CadViewer:
 
     @property
     def clip_normal_2(self):
+        """Get value of viewer attribute clip_normal_2"""
+
         return self.widget.clip_normal_2
 
     @clip_normal_2.setter
@@ -335,6 +362,8 @@ class CadViewer:
 
     @property
     def clip_value_0(self):
+        """Get value of viewer attribute clip_slider_0"""
+
         return self.widget.clip_slider_0
 
     @clip_value_0.setter
@@ -343,6 +372,8 @@ class CadViewer:
 
     @property
     def clip_value_1(self):
+        """Get value of viewer attribute clip_slider_1"""
+
         return self.widget.clip_slider_1
 
     @clip_value_1.setter
@@ -351,6 +382,8 @@ class CadViewer:
 
     @property
     def clip_value_2(self):
+        """Get value of viewer attribute clip_slider_2"""
+
         return self.widget.clip_slider_2
 
     @clip_value_2.setter
@@ -359,6 +392,8 @@ class CadViewer:
 
     @property
     def clip_planes(self):
+        """Get value of viewer attribute clip_planes"""
+
         return self.widget.clip_planes
 
     @clip_planes.setter
@@ -367,6 +402,8 @@ class CadViewer:
 
     @property
     def js_debug(self):
+        """Get value of viewer attribute js_debug"""
+
         return self.widget.js_debug
 
     @js_debug.setter
@@ -375,6 +412,8 @@ class CadViewer:
 
     @property
     def tools(self):
+        """Get value of viewer attribute tools"""
+
         return self.widget.tools
 
     @tools.setter
@@ -383,6 +422,8 @@ class CadViewer:
 
     @property
     def pan_speed(self):
+        """Get value of viewer attribute pan_speed"""
+
         return self.widget.pan_speed
 
     @pan_speed.setter
@@ -391,6 +432,8 @@ class CadViewer:
 
     @property
     def rotate_speed(self):
+        """Get value of viewer attribute rotate_speed"""
+
         return self.widget.rotate_speed
 
     @rotate_speed.setter
@@ -399,6 +442,8 @@ class CadViewer:
 
     @property
     def zoom_speed(self):
+        """Get value of viewer attribute zoom_speed"""
+
         return self.widget.zoom_speed
 
     @zoom_speed.setter
@@ -411,6 +456,8 @@ class CadViewer:
 
     @property
     def zoom(self):
+        """Get value of viewer attribute zoom"""
+
         return self.widget.zoom
 
     @zoom.setter
@@ -419,6 +466,8 @@ class CadViewer:
 
     @property
     def position(self):
+        """Get value of viewer attribute position"""
+
         return self.widget.position
 
     @position.setter
@@ -427,6 +476,8 @@ class CadViewer:
 
     @property
     def quaternion(self):
+        """Get value of viewer attribute quaternion"""
+
         return self.widget.quaternion
 
     @quaternion.setter
@@ -435,10 +486,14 @@ class CadViewer:
 
     @property
     def last_pick(self):
+        """Get value of viewer attribute lastPick"""
+
         return self.widget.lastPick
 
     @property
     def control(self):
+        """Get value of viewer attribute control"""
+
         return self.widget.control
 
     #
@@ -499,27 +554,35 @@ class CadViewer:
     # Rotations
     #
 
-    def rotateX(self, angle):
+    def rotate_x(self, angle):
+        """Rotate CAD obj around x-axis - trackball controls only"""
+
         if self.control != "trackball":
             raise NameError("rotateX only works for trackball control")
         self.execute("viewer.controls.rotateX", (angle,))
 
-    def rotateY(self, angle):
+    def rotate_y(self, angle):
+        """Rotate CAD obj around y-axis - trackball controls only"""
+
         if self.control != "trackball":
             raise NameError("rotateY only works for trackball control")
         self.execute("viewer.controls.rotateY", (angle,))
 
-    def rotateZ(self, angle):
+    def rotate_z(self, angle):
+        """Rotate CAD obj around z-axis - trackball controls only"""
+
         if self.control != "trackball":
             raise NameError("rotateZ only works for trackball control")
         self.execute("viewer.controls.rotateZ", (angle,))
 
-    def rotateUp(self, angle):
+    def rotate_up(self, angle):
+        """Rotate CAD obj up (positive angle) and down (negative angle) - orbit controls only"""
         if self.control != "orbit":
             raise NameError("rotateUp only works for orbit control")
         self.execute("viewer.controls.rotateUp", (angle,))
 
-    def rotateLeft(self, angle):
+    def rotate_left(self, angle):
+        """Rotate CAD obj to the left (positive angle) and right (negative angle) - orbit controls only"""
         if self.control != "orbit":
             raise NameError("rotateLeft only works for orbit control")
         self.execute("viewer.controls.rotateLeft", (angle,))
