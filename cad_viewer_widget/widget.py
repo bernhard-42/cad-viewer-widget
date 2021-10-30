@@ -554,14 +554,3 @@ class CadViewer:
 
     def _ipython_display_(self):
         display(self.widget)
-
-
-def show_msg():
-    def inner_show(msg):
-        with out:
-            print(msg)
-
-    out = widgets.Output()
-    display(out)
-
-    return inner_show
