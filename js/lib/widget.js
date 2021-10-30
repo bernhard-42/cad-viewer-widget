@@ -83,7 +83,6 @@ export var CadViewerModel = DOMWidgetModel.extend({
     shapes: null,
     states: null,
     tracks: null,
-    animationLoop: null,
     timeit: null,
     tools: null,
 
@@ -232,10 +231,8 @@ export var CadViewerView = DOMWidgetView.extend({
 
     var tracks = null;
     this.tracks = [];
-    var animationLoop = this.model.get("animation_loop");
     if (this.model.get("tracks")) {
       tracks = decode(this.model.get("tracks"));
-      animationLoop = true;
     }
 
     this.states = this.model.get("states");
@@ -260,7 +257,6 @@ export var CadViewerView = DOMWidgetView.extend({
 
     this.viewer = new Viewer(
       this.display,
-      animationLoop,
       this.options,
       this.notificationCallback.bind(this)
     );

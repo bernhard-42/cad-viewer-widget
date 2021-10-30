@@ -52,7 +52,6 @@ class CadViewerWidget(widgets.Widget):  # pylint: disable-msg=too-many-instance-
     states = Dict(Tuple(Integer(), Integer()), allow_none=True).tag(sync=True)
 
     tracks = Unicode(allow_none=True).tag(sync=True)
-    animation_loop = Bool(default_value=True, allow_None=True).tag(sync=True)
 
     timeit = Bool(default_value=False, allow_None=True).tag(sync=True)
     tools = Bool(allow_none=True, default_value=True).tag(sync=True)
@@ -164,7 +163,6 @@ class CadViewer:
         zoom=None,
         reset_camera=True,
         timeit=False,
-        animation_loop=True,
         # bb_factor=1.0,
     ):
         """Adding shapes to the CAD view"""
@@ -199,7 +197,6 @@ class CadViewer:
             self.widget.black_edges = black_edges
             self.widget.timeit = timeit
             self.add_tracks(tracks)
-            self.widget.animation_loop = animation_loop
             # reset camera if requested
             if reset_camera:
                 self.widget.position = position
@@ -464,9 +461,6 @@ class CadViewer:
 
     def animate(self, speed=1):
         """Send animation tracks to CAD view"""
-
-        if not self.widget.animation_loop:
-            raise ValueError("For animations call 'add_shapes' with 'animation_Loop=True'")
 
         self.widget.tracks = json.dumps([track.to_array() for track in self.tracks])
         self.execute("animate", (speed,))
