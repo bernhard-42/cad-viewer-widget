@@ -1,3 +1,5 @@
+"""Utility functions"""
+
 import zlib
 from base64 import b64encode
 import numpy as np
@@ -5,9 +7,11 @@ from pyparsing import Literal, Word, alphanums, nums, delimitedList, ZeroOrMore
 
 
 def serializer(obj):
+    """Serialize numpy nested arrays"""
+
     def compress(obj, dtype):
-        c = zlib.compress(obj.reshape(-1).astype(dtype).tobytes(order="C"))
-        return b64encode(c).decode()
+        cobj = zlib.compress(obj.reshape(-1).astype(dtype).tobytes(order="C"))
+        return b64encode(cobj).decode()
 
     if type(obj).__module__ == np.__name__:
         if isinstance(obj, np.ndarray):
@@ -23,6 +27,7 @@ def serializer(obj):
 
 
 def check(name, var, types):
+    """Check variable type"""
     if isinstance(var, types):
         return var
     else:
@@ -30,6 +35,8 @@ def check(name, var, types):
 
 
 def check_list(name, var, types, length):
+    """Check type of list elements"""
+
     if isinstance(var, (list, tuple)) and len(var) == length and all(isinstance(v, types) for v in var):
         return var
     else:
