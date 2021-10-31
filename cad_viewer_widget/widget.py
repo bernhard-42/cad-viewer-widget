@@ -64,7 +64,7 @@ class CadViewerWidget(widgets.Widget):  # pylint: disable-msg=too-many-instance-
     axes = Bool(allow_none=True).tag(sync=True)
     axes0 = Bool(allow_none=True).tag(sync=True)
     grid = Tuple(Bool(), Bool(), Bool(), allow_none=True).tag(sync=True)
-    ticks = Integer(default_value=10, allow_none=True).tag(sync=True)
+    ticks = Integer(allow_none=True).tag(sync=True)
     transparent = Bool(allow_none=True).tag(sync=True)
     black_edges = Bool(allow_none=True).tag(sync=True)
 
@@ -78,7 +78,7 @@ class CadViewerWidget(widgets.Widget):  # pylint: disable-msg=too-many-instance-
     # Generic UI traits
     #
 
-    tab = Unicode(allow_none=True, default_value="tree").tag(sync=True)
+    tab = Unicode(allow_none=True).tag(sync=True)
     clip_intersection = Bool(allow_none=True).tag(sync=True)
     clip_planes = Bool(allow_none=True).tag(sync=True)
     clip_normal_0 = Tuple(Float(), Float(), Float(), allow_none=True).tag(sync=True)
