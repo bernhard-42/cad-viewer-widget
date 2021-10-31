@@ -172,6 +172,11 @@ export var CadViewerView = DOMWidgetView.extend({
     this.init = false;
     this.is_empty = true;
     this.debug = this.model.get("js_debug");
+
+    // for embedding into other webpages, when widget state is provided
+    if (this.model.get("shapes") != "") {
+      this.addShapes();
+    }
   },
 
   createDisplay: function () {
@@ -228,13 +233,6 @@ export var CadViewerView = DOMWidgetView.extend({
 
   addShapes: function () {
     this.shapes = decode(this.model.get("shapes"));
-
-    var tracks = null;
-    this.tracks = [];
-    if (this.model.get("tracks")) {
-      tracks = decode(this.model.get("tracks"));
-    }
-
     this.states = this.model.get("states");
     this.options = {
       cadWidth: this.model.get("cad_width"),
@@ -254,6 +252,7 @@ export var CadViewerView = DOMWidgetView.extend({
       timeit: this.model.get("timeit")
       // bbFactor: this.model.get("bb_factor"),
     };
+    this.tracks = [];
 
     this.viewer = new Viewer(
       this.display,
@@ -287,7 +286,10 @@ export var CadViewerView = DOMWidgetView.extend({
     this.model.save_changes();
 
     // add animation tracks if exists
-    this.addTracks(tracks);
+    const tracks = this.model.get("tracks");
+    if (tracks != "" && tracks != null) {
+      this.addTracks(tracks);
+    }
 
     timer.stop();
 
