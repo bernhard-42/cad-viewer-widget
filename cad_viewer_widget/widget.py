@@ -599,7 +599,7 @@ class CadViewer:
     # Custom message handling
     #
 
-    def execute(self, method, args):
+    def execute(self, method, args=None):
         """Execute a method of a Javascript object"""
 
         def wrapper(change=None):
