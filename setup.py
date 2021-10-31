@@ -9,7 +9,6 @@ from jupyter_packaging import (
     install_npm,
     ensure_targets,
     combine_commands,
-    get_version,
 )
 
 
@@ -23,7 +22,9 @@ name = "cad_viewer_widget"
 LONG_DESCRIPTION = "A Jupyter widget to view cad objects"
 
 # Get cad_viewer_widget version
-version = get_version(pjoin(name, "_version.py"))
+from cad_viewer_widget._version import __version__
+
+version = __version__
 
 js_dir = pjoin(here, "js")
 

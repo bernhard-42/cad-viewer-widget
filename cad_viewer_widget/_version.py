@@ -1,9 +1,14 @@
-# Module version
-version_info = (0, 1, 0, 'alpha', 0)
+from collections import namedtuple
+import re
 
-# Module version stage suffix map
-_specifier_ = {'alpha': 'a', 'beta': 'b', 'candidate': 'rc', 'final': ''}
+VersionInfo = namedtuple("VersionInfo", ["major", "minor", "patch", "release", "build"])
 
-# Module version accessible using cad_viewer_widget.__version__
-__version__ = '%s.%s.%s%s'%(version_info[0], version_info[1], version_info[2],
-  '' if version_info[3]=='final' else _specifier_[version_info[3]]+str(version_info[4]))
+
+def get_version(version):
+    r = re.compile(r"(?P<major>\d+)\.(?P<minor>\d+)\.(?P<patch>\d+)\-{0,1}(?P<release>\D*)(?P<build>\d*)")
+    major, minor, patch, release, build = r.match(version).groups()
+    return VersionInfo(major, minor, patch, release, build)
+
+
+__version__ = "0.9.5"  # DO NOT EDIT THIS DIRECTLY!  It is managed by bumpversion
+__version_info__ = get_version(__version__)
