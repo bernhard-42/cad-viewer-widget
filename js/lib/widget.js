@@ -120,6 +120,7 @@ export var CadViewerModel = DOMWidgetModel.extend({
     zoom_speed: null,
     pan_speed: null,
     rotate_speed: null,
+    animation_speed: null,
 
     // Read only traitlets
 
@@ -285,10 +286,11 @@ export var CadViewerView = DOMWidgetView.extend({
     this.model.set("clip_slider_2", this.viewer.getClipSlider(2));
     this.model.save_changes();
 
-    // add animation tracks if exists
+    // add animation tracks if exist
     const tracks = this.model.get("tracks");
     if (tracks != "" && tracks != null) {
       this.addTracks(tracks);
+      this.animate();
     }
 
     timer.stop();
@@ -307,7 +309,8 @@ export var CadViewerView = DOMWidgetView.extend({
     }
   },
 
-  animate: function (speed) {
+  animate: function () {
+    const speed = this.model.get("animation_speed");
     const duration = Math.max(
       ...this.tracks.map((track) => Math.max(...track[2]))
     );

@@ -95,6 +95,7 @@ class CadViewerWidget(widgets.Widget):  # pylint: disable-msg=too-many-instance-
     zoom_speed = Float(allow_none=True).tag(sync=True)
     pan_speed = Float(allow_none=True).tag(sync=True)
     rotate_speed = Float(allow_none=True).tag(sync=True)
+    animation_speed = Float(allow_none=True).tag(sync=True)
 
     state_updates = Dict(Tuple(Integer(), Integer()), allow_none=True).tag(sync=True)
 
@@ -526,8 +527,9 @@ class CadViewer:
         """Send animation tracks to CAD view"""
 
         self.widget.tracks = json.dumps([track.to_array() for track in self.tracks])
-        self.execute("animate", (speed,))
-        self.play()
+        self.widget.animation_speed = speed
+        self.execute("animate")
+        # self.play()
 
     def play(self):
         """Start animation"""
