@@ -42,10 +42,10 @@ class CadViewerWidget(widgets.Widget):  # pylint: disable-msg=too-many-instance-
     # Display traits
     #
 
-    cad_width = Integer(default_value=800).tag(sync=True)
-    height = Integer(default_value=600).tag(sync=True)
-    tree_width = Integer(default_vlue=240).tag(sync=True)
-    theme = Unicode(default_value="light").tag(sync=True)
+    cad_width = Integer().tag(sync=True)
+    height = Integer().tag(sync=True)
+    tree_width = Integer().tag(sync=True)
+    theme = Unicode().tag(sync=True)
 
     #
     # Viewer traits
@@ -56,45 +56,45 @@ class CadViewerWidget(widgets.Widget):  # pylint: disable-msg=too-many-instance-
 
     tracks = Unicode(allow_none=True).tag(sync=True)
 
-    timeit = Bool(default_value=False, allow_None=True).tag(sync=True)
-    tools = Bool(allow_none=True, default_value=True).tag(sync=True)
+    timeit = Bool(allow_None=True).tag(sync=True)
+    tools = Bool(allow_none=True).tag(sync=True)
 
-    ortho = Bool(allow_none=True, default_value=False).tag(sync=True)
-    control = Unicode(default_value="trackball").tag(sync=True)
-    axes = Bool(allow_none=True, default_value=False).tag(sync=True)
-    axes0 = Bool(allow_none=True, default_value=False).tag(sync=True)
-    grid = Tuple(Bool(), Bool(), Bool(), default_value=[False, False, False], allow_none=True).tag(sync=True)
+    ortho = Bool(allow_none=True).tag(sync=True)
+    control = Unicode().tag(sync=True)
+    axes = Bool(allow_none=True).tag(sync=True)
+    axes0 = Bool(allow_none=True).tag(sync=True)
+    grid = Tuple(Bool(), Bool(), Bool(), allow_none=True).tag(sync=True)
     ticks = Integer(default_value=10, allow_none=True).tag(sync=True)
-    transparent = Bool(allow_none=True, default_value=False).tag(sync=True)
-    black_edges = Bool(allow_none=True, default_value=False).tag(sync=True)
+    transparent = Bool(allow_none=True).tag(sync=True)
+    black_edges = Bool(allow_none=True).tag(sync=True)
 
-    edge_color = Unicode(allow_none=True, default_value="#707070").tag(sync=True)
-    ambient_intensity = Float(allow_none=True, default_value=0.9).tag(sync=True)
-    direct_intensity = Float(allow_none=True, default_value=0.12).tag(sync=True)
+    edge_color = Unicode(allow_none=True).tag(sync=True)
+    ambient_intensity = Float(allow_none=True).tag(sync=True)
+    direct_intensity = Float(allow_none=True).tag(sync=True)
 
-    # bb_factor = Float(allow_none=True, default_value=1.0).tag(sync=True)
+    # bb_factor = Float(allow_none=True).tag(sync=True)
 
     #
     # Generic UI traits
     #
 
     tab = Unicode(allow_none=True, default_value="tree").tag(sync=True)
-    clip_intersection = Bool(allow_none=True, default_value=False).tag(sync=True)
-    clip_planes = Bool(allow_none=True, default_value=False).tag(sync=True)
-    clip_normal_0 = Tuple(Float(), Float(), Float(), allow_none=True, default_value=[-1.0, 0.0, 0.0]).tag(sync=True)
-    clip_normal_1 = Tuple(Float(), Float(), Float(), allow_none=True, default_value=[0.0, -1.0, 0.0]).tag(sync=True)
-    clip_normal_2 = Tuple(Float(), Float(), Float(), allow_none=True, default_value=[0.0, 0.0, -1.0]).tag(sync=True)
-    clip_slider_0 = Float(allow_none=True, default_value=0.0).tag(sync=True)
-    clip_slider_1 = Float(allow_none=True, default_value=0.0).tag(sync=True)
-    clip_slider_2 = Float(allow_none=True, default_value=0.0).tag(sync=True)
+    clip_intersection = Bool(allow_none=True).tag(sync=True)
+    clip_planes = Bool(allow_none=True).tag(sync=True)
+    clip_normal_0 = Tuple(Float(), Float(), Float(), allow_none=True).tag(sync=True)
+    clip_normal_1 = Tuple(Float(), Float(), Float(), allow_none=True).tag(sync=True)
+    clip_normal_2 = Tuple(Float(), Float(), Float(), allow_none=True).tag(sync=True)
+    clip_slider_0 = Float(allow_none=True).tag(sync=True)
+    clip_slider_1 = Float(allow_none=True).tag(sync=True)
+    clip_slider_2 = Float(allow_none=True).tag(sync=True)
 
-    position = Tuple(Float(), Float(), Float(), default_value=None, allow_none=True).tag(sync=True)
-    quaternion = Tuple(Float(), Float(), Float(), Float(), default_value=None, allow_none=True).tag(sync=True)
-    zoom = Float(allow_none=True, default_value=None).tag(sync=True)
+    position = Tuple(Float(), Float(), Float(), allow_none=True).tag(sync=True)
+    quaternion = Tuple(Float(), Float(), Float(), Float(), allow_none=True).tag(sync=True)
+    zoom = Float(allow_none=True).tag(sync=True)
 
-    zoom_speed = Float(allow_none=True, default_value=0.5).tag(sync=True)
-    pan_speed = Float(allow_none=True, default_value=0.5).tag(sync=True)
-    rotate_speed = Float(allow_none=True, default_value=1.0).tag(sync=True)
+    zoom_speed = Float(allow_none=True).tag(sync=True)
+    pan_speed = Float(allow_none=True).tag(sync=True)
+    rotate_speed = Float(allow_none=True).tag(sync=True)
 
     state_updates = Dict(Tuple(Integer(), Integer()), allow_none=True).tag(sync=True)
 
@@ -102,11 +102,11 @@ class CadViewerWidget(widgets.Widget):  # pylint: disable-msg=too-many-instance-
     # Read only traitlets
     #
 
-    lastPick = Dict(Any(), allow_none=True, default_value={}, read_only=True).tag(sync=True)
+    lastPick = Dict(Any(), allow_none=True, read_only=True).tag(sync=True)
     target = Tuple(Float(), Float(), Float(), allow_none=True, read_only=True).tag(sync=True)
 
-    initialize = Bool(allow_none=True, default_value=False).tag(sync=True)
-    js_debug = Bool(allow_none=True, default_value=False).tag(sync=True)
+    initialize = Bool(allow_none=True).tag(sync=True)
+    js_debug = Bool(allow_none=True).tag(sync=True)
 
 
 class CadViewer:
@@ -165,6 +165,9 @@ class CadViewer:
         quaternion=None,
         zoom=None,
         reset_camera=True,
+        zoom_speed=1.0,
+        pan_speed=1.0,
+        rotate_speed=1.0,
         timeit=False,
         # bb_factor=1.0,
     ):
@@ -198,6 +201,9 @@ class CadViewer:
             self.widget.control = control
             self.widget.transparent = transparent
             self.widget.black_edges = black_edges
+            self.widget.zoom_speed = zoom_speed
+            self.widget.pan_speed = pan_speed
+            self.widget.rotate_speed = rotate_speed
             self.widget.timeit = timeit
             self.add_tracks(tracks)
             # reset camera if requested
