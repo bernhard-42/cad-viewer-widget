@@ -232,9 +232,18 @@ export var CadViewerView = DOMWidgetView.extend({
     }
   },
 
+  clone_states() {
+    const states = this.model.get("states");
+    const states2 = {};
+    for (var key in states) {
+      states2[key] = states[key].slice();
+    }
+    return states2;
+  },
+
   addShapes: function () {
     this.shapes = decode(this.model.get("shapes"));
-    this.states = this.model.get("states");
+    this.states = this.clone_states();
     this.options = {
       cadWidth: this.model.get("cad_width"),
       height: this.model.get("height"),
@@ -243,7 +252,7 @@ export var CadViewerView = DOMWidgetView.extend({
       control: this.model.get("control"),
       axes: this.model.get("axes"),
       axes0: this.model.get("axes0"),
-      grid: this.model.get("grid"),
+      grid: this.model.get("grid").slice(), // clone the array to ensure changes get detected
       ticks: this.model.get("ticks"),
       transparent: this.model.get("transparent"),
       blackEdges: this.model.get("black_edges"),
