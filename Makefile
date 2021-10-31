@@ -23,6 +23,7 @@ clean_notebooks: ./test.ipynb
 clean: clean_notebooks
 	@echo "=> Cleaning"
 	@rm -fr build dist $(EGGS) $(PYCACHE)
+	@rm -f js/dist/*
 
 prepare: clean
 	git add .
