@@ -23,9 +23,9 @@
   ],
   "scripts": {
     "clean": "rimraf dist/ && rimraf ../cad_viewer_widget/labextension/ && rimraf ../cad_viewer_widget/nbextension",
-    "prepublish": "npm run clean && npm run build:prod",
-    "build": "webpack --mode=development && npm run build:labextension:dev",
-    "build:prod": "webpack --mode=production && npm run build:labextension",
+    "prepublish": "yarn run clean && yarn run build:prod",
+    "build": "webpack --mode=development && yarn run build:labextension:dev",
+    "build:prod": "webpack --mode=production && yarn run build:labextension",
     "build:labextension": "jupyter labextension build .",
     "build:labextension:dev": "jupyter labextension build --development True .",
     "watch": "webpack --watch --mode=development",
@@ -41,6 +41,7 @@
   },
   "devDependencies": {
     "@jupyterlab/builder": "^3.0.0",
+    "terser-webpack-plugin": "^5.2.4",
     "css-loader": "^6.4.0",
     "eslint": "^7.31.0",
     "eslint-config-prettier": "^8.3.0",
