@@ -13,7 +13,7 @@ module.exports = {
       version: plugin.version,
       exports: plugin
     });
-    console.log("Widget 'cad-viewer-widget' is registered");
+    console.log(`Widget 'cad-viewer-widget' ${plugin.version} is registered`);
   },
   autoStart: true
 };
