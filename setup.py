@@ -55,6 +55,7 @@ setup_args = dict(
     install_requires=[
         "ipywidgets>=7.6.0",
     ],
+    extras_require={"dev": ["twine", "bumpversion", "pydoc3"]},
     packages=find_packages(),
     zip_safe=False,
     cmdclass=cmdclass,
