@@ -1,4 +1,4 @@
-.PHONY: clean_notebooks bump dist release install upload
+.PHONY: clean_notebooks bump dist release install upload docs
 
 PYCACHE := $(shell find . -name '__pycache__')
 EGGS := $(wildcard *.egg-info)
@@ -48,6 +48,9 @@ dist:
 	@rm -f dist/*
 	@rm -f js/dist/*
 	python setup.py sdist bdist_wheel
+
+docs:
+	@pdoc3 --force --config show_source_code=False --html --output-dir docs cad_viewer_widget
 
 release:
 	git add .
