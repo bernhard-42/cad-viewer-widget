@@ -48,19 +48,44 @@ Usually of the form <code>/top-level/level2/...</code></dd>
 <dd>
 <p>The action type:</p>
 <ul>
-<li>"rx", "ry", "rz" for rotations around x, y or z-axis</li>
 <li>"tx", "ty", "tz" for translations along the x, y or z-axis</li>
-<li>"q" to apply a quaternion to the location of the CAD object</li>
 <li>"t" to add a position vector (3-dim array) to the current position of the CAD object</li>
+<li>"rx", "ry", "rz" for rotations around x, y or z-axis</li>
+<li>"q" to apply a quaternion to the location of the CAD object</li>
 </ul>
 </dd>
 <dt><strong><code>times</code></strong> :&ensp;<code>list</code> of <code>float</code> or <code>int</code></dt>
 <dd>An array of floats describing the points in time where CAD object (with id <code>path</code>) should be at the location
 defined by <code>action</code> and <code>values</code></dd>
 <dt><strong><code>values</code></strong> :&ensp;<code>list</code> of <code>float</code> or <code>int</code></dt>
-<dd>An array of same length as <code>times</code> defining the locations where the CAD objects should be according to the
-<code>action</code> provided</dd>
+<dd>
+<p>An array of same length as <code>times</code> defining the locations where the CAD objects should be according to the
+<code>action</code> provided. Formats:</p>
+<ul>
+<li>"tx", "ty", "tz": float distance to move</li>
+<li>"t": 3-dim tuples or lists defining the positions to move to</li>
+<li>"rx", "ry", "rz": float angle in degrees</li>
+<li>"q" quaternions of the form (x,y,z,w) the represent the rotation to be applied</li>
+</ul>
+</dd>
 </dl>
+<h2 id="examples">Examples</h2>
+<pre><code>AnimationTrack(
+    '/bottom/left_middle/lower',                                # path
+    'rz',                                                       # action
+    [0.0, 0.5, 1.0, 1.5, 2.0, 2.5, 3.0, 3.5, 4.0],              # times (seconds)
+    [-15.0, -15.0, -15.0, 9.7, 20.0, 9.7, -15.0, -15.0, -15.0]  # angles
+)
+
+AnimationTrack(
+    'base/link_4_6',                                            # path
+    't',                                                        # action
+    [0.0, 1.0, 2.0, 3.0, 4.0],                                  # times (seconds)
+    [[0.0, 0.0, 0.0], [0.0, 1.9509, 3.9049],
+     [0.0 , -3.2974, -16.7545], [0.0 , 0.05894 , -32.0217],
+     [0.0 , -3.2212, -13.3424]]                                 # 3-dim positions
+)
+</code></pre>
 <h2 id="see-also">See Also</h2>
 <ul>
 <li><a href="https://threejs.org/docs/index.html?q=track#api/en/animation/tracks/NumberKeyframeTrack">three.js NumberKeyframeTrack</a></li>
@@ -296,16 +321,116 @@ see <a href="./widget.html#cad_viewer_widget.widget.CadViewerWidget.zoom_speed">
 <dd>Speed of rotation with the mouse</dd>
 <dt><strong><code>timeit</code></strong> :&ensp;<code>bool</code>, default <code>False</code></dt>
 <dd>Whether to output timing info to the browser console (True) or not (False)</dd>
-</dl></div>
+</dl>
+<h2 id="examples">Examples</h2>
+<p>A simple cube with edge len of 1 is tessellated like the <code>shape</code> eloment of the first (and only) element of
+the <code>parts</code> list:</p>
+<pre><code>shapes = {
+    'name': 'Group',
+    'id': '/Group',
+    'loc': None,  # would be (&lt;position&gt;, &lt;quaternion&gt;), e.g. ([0,0,0), (0,0,0,1)])
+    'parts': [{
+        'name': 'Part_0',
+        'id': '/Group/Part_0',
+        'type': 'shapes',
+        'shape': {'vertices': [
+            [-0.5, -0.5, -0.5], [-0.5, -0.5, 0.5], [-0.5, 0.5, -0.5], [-0.5, 0.5, 0.5],
+            [0.5, -0.5, -0.5], [0.5, -0.5, 0.5], [0.5, 0.5, -0.5], [0.5, 0.5, 0.5],
+            [-0.5, -0.5, -0.5], [0.5, -0.5, -0.5], [-0.5, -0.5, 0.5], [0.5, -0.5, 0.5],
+            [-0.5, 0.5, -0.5], [0.5, 0.5, -0.5], [-0.5, 0.5, 0.5], [0.5, 0.5, 0.5],
+            [-0.5, -0.5, -0.5], [-0.5, 0.5, -0.5], [0.5, -0.5, -0.5], [0.5, 0.5, -0.5],
+            [-0.5, -0.5, 0.5], [-0.5, 0.5, 0.5], [0.5, -0.5, 0.5], [0.5, 0.5, 0.5]],
+        'triangles': [
+            1, 2, 0, 1, 3, 2, 5, 4, 6, 5, 6, 7, 11, 8, 9, 11, 10, 8, 15, 13,
+            12, 15, 12, 14, 19, 16, 17, 19, 18, 16, 23, 21, 20, 23, 20, 22 ],
+        'normals': [
+            [-1, 0, 0], [-1, 0, 0], [-1, 0, 0], [-1, 0, 0],
+            [1, 0, 0], [1, 0, 0], [1, 0, 0], [1, 0, 0],
+            [0, -1, 0], [0, -1, 0], [0, -1, 0], [0, -1, 0],
+            [0, 1, 0], [0, 1, 0], [0, 1, 0], [0, 1, 0],
+            [0, 0, -1], [0, 0, -1], [0, 0, -1], [0, 0, -1],
+            [0, 0, 1], [0, 0, 1], [0, 0, 1], [0, 0, 1]
+        ],
+        'edges': [
+            [[-0.5, -0.5, -0.5], [-0.5, -0.5, 0.5]],
+            [[-0.5, -0.5, 0.5], [-0.5, 0.5, 0.5]],
+            [[-0.5, 0.5, -0.5], [-0.5, 0.5, 0.5]],
+            [[-0.5, -0.5, -0.5], [-0.5, 0.5, -0.5]],
+            [[0.5, -0.5, -0.5], [0.5, -0.5, 0.5]],
+            [[0.5, -0.5, 0.5], [0.5, 0.5, 0.5]],
+            [[0.5, 0.5, -0.5], [0.5, 0.5, 0.5]],
+            [[0.5, -0.5, -0.5], [0.5, 0.5, -0.5]],
+            [[-0.5, -0.5, -0.5], [0.5, -0.5, -0.5]],
+            [[-0.5, -0.5, 0.5], [0.5, -0.5, 0.5]],
+            [[-0.5, 0.5, -0.5], [0.5, 0.5, -0.5]],
+            [[-0.5, 0.5, 0.5], [0.5, 0.5, 0.5]]
+        ]},
+        'color': '#e8b024'
+    }]
+}
+states = {'/Group/Part_0': [1, 1]}
+</code></pre>
+<p>A nested object (with shapes shortened) looks like:</p>
+<pre><code>{
+    'id': '/bottom', 'name': 'bottom', 'loc': ['&lt;position&gt;', '&lt;quaternion&gt;'],
+    'parts': [{
+            'id': '/bottom/bottom_0', 'name': 'bottom_0', 'type': 'shapes', 'color': '#bfbfbf',
+            'shape': {'vertices': [...], 'triangles': [...], 'normals': [...], 'edges': [...]},
+        }, {
+            'id': '/bottom/top', 'name': 'top', 'loc': ['&lt;position&gt;', '&lt;quaternion&gt;'],
+            'parts': [{
+                'id': '/bottom/top/top_0', 'name': 'top_0', 'type': 'shapes', 'color': '#bfbfbf',
+                'shape': {'vertices': [...], 'triangles': [...], 'normals': [...], 'edges': [...]},
+            }]
+        }, {
+            'id': '/bottom/front_stand', 'name': 'front_stand', 'loc': ['&lt;position&gt;', '&lt;quaternion&gt;'],
+            'parts': [{
+                'id': '/bottom/front_stand/front_stand_0', 'name': 'front_stand_0', 'type': 'shapes', 'color': '#7fcce5',
+                'shape': {'vertices': [...], 'triangles': [...], 'normals': [...], 'edges': [...]},
+            }]
+        }, {
+            'id': '/bottom/back_stand', 'name': 'back_stand', 'loc': ['&lt;position&gt;', '&lt;quaternion&gt;'],
+            'parts': [{
+                'id': '/bottom/back_stand/back_stand_0', 'name': 'back_stand_0', 'type': 'shapes', 'color': '#7fcce5',
+                'shape': {'vertices': [...], 'triangles': [...], 'normals': [...], 'edges': [...]},
+            }]
+        }, {
+            'id': '/bottom/right_back', 'name': 'right_back', 'loc': ['&lt;position&gt;', '&lt;quaternion&gt;'],
+            'parts': [{
+                'id': '/bottom/right_back/right_back_0', 'name': 'right_back_0', 'type': 'shapes', 'color': '#ffa500',
+                'shape': {'vertices': [...], 'triangles': [...], 'normals': [...], 'edges': [...]},
+            }, {
+                'id': '/bottom/right_back/lower', 'name': 'lower', 'loc': ['&lt;position&gt;', '&lt;quaternion&gt;'],
+                'parts': [{
+                    'id': '/bottom/right_back/lower/lower_0', 'name': 'lower_0', 'type': 'shapes', 'color': '#ffa500',
+                    'shape': {'vertices': [...], 'triangles': [...], 'normals': [...], 'edges': [...]},
+                }]
+            }]
+        },
+        ...
+    ]
+}
+states = {
+    '/bottom/bottom_0': [1, 1],
+    '/bottom/top/top_0': [1, 1],
+    '/bottom/front_stand/front_stand_0': [1, 1],
+    '/bottom/back_stand/back_stand_0': [1, 1],
+    '/bottom/right_back/right_back_0': [1, 1],
+    '/bottom/right_back/lower/lower_0': [1, 1],
+    ...
+}
+</code></pre></div>
 </dd>
 <dt id="cad_viewer_widget.widget.CadViewer.add_track"><code class="name flex">
 <span>def <span class="ident">add_track</span></span>(<span>self, track)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Add an animation track to CAD view</p>
-<p>Parameters:
-track: AnumationTrack
-Animation track, see <a href="/widget.html#cad_viewer_widget.widget.AnimationTrack">AnimationTrack</a></p></div>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>track</code></strong> :&ensp;<code><a title="cad_viewer_widget.widget.AnimationTrack" href="#cad_viewer_widget.widget.AnimationTrack">AnimationTrack</a></code></dt>
+<dd>Animation track, see <a href="/widget.html#cad_viewer_widget.widget.AnimationTrack">AnimationTrack</a></dd>
+</dl></div>
 </dd>
 <dt id="cad_viewer_widget.widget.CadViewer.add_tracks"><code class="name flex">
 <span>def <span class="ident">add_tracks</span></span>(<span>self, tracks)</span>
@@ -314,7 +439,7 @@ Animation track, see <a href="/widget.html#cad_viewer_widget.widget.AnimationTra
 <div class="desc"><p>Add a list of animation tracks to CAD view</p>
 <h2 id="parameters">Parameters</h2>
 <dl>
-<dt><strong><code>tracks</code></strong> :&ensp;<code>list</code> of <code>AnumationTrack</code></dt>
+<dt><strong><code>tracks</code></strong> :&ensp;<code>list</code> of <code><a title="cad_viewer_widget.widget.AnimationTrack" href="#cad_viewer_widget.widget.AnimationTrack">AnimationTrack</a></code></dt>
 <dd>List of Animation tracks, see <a href="/widget.html#cad_viewer_widget.widget.AnimationTrack">AnimationTrack</a></dd>
 </dl></div>
 </dd>

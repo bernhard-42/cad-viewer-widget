@@ -22,16 +22,41 @@ class AnimationTrack:
     action : {"t", "tx", "ty", "tz", "q", "rx", "ry", "rz"}
         The action type:
 
-        - "rx", "ry", "rz" for rotations around x, y or z-axis
         - "tx", "ty", "tz" for translations along the x, y or z-axis
-        - "q" to apply a quaternion to the location of the CAD object
         - "t" to add a position vector (3-dim array) to the current position of the CAD object
+        - "rx", "ry", "rz" for rotations around x, y or z-axis
+        - "q" to apply a quaternion to the location of the CAD object
     times : list of float or int
         An array of floats describing the points in time where CAD object (with id `path`) should be at the location
         defined by `action` and `values`
     values : list of float or int
         An array of same length as `times` defining the locations where the CAD objects should be according to the
-        `action` provided
+        `action` provided. Formats:
+
+        - "tx", "ty", "tz": float distance to move
+        - "t": 3-dim tuples or lists defining the positions to move to
+        - "rx", "ry", "rz": float angle in degrees
+        - "q" quaternions of the form (x,y,z,w) the represent the rotation to be applied
+
+    Examples
+    --------
+    ```
+    AnimationTrack(
+        '/bottom/left_middle/lower',                                # path
+        'rz',                                                       # action
+        [0.0, 0.5, 1.0, 1.5, 2.0, 2.5, 3.0, 3.5, 4.0],              # times (seconds)
+        [-15.0, -15.0, -15.0, 9.7, 20.0, 9.7, -15.0, -15.0, -15.0]  # angles
+    )
+
+    AnimationTrack(
+        'base/link_4_6',                                            # path
+        't',                                                        # action
+        [0.0, 1.0, 2.0, 3.0, 4.0],                                  # times (seconds)
+        [[0.0, 0.0, 0.0], [0.0, 1.9509, 3.9049],
+         [0.0 , -3.2974, -16.7545], [0.0 , 0.05894 , -32.0217],
+         [0.0 , -3.2212, -13.3424]]                                 # 3-dim positions
+    )
+    ```
 
     See also
     --------
@@ -349,6 +374,112 @@ class CadViewer:
             Speed of rotation with the mouse
         timeit : bool, default False
             Whether to output timing info to the browser console (True) or not (False)
+
+        Examples
+        --------
+
+        A simple cube with edge len of 1 is tessellated like the `shape` eloment of the first (and only) element of
+        the `parts` list:
+
+        ```
+        shapes = {
+            'name': 'Group',
+            'id': '/Group',
+            'loc': None,  # would be (<position>, <quaternion>), e.g. ([0,0,0), (0,0,0,1)])
+            'parts': [{
+                'name': 'Part_0',
+                'id': '/Group/Part_0',
+                'type': 'shapes',
+                'shape': {'vertices': [
+                    [-0.5, -0.5, -0.5], [-0.5, -0.5, 0.5], [-0.5, 0.5, -0.5], [-0.5, 0.5, 0.5],
+                    [0.5, -0.5, -0.5], [0.5, -0.5, 0.5], [0.5, 0.5, -0.5], [0.5, 0.5, 0.5],
+                    [-0.5, -0.5, -0.5], [0.5, -0.5, -0.5], [-0.5, -0.5, 0.5], [0.5, -0.5, 0.5],
+                    [-0.5, 0.5, -0.5], [0.5, 0.5, -0.5], [-0.5, 0.5, 0.5], [0.5, 0.5, 0.5],
+                    [-0.5, -0.5, -0.5], [-0.5, 0.5, -0.5], [0.5, -0.5, -0.5], [0.5, 0.5, -0.5],
+                    [-0.5, -0.5, 0.5], [-0.5, 0.5, 0.5], [0.5, -0.5, 0.5], [0.5, 0.5, 0.5]],
+                'triangles': [
+                    1, 2, 0, 1, 3, 2, 5, 4, 6, 5, 6, 7, 11, 8, 9, 11, 10, 8, 15, 13,
+                    12, 15, 12, 14, 19, 16, 17, 19, 18, 16, 23, 21, 20, 23, 20, 22 ],
+                'normals': [
+                    [-1, 0, 0], [-1, 0, 0], [-1, 0, 0], [-1, 0, 0],
+                    [1, 0, 0], [1, 0, 0], [1, 0, 0], [1, 0, 0],
+                    [0, -1, 0], [0, -1, 0], [0, -1, 0], [0, -1, 0],
+                    [0, 1, 0], [0, 1, 0], [0, 1, 0], [0, 1, 0],
+                    [0, 0, -1], [0, 0, -1], [0, 0, -1], [0, 0, -1],
+                    [0, 0, 1], [0, 0, 1], [0, 0, 1], [0, 0, 1]
+                ],
+                'edges': [
+                    [[-0.5, -0.5, -0.5], [-0.5, -0.5, 0.5]],
+                    [[-0.5, -0.5, 0.5], [-0.5, 0.5, 0.5]],
+                    [[-0.5, 0.5, -0.5], [-0.5, 0.5, 0.5]],
+                    [[-0.5, -0.5, -0.5], [-0.5, 0.5, -0.5]],
+                    [[0.5, -0.5, -0.5], [0.5, -0.5, 0.5]],
+                    [[0.5, -0.5, 0.5], [0.5, 0.5, 0.5]],
+                    [[0.5, 0.5, -0.5], [0.5, 0.5, 0.5]],
+                    [[0.5, -0.5, -0.5], [0.5, 0.5, -0.5]],
+                    [[-0.5, -0.5, -0.5], [0.5, -0.5, -0.5]],
+                    [[-0.5, -0.5, 0.5], [0.5, -0.5, 0.5]],
+                    [[-0.5, 0.5, -0.5], [0.5, 0.5, -0.5]],
+                    [[-0.5, 0.5, 0.5], [0.5, 0.5, 0.5]]
+                ]},
+                'color': '#e8b024'
+            }]
+        }
+        states = {'/Group/Part_0': [1, 1]}
+        ```
+
+        A nested object (with shapes shortened) looks like:
+
+        ```
+        {
+            'id': '/bottom', 'name': 'bottom', 'loc': ['<position>', '<quaternion>'],
+            'parts': [{
+                    'id': '/bottom/bottom_0', 'name': 'bottom_0', 'type': 'shapes', 'color': '#bfbfbf',
+                    'shape': {'vertices': [...], 'triangles': [...], 'normals': [...], 'edges': [...]},
+                }, {
+                    'id': '/bottom/top', 'name': 'top', 'loc': ['<position>', '<quaternion>'],
+                    'parts': [{
+                        'id': '/bottom/top/top_0', 'name': 'top_0', 'type': 'shapes', 'color': '#bfbfbf',
+                        'shape': {'vertices': [...], 'triangles': [...], 'normals': [...], 'edges': [...]},
+                    }]
+                }, {
+                    'id': '/bottom/front_stand', 'name': 'front_stand', 'loc': ['<position>', '<quaternion>'],
+                    'parts': [{
+                        'id': '/bottom/front_stand/front_stand_0', 'name': 'front_stand_0', 'type': 'shapes', 'color': '#7fcce5',
+                        'shape': {'vertices': [...], 'triangles': [...], 'normals': [...], 'edges': [...]},
+                    }]
+                }, {
+                    'id': '/bottom/back_stand', 'name': 'back_stand', 'loc': ['<position>', '<quaternion>'],
+                    'parts': [{
+                        'id': '/bottom/back_stand/back_stand_0', 'name': 'back_stand_0', 'type': 'shapes', 'color': '#7fcce5',
+                        'shape': {'vertices': [...], 'triangles': [...], 'normals': [...], 'edges': [...]},
+                    }]
+                }, {
+                    'id': '/bottom/right_back', 'name': 'right_back', 'loc': ['<position>', '<quaternion>'],
+                    'parts': [{
+                        'id': '/bottom/right_back/right_back_0', 'name': 'right_back_0', 'type': 'shapes', 'color': '#ffa500',
+                        'shape': {'vertices': [...], 'triangles': [...], 'normals': [...], 'edges': [...]},
+                    }, {
+                        'id': '/bottom/right_back/lower', 'name': 'lower', 'loc': ['<position>', '<quaternion>'],
+                        'parts': [{
+                            'id': '/bottom/right_back/lower/lower_0', 'name': 'lower_0', 'type': 'shapes', 'color': '#ffa500',
+                            'shape': {'vertices': [...], 'triangles': [...], 'normals': [...], 'edges': [...]},
+                        }]
+                    }]
+                },
+                ...
+            ]
+        }
+        states = {
+            '/bottom/bottom_0': [1, 1],
+            '/bottom/top/top_0': [1, 1],
+            '/bottom/front_stand/front_stand_0': [1, 1],
+            '/bottom/back_stand/back_stand_0': [1, 1],
+            '/bottom/right_back/right_back_0': [1, 1],
+            '/bottom/right_back/lower/lower_0': [1, 1],
+            ...
+        }
+        ```
         """
 
         if grid is None:
@@ -777,8 +908,9 @@ class CadViewer:
         """
         Add an animation track to CAD view
 
-        Parameters:
-        track: AnumationTrack
+        Parameters
+        ----------
+        track: AnimationTrack
             Animation track, see [AnimationTrack](/widget.html#cad_viewer_widget.widget.AnimationTrack)
         """
 
@@ -790,7 +922,7 @@ class CadViewer:
 
         Parameters
         ----------
-        tracks: list of AnumationTrack
+        tracks: list of AnimationTrack
             List of Animation tracks, see [AnimationTrack](/widget.html#cad_viewer_widget.widget.AnimationTrack)
         """
 
