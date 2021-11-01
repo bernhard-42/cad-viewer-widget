@@ -11,7 +11,35 @@ from .utils import serializer, check, check_list, get_parser
 
 
 class AnimationTrack:
-    """A three.js animation track"""
+    """
+    Defining a three.js animation track.
+
+    Parameters
+    ----------
+    path : string
+        The path (or id) of the cad object for which this track is meant.
+        Usually of the form `/top-level/level2/...`
+    action : {"t", "tx", "ty", "tz", "q", "rx", "ry", "rz"}
+        The action type:
+
+        - "rx", "ry", "rz" for rotations around x, y or z-axis
+        - "tx", "ty", "tz" for translations along the x, y or z-axis
+        - "q" to apply a quaternion to the location of the CAD object
+        - "t" to add a position vector (3-dim array) to the current position of the CAD object
+    times : list of float or int
+        An array of floats describing the points in time where CAD object (with id `path`) should be at the location
+        defined by `action` and `values`
+    values : list of float or int
+        An array of same length as `times` defining the locations where the CAD objects should be according to the
+        `action` provided
+
+    See also
+    --------
+
+    - [three.js NumberKeyframeTrack](https://threejs.org/docs/index.html?q=track#api/en/animation/tracks/NumberKeyframeTrack)
+    - [three.js QuaternionKeyframeTrack](https://threejs.org/docs/index.html?q=track#api/en/animation/tracks/QuaternionKeyframeTrack)
+
+    """
 
     def __init__(self, path, action, times, values):
         if len(times) != len(values):
@@ -23,7 +51,15 @@ class AnimationTrack:
         self.length = len(times)
 
     def to_array(self):
-        """return track as 4 dim array"""
+        """
+        Create an array representation of the animation track
+
+        Returns
+        -------
+        array-like
+            The 4 dim array comprising of the instance variables `path`, `action`, `times` and `values`
+        """
+
         return [self.path, self.action, self.times, self.values]
 
 
@@ -43,34 +79,68 @@ class CadViewerWidget(widgets.Widget):  # pylint: disable-msg=too-many-instance-
     #
 
     cad_width = Integer().tag(sync=True)
+    "unicode string: Width of the canvas element"
+
     height = Integer().tag(sync=True)
+    "int: Heigth of the canvas element"
+
     tree_width = Integer().tag(sync=True)
+    "int: Width of the navigatoin tree element"
+
     theme = Unicode().tag(sync=True)
+    "unicode string: UI theme, can be 'dark' or 'light' (default)"
 
     #
     # Viewer traits
     #
 
     shapes = Unicode(allow_none=True).tag(sync=True)
+    "unicode: Serialized nested tessellated shapes"
+
     states = Dict(Tuple(Integer(), Integer()), allow_none=True).tag(sync=True)
+    "dict: State of the nested cad objects, key = object path, value = 2-dim tuple of 0/1 (hidden/visible) for object and edges"
 
     tracks = Unicode(allow_none=True).tag(sync=True)
+    "unicode: Serialized list of animation track arrays, see [AnimationTrack.to_array](/widget.html#cad_viewer_widget.widget.AnimationTrack.to_array)"
 
-    timeit = Bool(allow_None=True).tag(sync=True)
+    timeit = Bool(allow_none=True).tag(sync=True)
+    "bool: Whether to output timing info to the browser console (True) or not (False)"
+
     tools = Bool(allow_none=True).tag(sync=True)
+    "bool: Whether to show CAD tools (True) or not (False)"
 
     ortho = Bool(allow_none=True).tag(sync=True)
+    "bool: Whether to use orthographic view (True) or perspective view (False)"
+
     control = Unicode().tag(sync=True)
+    "unicode: Whether to use trackball controls ('trackball') or orbit controls ('orbit')"
+
     axes = Bool(allow_none=True).tag(sync=True)
+    "bool: Whether to show coordinate axes (True) or not (False)"
+
     axes0 = Bool(allow_none=True).tag(sync=True)
+    "bool: Whether to center coordinate axes at the origin [0,0,0] (True) or at the CAD object center (False)"
+
     grid = Tuple(Bool(), Bool(), Bool(), allow_none=True).tag(sync=True)
+    "tuple: Whether to show the grids for `xy`, `xz`, `yz`."
+
     ticks = Integer(allow_none=True).tag(sync=True)
+    "integer: Hint for the number of ticks for the grids (will be adjusted for nice intervals)"
+
     transparent = Bool(allow_none=True).tag(sync=True)
+    "bool: Whether to show the CAD objetcs transparently (True) or not (False)"
+
     black_edges = Bool(allow_none=True).tag(sync=True)
+    "bool: Whether to shows the edges in black (True) or not(False)"
 
     edge_color = Unicode(allow_none=True).tag(sync=True)
+    "unicode: The default edge color in web format, e.g. '#ffaa88'"
+
     ambient_intensity = Float(allow_none=True).tag(sync=True)
+    "float: The intensity of the ambient light"
+
     direct_intensity = Float(allow_none=True).tag(sync=True)
+    "float: The intensity of the 8 direct lights"
 
     # bb_factor = Float(allow_none=True).tag(sync=True)
 
@@ -79,39 +149,97 @@ class CadViewerWidget(widgets.Widget):  # pylint: disable-msg=too-many-instance-
     #
 
     tab = Unicode(allow_none=True).tag(sync=True)
+    "unicode: Whther to show the navigation tree ('tree') or the clipping UI ('clip')"
+
     clip_intersection = Bool(allow_none=True).tag(sync=True)
+    "bool: Whether to use intersection clipping (True) or not (False)"
+
     clip_planes = Bool(allow_none=True).tag(sync=True)
+    "bool: Whether to show colored clipping planes (True) or not (False)"
+
     clip_normal_0 = Tuple(Float(), Float(), Float(), allow_none=True).tag(sync=True)
+    "tuple: Normal of clipping plane 1 as a 3-dim tuple of float (x,y,z)"
+
     clip_normal_1 = Tuple(Float(), Float(), Float(), allow_none=True).tag(sync=True)
+    "tuple: Normal of clipping plane 2 as a 3-dim tuple of float (x,y,z)"
+
     clip_normal_2 = Tuple(Float(), Float(), Float(), allow_none=True).tag(sync=True)
+    "tuple: Normal of clipping plane 3 as a 3-dim tuple of float (x,y,z)"
+
     clip_slider_0 = Float(allow_none=True).tag(sync=True)
+    "float: Slider value of clipping plane 1"
+
     clip_slider_1 = Float(allow_none=True).tag(sync=True)
+    "float: Slider value of clipping plane 2"
+
     clip_slider_2 = Float(allow_none=True).tag(sync=True)
+    "float: Slider value of clipping plane 3"
 
     position = Tuple(Float(), Float(), Float(), allow_none=True).tag(sync=True)
+    "tuple: Position of the camera as a 3-dim tuple of float (x,y,z)"
+
     quaternion = Tuple(Float(), Float(), Float(), Float(), allow_none=True).tag(sync=True)
+    "tuple: Rotation of the camera as 4-dim quaternion (x,y,z,w)"
+
     zoom = Float(allow_none=True).tag(sync=True)
+    "float: Zoom value of the camera"
 
     zoom_speed = Float(allow_none=True).tag(sync=True)
+    "float: Speed of zooming with the mouse"
+
     pan_speed = Float(allow_none=True).tag(sync=True)
+    "float: Speed of panning with the mouse"
+
     rotate_speed = Float(allow_none=True).tag(sync=True)
+    "float: Speed of rotation with the mouse"
+
     animation_speed = Float(allow_none=True).tag(sync=True)
+    "float: Animation speed"
 
     state_updates = Dict(Tuple(Integer(), Integer()), allow_none=True).tag(sync=True)
+    "dict: Dict with paths as key and a 2-dim tuple of 0/1 (hidden/visible) for object and edges"
 
     #
     # Read only traitlets
     #
 
-    lastPick = Dict(Any(), allow_none=True, read_only=True).tag(sync=True)
+    lastPick = Dict(key_trait=Unicode(), value_trait=Any(), allow_none=True, read_only=True).tag(sync=True)
+    "dict: Describes the last picked element of the CAD view"
+
     target = Tuple(Float(), Float(), Float(), allow_none=True, read_only=True).tag(sync=True)
+    "tuple: Camera target as a 3-dim tuple of float (x,y,z)"
 
     initialize = Bool(allow_none=True).tag(sync=True)
+    "bool: internally used to control initialisation of view. Do not use!"
+
     js_debug = Bool(allow_none=True).tag(sync=True)
+    "bool: Whether to show infos in the browser console (True) or not (False)"
 
 
 class CadViewer:
-    """The main class for the CAD Viewer encapsulationg the three-cad-viewer Javascript module"""
+    """
+    The main class for the CAD Viewer encapsulating the three-cad-viewer Javascript module
+
+    Parameters
+    ----------
+    cad_width : int, default: 800
+        Width of the canvas element
+    height : int, default: 600
+        Heigth of the canvas element
+    tree_width : int, default: 240
+        Width of the navigatoin tree element
+    theme : string, default: 'light'
+        UI theme, can be 'dark' or 'light' (default)
+    tools : bool, default: True
+        Whether to show CAD tools (True) or not (False)
+
+    See also
+    --------
+
+    - [three-cad-viewer](https://github.com/bernhard-42/three-cad-viewer) ([Demo](https://bernhard-42.github.io/three-cad-viewer/example.html))
+    - [threejs](https://threejs.org/docs/index.html#manual/en/introduction/Creating-a-scene)
+
+    """
 
     def __init__(
         self,
@@ -172,7 +300,56 @@ class CadViewer:
         timeit=False,
         # bb_factor=1.0,
     ):
-        """Adding shapes to the CAD view"""
+        """
+        Adding shapes to the CAD view
+
+        Parameters
+        ----------
+        shapes : dict
+            Nested tessellated shapes
+        states : dict
+            State of the nested cad objects, key = object path, value = 2-dim tuple of 0/1 (hidden/visible) for object and edges
+        tracks : dict, default None
+            Serialized list of animation track arrays, see [AnimationTrack.to_array](/widget.html#cad_viewer_widget.widget.AnimationTrack.to_array)
+        ortho : bool, default True
+            Whether to use orthographic view (True) or perspective view (False)
+        control : string, default 'trackball'
+            Whether to use trackball controls ('trackball') or orbit controls ('orbit')
+        axes : bool, default False
+            Whether to show coordinate axes (True) or not (False)
+        axes0 : bool, default False
+            Whether to center coordinate axes at the origin [0,0,0] (True) or at the CAD object center (False)
+        grid : 3-dim list of bool, default None
+            Whether to show the grids for `xy`, `xz`, `yz` (`None` means `(False, False, False)`)
+        ticks : int, default 10
+            Hint for the number of ticks for the grids (will be adjusted for nice intervals)
+        transparent : bool, default False
+            Whether to show the CAD objetcs transparently (True) or not (False)
+        black_edges : bool, default False
+            Whether to shows the edges in black (True) or not(False)
+        edge_color : string, default "#707070"
+            The default edge color in web format, e.g. '#ffaa88'
+        ambient_intensity : float, default 0.9
+            The intensity of the ambient light
+        direct_intensity : float, default 0.12
+            The intensity of the 8 direct lights
+        position : 3-dim list of float, default None
+            Position of the camera as a 3-dim tuple of float (x,y,z)
+        quaternion : 4-dim list of float, default None
+            Rotation of the camera as 4-dim quaternion (x,y,z,w)
+        zoom : float, default None
+            Zoom value of the camera
+        reset_camera : bool, default True
+            Keep the camera position and rotation when showing new shapes (True) or not (False)
+        zoom_speed : float, default 1.0
+            Speed of zooming with the mouse
+        pan_speed : float, default 1.0
+            Speed of panning with the mouse
+        rotate_speed : float, default 1.0
+            Speed of rotation with the mouse
+        timeit : bool, default False
+            Whether to output timing info to the browser console (True) or not (False)
+        """
 
         if grid is None:
             grid = [False, False, False]
@@ -235,7 +412,10 @@ class CadViewer:
 
     @property
     def ambient_intensity(self):
-        """Get value of viewer attribute ambient_intensity"""
+        """
+        Get or set the CadViewerWidget traitlet `ambient_intensity`.
+        see [CadViewerWidget.ambient_intensity](./widget.html#cad_viewer_widget.widget.CadViewerWidget.ambient_intensity)
+        """
 
         return self.widget.ambient_intensity
 
@@ -245,7 +425,10 @@ class CadViewer:
 
     @property
     def direct_intensity(self):
-        """Get value of viewer attribute direct_intensity"""
+        """
+        Get or set the CadViewerWidget traitlet `direct_intensity`
+        see [CadViewerWidget.direct_intensity](./widget.html#cad_viewer_widget.widget.CadViewerWidget.direct_intensity)
+        """
 
         return self.widget.direct_intensity
 
@@ -255,7 +438,10 @@ class CadViewer:
 
     @property
     def axes(self):
-        """Get value of viewer attribute axes"""
+        """
+        Get or set the CadViewerWidget traitlet `axes`
+        see [CadViewerWidget.axes](./widget.html#cad_viewer_widget.widget.CadViewerWidget.axes)
+        """
 
         return self.widget.axes
 
@@ -265,7 +451,10 @@ class CadViewer:
 
     @property
     def axes0(self):
-        """Get value of viewer attribute axes0"""
+        """
+        Get or set the CadViewerWidget traitlet `axes0`
+        see [CadViewerWidget.axes0](./widget.html#cad_viewer_widget.widget.CadViewerWidget.axes0)
+        """
 
         return self.widget.axes0
 
@@ -275,7 +464,10 @@ class CadViewer:
 
     @property
     def grid(self):
-        """Get value of viewer attribute grid"""
+        """
+        Get or set the CadViewerWidget traitlet `grid`
+        see [CadViewerWidget.grid](./widget.html#cad_viewer_widget.widget.CadViewerWidget.grid)
+        """
 
         return self.widget.grid
 
@@ -285,7 +477,10 @@ class CadViewer:
 
     @property
     def ortho(self):
-        """Get value of viewer attribute ortho"""
+        """
+        Get or set the CadViewerWidget traitlet `ortho`
+        see [CadViewerWidget.ortho](./widget.html#cad_viewer_widget.widget.CadViewerWidget.ortho)
+        """
 
         return self.widget.ortho
 
@@ -295,7 +490,10 @@ class CadViewer:
 
     @property
     def transparent(self):
-        """Get value of viewer attribute transparent"""
+        """
+        Get or set the CadViewerWidget traitlet `transparent`
+        see [CadViewerWidget.transparent](./widget.html#cad_viewer_widget.widget.CadViewerWidget.transparent)
+        """
 
         return self.widget.transparent
 
@@ -305,7 +503,10 @@ class CadViewer:
 
     @property
     def black_edges(self):
-        """Get value of viewer attribute black_edges"""
+        """
+        Get or set the CadViewerWidget traitlet `black_edges`
+        see [CadViewerWidget.black_edges](./widget.html#cad_viewer_widget.widget.CadViewerWidget.black_edges)
+        """
 
         return self.widget.black_edges
 
@@ -315,7 +516,10 @@ class CadViewer:
 
     @property
     def edge_color(self):
-        """Get value of viewer attribute edge_color"""
+        """
+        Get or set the CadViewerWidget traitlet `edge_color`
+        see [CadViewerWidget.edge_color](./widget.html#cad_viewer_widget.widget.CadViewerWidget.edge_color)
+        """
 
         return self.widget.edge_color
 
@@ -329,7 +533,10 @@ class CadViewer:
 
     @property
     def clip_intersection(self):
-        """Get value of viewer attribute clip_intersection"""
+        """
+        Get or set the CadViewerWidget traitlet `clip_intersection`
+        see [CadViewerWidget.clip_intersection](./widget.html#cad_viewer_widget.widget.CadViewerWidget.clip_intersection)
+        """
 
         return self.widget.clip_intersection
 
@@ -339,7 +546,10 @@ class CadViewer:
 
     @property
     def clip_normal_0(self):
-        """Get value of viewer attribute clip_normal_0"""
+        """
+        Get or set the CadViewerWidget traitlet `clip_normal_0`
+        see [CadViewerWidget.clip_normal_0](./widget.html#cad_viewer_widget.widget.CadViewerWidget.clip_normal_0)
+        """
 
         return self.widget.clip_normal_0
 
@@ -349,7 +559,10 @@ class CadViewer:
 
     @property
     def clip_normal_1(self):
-        """Get value of viewer attribute clip_normal_1"""
+        """
+        Get or set the CadViewerWidget traitlet `clip_normal_1`
+        see [CadViewerWidget.clip_normal_1](./widget.html#cad_viewer_widget.widget.CadViewerWidget.clip_normal_1)
+        """
 
         return self.widget.clip_normal_1
 
@@ -359,7 +572,10 @@ class CadViewer:
 
     @property
     def clip_normal_2(self):
-        """Get value of viewer attribute clip_normal_2"""
+        """
+        Get or set the CadViewerWidget traitlet `clip_normal_2`
+        see [CadViewerWidget.clip_normal_2](./widget.html#cad_viewer_widget.widget.CadViewerWidget.clip_normal_2)
+        """
 
         return self.widget.clip_normal_2
 
@@ -369,7 +585,10 @@ class CadViewer:
 
     @property
     def clip_value_0(self):
-        """Get value of viewer attribute clip_slider_0"""
+        """
+        Get or set the CadViewerWidget traitlet `clip_slider_0`
+        see [CadViewerWidget.clip_slider_0](./widget.html#cad_viewer_widget.widget.CadViewerWidget.clip_slider_0)
+        """
 
         return self.widget.clip_slider_0
 
@@ -379,7 +598,10 @@ class CadViewer:
 
     @property
     def clip_value_1(self):
-        """Get value of viewer attribute clip_slider_1"""
+        """
+        Get or set the CadViewerWidget traitlet `clip_slider_1`
+        see [CadViewerWidget.clip_slider_1](./widget.html#cad_viewer_widget.widget.CadViewerWidget.clip_slider_1)
+        """
 
         return self.widget.clip_slider_1
 
@@ -389,7 +611,10 @@ class CadViewer:
 
     @property
     def clip_value_2(self):
-        """Get value of viewer attribute clip_slider_2"""
+        """
+        Get or set the CadViewerWidget traitlet `clip_slider_2`
+        see [CadViewerWidget.clip_slider_2](./widget.html#cad_viewer_widget.widget.CadViewerWidget.clip_slider_2)
+        """
 
         return self.widget.clip_slider_2
 
@@ -399,7 +624,10 @@ class CadViewer:
 
     @property
     def clip_planes(self):
-        """Get value of viewer attribute clip_planes"""
+        """
+        Get or set the CadViewerWidget traitlet `clip_planes`
+        see [CadViewerWidget.clip_planes](./widget.html#cad_viewer_widget.widget.CadViewerWidget.clip_planes)
+        """
 
         return self.widget.clip_planes
 
@@ -409,7 +637,10 @@ class CadViewer:
 
     @property
     def js_debug(self):
-        """Get value of viewer attribute js_debug"""
+        """
+        Get or set the CadViewerWidget traitlet `js_debug`
+        see [CadViewerWidget.js_debug](./widget.html#cad_viewer_widget.widget.CadViewerWidget.js_debug)
+        """
 
         return self.widget.js_debug
 
@@ -419,7 +650,10 @@ class CadViewer:
 
     @property
     def tools(self):
-        """Get value of viewer attribute tools"""
+        """
+        Get or set the CadViewerWidget traitlet `tools`
+        see [CadViewerWidget.tools](./widget.html#cad_viewer_widget.widget.CadViewerWidget.tools)
+        """
 
         return self.widget.tools
 
@@ -429,7 +663,10 @@ class CadViewer:
 
     @property
     def pan_speed(self):
-        """Get value of viewer attribute pan_speed"""
+        """
+        Get or set the CadViewerWidget traitlet `pan_speed`
+        see [CadViewerWidget.pan_speed](./widget.html#cad_viewer_widget.widget.CadViewerWidget.pan_speed)
+        """
 
         return self.widget.pan_speed
 
@@ -439,7 +676,10 @@ class CadViewer:
 
     @property
     def rotate_speed(self):
-        """Get value of viewer attribute rotate_speed"""
+        """
+        Get or set the CadViewerWidget traitlet `rotate_speed`
+        see [CadViewerWidget.rotate_speed](./widget.html#cad_viewer_widget.widget.CadViewerWidget.rotate_speed)
+        """
 
         return self.widget.rotate_speed
 
@@ -449,7 +689,10 @@ class CadViewer:
 
     @property
     def zoom_speed(self):
-        """Get value of viewer attribute zoom_speed"""
+        """
+        Get or set the CadViewerWidget traitlet `zoom_speed`
+        see [CadViewerWidget.zoom_speed](./widget.html#cad_viewer_widget.widget.CadViewerWidget.zoom_speed)
+        """
 
         return self.widget.zoom_speed
 
@@ -463,7 +706,10 @@ class CadViewer:
 
     @property
     def zoom(self):
-        """Get value of viewer attribute zoom"""
+        """
+        Get or set the CadViewerWidget traitlet `zoom`
+        see [CadViewerWidget.zoom](./widget.html#cad_viewer_widget.widget.CadViewerWidget.zoom)
+        """
 
         return self.widget.zoom
 
@@ -473,7 +719,10 @@ class CadViewer:
 
     @property
     def position(self):
-        """Get value of viewer attribute position"""
+        """
+        Get or set the CadViewerWidget traitlet `position`
+        see [CadViewerWidget.position](./widget.html#cad_viewer_widget.widget.CadViewerWidget.position)
+        """
 
         return self.widget.position
 
@@ -483,7 +732,10 @@ class CadViewer:
 
     @property
     def quaternion(self):
-        """Get value of viewer attribute quaternion"""
+        """
+        Get or set the CadViewerWidget traitlet `quaternion`
+        see [CadViewerWidget.quaternion](./widget.html#cad_viewer_widget.widget.CadViewerWidget.quaternion)
+        """
 
         return self.widget.quaternion
 
@@ -493,13 +745,19 @@ class CadViewer:
 
     @property
     def last_pick(self):
-        """Get value of viewer attribute lastPick"""
+        """
+        Get or set the CadViewerWidget traitlet `lastPick`
+        see [CadViewerWidget.lastPick](./widget.html#cad_viewer_widget.widget.CadViewerWidget.lastPick)
+        """
 
         return self.widget.lastPick
 
     @property
     def control(self):
-        """Get value of viewer attribute control"""
+        """
+        Get or set the CadViewerWidget traitlet `control`
+        see [CadViewerWidget.control](./widget.html#cad_viewer_widget.widget.CadViewerWidget.control)
+        """
 
         return self.widget.control
 
@@ -508,23 +766,45 @@ class CadViewer:
     #
 
     def clear_tracks(self):
-        """Remove animation tracks from CAD view"""
+        """
+        Remove animation tracks from CAD view
+        """
 
         self.tracks = []
         self.widget.tracks = ""
 
     def add_track(self, track):
-        """Add an animation track to CAD view"""
+        """
+        Add an animation track to CAD view
+
+        Parameters:
+        track: AnumationTrack
+            Animation track, see [AnimationTrack](/widget.html#cad_viewer_widget.widget.AnimationTrack)
+        """
 
         self.tracks.append(track)
 
     def add_tracks(self, tracks):
-        """Add animation tracks to CAD view"""
+        """
+        Add a list of animation tracks to CAD view
+
+        Parameters
+        ----------
+        tracks: list of AnumationTrack
+            List of Animation tracks, see [AnimationTrack](/widget.html#cad_viewer_widget.widget.AnimationTrack)
+        """
 
         self.tracks = [] if tracks is None else [track for track in tracks]  # enforce a new array
 
     def animate(self, speed=1):
-        """Send animation tracks to CAD view"""
+        """
+        Send animation tracks to CAD view
+
+        Parameters
+        ----------
+        speed : float, default: 1
+            Animation speed, will be forwarded via `animation_speed` traitlet
+        """
 
         self.widget.tracks = json.dumps([track.to_array() for track in self.tracks])
         self.widget.animation_speed = speed
@@ -532,17 +812,23 @@ class CadViewer:
         # self.play()
 
     def play(self):
-        """Start animation"""
+        """
+        Start or unpause animation
+        """
 
         self.execute("viewer.controlAnimation", ["play"])
 
     def stop(self):
-        """Stop animation"""
+        """
+        Stop animation
+        """
 
         self.execute("viewer.controlAnimation", ["stop"])
 
     def pause(self):
-        """Pause animation"""
+        """
+        Pause or unpause animation
+        """
 
         self.execute("viewer.controlAnimation", ["pause"])
 
@@ -551,11 +837,17 @@ class CadViewer:
     #
 
     def select_tree(self):
-        """Select Navigation tree tab"""
+        """
+        Select Navigation tree tab
+        """
+
         self.widget.tab = "tree"
 
     def select_clipping(self):
-        """Select Clipping tab"""
+        """
+        Select Clipping tab
+        """
+
         self.widget.tab = "clip"
 
     #
@@ -563,34 +855,71 @@ class CadViewer:
     #
 
     def rotate_x(self, angle):
-        """Rotate CAD obj around x-axis - trackball controls only"""
+        """
+        Rotate CAD obj around x-axis - trackball controls only
+
+        Parameters
+        ----------
+        angle : float
+            The rotation angle in degrees
+        """
 
         if self.control != "trackball":
             raise NameError("rotateX only works for trackball control")
         self.execute("viewer.controls.rotateX", (angle,))
 
     def rotate_y(self, angle):
-        """Rotate CAD obj around y-axis - trackball controls only"""
+        """
+        Rotate CAD obj around y-axis - trackball controls only
+
+        Parameters
+        ----------
+        angle : float
+            The rotation angle in degrees
+        """
 
         if self.control != "trackball":
             raise NameError("rotateY only works for trackball control")
         self.execute("viewer.controls.rotateY", (angle,))
 
     def rotate_z(self, angle):
-        """Rotate CAD obj around z-axis - trackball controls only"""
+        """
+        Rotate CAD obj around z-axis - trackball controls only
+
+        Parameters
+        ----------
+        angle : float
+            The rotation angle in degrees
+        """
 
         if self.control != "trackball":
             raise NameError("rotateZ only works for trackball control")
         self.execute("viewer.controls.rotateZ", (angle,))
 
     def rotate_up(self, angle):
-        """Rotate CAD obj up (positive angle) and down (negative angle) - orbit controls only"""
+        """
+        Rotate CAD obj up (positive angle) and down (negative angle) - orbit controls only
+
+        Parameters
+        ----------
+        angle : float
+            The rotation angle in degrees
+        """
+
         if self.control != "orbit":
             raise NameError("rotateUp only works for orbit control")
         self.execute("viewer.controls.rotateUp", (angle,))
 
     def rotate_left(self, angle):
-        """Rotate CAD obj to the left (positive angle) and right (negative angle) - orbit controls only"""
+        """
+        Rotate CAD obj to the left (positive angle) and right (negative angle) - orbit controls only
+
+        Parameters
+        ----------
+        angle : float
+            The rotation angle in degrees
+        """
+
         if self.control != "orbit":
             raise NameError("rotateLeft only works for orbit control")
         self.execute("viewer.controls.rotateLeft", (angle,))
@@ -600,7 +929,17 @@ class CadViewer:
     #
 
     def execute(self, method, args=None):
-        """Execute a method of a Javascript object"""
+        """
+        Execute a method of a Javascript object
+
+        Parameters
+        ----------
+        method : string
+            A 'CadViewer' object based Javascrip object path, e.g. `abc.def[3].method(args)` where `abc.def[3]` is the
+            object notation relative to the 'CadViewer' object and `method` is the method to call
+        args : list of any
+            The arguments passed to `abc.def[3].method(args)`
+        """
 
         def wrapper(change=None):
             if change is None:
