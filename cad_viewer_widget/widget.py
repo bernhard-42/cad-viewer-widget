@@ -334,8 +334,8 @@ class CadViewer:
             Nested tessellated shapes
         states : dict
             State of the nested cad objects, key = object path, value = 2-dim tuple of 0/1 (hidden/visible) for object and edges
-        tracks : dict, default None
-            Serialized list of animation track arrays, see [AnimationTrack.to_array](/widget.html#cad_viewer_widget.widget.AnimationTrack.to_array)
+        tracks : list or tuple, default None
+            List of animation track arrays, see [AnimationTrack.to_array](/widget.html#cad_viewer_widget.widget.AnimationTrack.to_array)
         ortho : bool, default True
             Whether to use orthographic view (True) or perspective view (False)
         control : string, default 'trackball'
