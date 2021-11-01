@@ -7,7 +7,14 @@ from pyparsing import Literal, Word, alphanums, nums, delimitedList, ZeroOrMore
 
 
 def serializer(obj):
-    """Serialize numpy nested arrays"""
+    """
+    Serialize objects and arrays with converting numpy 64 bit floats/int into 32 bit equivalent values for threejs
+
+    Parameters
+    ----------
+    obj: dict
+        Nested dict with numpy arrays
+    """
 
     def compress(obj, dtype):
         cobj = zlib.compress(obj.reshape(-1).astype(dtype).tobytes(order="C"))
@@ -27,7 +34,19 @@ def serializer(obj):
 
 
 def check(name, var, types):
-    """Check variable type"""
+    """
+    Check variable type
+
+    Parameters
+    ----------
+    name : string
+        Name of the variable to check
+    var : any
+        Value of the variable
+    types
+        Allowed Python types
+    """
+
     if isinstance(var, types):
         return var
     else:
@@ -35,7 +54,20 @@ def check(name, var, types):
 
 
 def check_list(name, var, types, length):
-    """Check type of list elements"""
+    """
+    Check type of list elements
+
+    Parameters
+    ----------
+    name : string
+        Name of the variable to check
+    var : any
+        List value of the variable
+    types
+        Allowed Python types for every element of the list
+    length
+        Required length of the list
+    """
 
     if isinstance(var, (list, tuple)) and len(var) == length and all(isinstance(v, types) for v in var):
         return var
@@ -44,7 +76,12 @@ def check_list(name, var, types, length):
 
 
 def get_parser():
-    """A parser for nested json objects"""
+    """
+    A parser for nested json objects
+
+    Only used internally to parse Javascript object paths
+    """
+
     dot = Literal(".").suppress()
     lbrack = Literal("[").suppress()
     rbrack = Literal("]").suppress()

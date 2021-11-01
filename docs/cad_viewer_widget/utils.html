@@ -35,25 +35,51 @@
 <span>def <span class="ident">check</span></span>(<span>name, var, types)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Check variable type</p></div>
+<div class="desc"><p>Check variable type</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>name</code></strong> :&ensp;<code>string</code></dt>
+<dd>Name of the variable to check</dd>
+<dt><strong><code>var</code></strong> :&ensp;<code>any</code></dt>
+<dd>Value of the variable</dd>
+<dt><strong><code>types</code></strong></dt>
+<dd>Allowed Python types</dd>
+</dl></div>
 </dd>
 <dt id="cad_viewer_widget.utils.check_list"><code class="name flex">
 <span>def <span class="ident">check_list</span></span>(<span>name, var, types, length)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Check type of list elements</p></div>
+<div class="desc"><p>Check type of list elements</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>name</code></strong> :&ensp;<code>string</code></dt>
+<dd>Name of the variable to check</dd>
+<dt><strong><code>var</code></strong> :&ensp;<code>any</code></dt>
+<dd>List value of the variable</dd>
+<dt><strong><code>types</code></strong></dt>
+<dd>Allowed Python types for every element of the list</dd>
+<dt><strong><code>length</code></strong></dt>
+<dd>Required length of the list</dd>
+</dl></div>
 </dd>
 <dt id="cad_viewer_widget.utils.get_parser"><code class="name flex">
 <span>def <span class="ident">get_parser</span></span>(<span>)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>A parser for nested json objects</p></div>
+<div class="desc"><p>A parser for nested json objects</p>
+<p>Only used internally to parse Javascript object paths</p></div>
 </dd>
 <dt id="cad_viewer_widget.utils.serializer"><code class="name flex">
 <span>def <span class="ident">serializer</span></span>(<span>obj)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Serialize numpy nested arrays</p></div>
+<div class="desc"><p>Serialize objects and arrays with converting numpy 64 bit floats/int into 32 bit equivalent values for threejs</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>obj</code></strong> :&ensp;<code>dict</code></dt>
+<dd>Nested dict with numpy arrays</dd>
+</dl></div>
 </dd>
 </dl>
 </section>
