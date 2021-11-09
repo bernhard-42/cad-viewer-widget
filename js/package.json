@@ -37,7 +37,7 @@
     "@jupyter-widgets/base": "^1.1 || ^2 || ^3 || ^4",
     "js-base64": "^3.7.2",
     "pako": "^2.0.4",
-    "three-cad-viewer": "1.0.0"
+    "three-cad-viewer": "1.1.1"
   },
   "devDependencies": {
     "@jupyterlab/builder": "^3.0.0",
