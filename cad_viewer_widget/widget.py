@@ -508,6 +508,46 @@ class CadViewer:
             ...
         }
         ```
+
+        Notes
+        -----
+
+        Vector     : float[3]     := [x, y, z]
+        VectorList : Vector[n]    := [ [x0, y0, z0], [x1, xy1, z1], ... ]
+        Index      : int[m]       := [ i0, i1, i2, ... ]
+        Edge       : Vector[2]    := [ [x0, y0, z0], [x1, xy1, z1]]
+        EdgeList   : Edge[k]      := [ [[x0, y0, z0], [x1, xy1, z1]], [[x2, y2, z2], [x3, xy3, z3]], ... ]
+
+        Shape, Faces := {
+            "id": "<str>",
+            "name": "<str>",
+            "type": "shapes",
+            "color": "#ffffff",
+            "shape": {
+                "vertices": <VectorList>,
+                "triangles": <Index>,
+                "normals": <VectorList>,
+                "edges": <EdgeList>
+            }
+        }
+
+        Edges := {
+            "id": "</path/to/<name>>",
+            "name": "<name>",
+            "type": "edges",
+            "color": "#ffffff",
+            "width": 3,
+            "shape": <EdgeList>
+        }
+
+        Vertices := {
+            "id": "</path/to/<name>>",
+            "name": "<name>",
+            "type": "vertices",
+            "color": "#ffffff",
+            "size": 6,
+            "shape": <VectorList>
+        }
         """
 
         if grid is None:
