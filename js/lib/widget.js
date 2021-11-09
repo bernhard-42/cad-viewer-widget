@@ -77,6 +77,7 @@ export var CadViewerModel = DOMWidgetModel.extend({
     height: null,
     treeWidth: null,
     theme: null,
+    pinning: null,
 
     // View traits
 
@@ -128,6 +129,8 @@ export var CadViewerModel = DOMWidgetModel.extend({
     target: null,
 
     initialize: null,
+    image_id: null,
+
     result: ""
   })
 });
@@ -186,7 +189,8 @@ export var CadViewerView = DOMWidgetView.extend({
       height: this.model.get("height"),
       treeWidth: this.model.get("tree_width"),
       theme: this.model.get("theme"),
-      tools: this.model.get("tools")
+      tools: this.model.get("tools"),
+      pinning: this.model.get("pinning")
     };
     const container = document.createElement("div");
     this.el.appendChild(container);
@@ -195,7 +199,7 @@ export var CadViewerView = DOMWidgetView.extend({
     this.display.setTools(this.options.tools);
   },
 
-  notificationCallback(change) {
+  handleNotification: function (change) {
     var changed = false;
     Object.keys(change).forEach((key) => {
       const old_value = this.model.get(key);
@@ -267,7 +271,8 @@ export var CadViewerView = DOMWidgetView.extend({
     this.viewer = new Viewer(
       this.display,
       this.options,
-      this.notificationCallback.bind(this)
+      this.handleNotification.bind(this),
+      this.pinAsPng.bind(this)
     );
 
     const timer = new Timer("addShapes", this.options.timeit);
@@ -468,6 +473,21 @@ export var CadViewerView = DOMWidgetView.extend({
         this.debug = change.changed[key];
         break;
     }
+  },
+
+  pinAsPng: function (image) {
+    this.model.set(
+      "result",
+      JSON.stringify({
+        display_id: this.model.get("image_id"),
+        src: image.src,
+        width: image.width,
+        height: image.height
+      })
+    );
+    this.model.save_changes();
+    // and remove itself
+    this.remove();
   },
 
   onCustomMessage: function (msg, buffers) {

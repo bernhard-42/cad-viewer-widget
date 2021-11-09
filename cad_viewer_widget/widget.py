@@ -2,9 +2,10 @@
 
 import json
 import ipywidgets as widgets
+import uuid
 
-from traitlets import Unicode, Dict, Tuple, Integer, Float, Any, Bool
-from IPython.display import display
+from traitlets import Unicode, Dict, Tuple, Integer, Float, Any, Bool, observe
+from IPython.display import display, HTML, update_display
 from pyparsing import ParseException
 
 from .utils import serializer, check, check_list, get_parser
@@ -114,6 +115,9 @@ class CadViewerWidget(widgets.Widget):  # pylint: disable-msg=too-many-instance-
 
     theme = Unicode().tag(sync=True)
     "unicode string: UI theme, can be 'dark' or 'light' (default)"
+
+    pinning = Bool(allow_none=True).tag(sync=True)
+    "bool: WHether to show the pin a png button or not"
 
     #
     # Viewer traits
@@ -234,11 +238,27 @@ class CadViewerWidget(widgets.Widget):  # pylint: disable-msg=too-many-instance-
     target = Tuple(Float(), Float(), Float(), allow_none=True, read_only=True).tag(sync=True)
     "tuple: Camera target as a 3-dim tuple of float (x,y,z)"
 
+    result = Unicode(allow_none=True).tag(sync=True)
+    "unicode string: JSON serialiued result from Javascript"
+
+    #
+    # Internal traitlets
+    #
+
     initialize = Bool(allow_none=True).tag(sync=True)
     "bool: internally used to control initialisation of view. Do not use!"
 
     js_debug = Bool(allow_none=True).tag(sync=True)
     "bool: Whether to show infos in the browser console (True) or not (False)"
+
+    image_id = Unicode(allow_none=True).tag(sync=True)
+    "unicode string: the id of the image tag to use for pin as png"
+
+    @observe("result")
+    def func(self, change):
+        data = json.loads(change["new"])
+        html = f"""<img src="{data['src']}" width="{data['width']}px" height="{data['height']}px"/>"""
+        update_display(HTML(html), display_id=data["display_id"])
 
 
 class CadViewer:
@@ -273,6 +293,7 @@ class CadViewer:
         tree_width=240,
         theme="light",
         tools=True,
+        pinning=False,
     ):
         if cad_width < 640:
             raise ValueError("Ensure cad_width >= 640")
@@ -285,6 +306,7 @@ class CadViewer:
             tree_width=tree_width,
             theme=theme,
             tools=tools,
+            pinning=pinning,
         )
         self.msg_id = 0
         self.parser = get_parser()
@@ -292,6 +314,12 @@ class CadViewer:
         self.tracks = []
 
         display(self.widget)
+
+        if pinning:
+            image_id = "img_" + str(uuid.uuid4())
+            html = "<div></div>"
+            display(HTML(html), display_id=image_id)
+            self.widget.image_id = image_id
 
     def _parse(self, string):
         try:
