@@ -1,6 +1,7 @@
 from __future__ import print_function
 from setuptools import setup, find_packages
 import os
+import sys
 from os.path import join as pjoin
 from distutils import log
 
@@ -20,11 +21,6 @@ here = os.path.dirname(os.path.abspath(__file__))
 
 name = "cad_viewer_widget"
 LONG_DESCRIPTION = "A Jupyter widget to view cad objects"
-
-# Get cad_viewer_widget version
-from cad_viewer_widget._version import __version__
-
-version = __version__
 
 js_dir = pjoin(here, "js")
 
@@ -46,9 +42,13 @@ cmdclass["jsdeps"] = combine_commands(
     ensure_targets(jstargets),
 )
 
+# Get cad_viewer_widget version
+sys.path.insert(0, "./cad_viewer_widget")
+from _version import __version__
+
 setup_args = dict(
     name=name,
-    version=version,
+    version=__version__,
     description="A Jupyter widget to view cad objects",
     long_description=LONG_DESCRIPTION,
     include_package_data=True,
