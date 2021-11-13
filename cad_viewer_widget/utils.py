@@ -6,6 +6,25 @@ import numpy as np
 from pyparsing import Literal, Word, alphanums, nums, delimitedList, ZeroOrMore
 
 
+def numpyify(obj):
+    """Replace all arrays with numpy ndarrays. They will be serialized with compression"""
+    result = {}
+    for k, v in obj.items():
+        if isinstance(v, dict):
+            result[k] = numpyify(v)
+        elif k in ["vertices", "normals", "edges"]:
+            result[k] = np.asarray(v, dtype=np.float32)
+        elif k in ["triangles"]:
+            result[k] = np.asarray(v, dtype=np.int32).reshape(-1, 3)
+        elif k == "parts":
+            result[k] = [numpyify(el) for el in v]
+        elif obj.get("type") in ["edges", "vertices"] and k == "shape":
+            result[k] = np.asarray(v, dtype=np.float32)
+        else:
+            result[k] = v
+    return result
+
+
 def serializer(obj):
     """
     Serialize objects and arrays with converting numpy 64 bit floats/int into 32 bit equivalent values for threejs
