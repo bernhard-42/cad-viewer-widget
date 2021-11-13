@@ -9,6 +9,7 @@ from IPython.display import display, HTML, update_display
 from pyparsing import ParseException
 
 from .utils import serializer, check, check_list, get_parser
+from .sidecar import close_sidecars, set_sidecar, get_sidecar, sidecar as open_sidecar, close_sidecar
 
 
 class AnimationTrack:
@@ -287,13 +288,7 @@ class CadViewer:
     """
 
     def __init__(
-        self,
-        cad_width=800,
-        height=600,
-        tree_width=240,
-        theme="light",
-        tools=True,
-        pinning=False,
+        self, cad_width=800, height=600, tree_width=240, theme="light", tools=True, pinning=False, sidecar=None
     ):
         if cad_width < 640:
             raise ValueError("Ensure cad_width >= 640")
@@ -313,13 +308,20 @@ class CadViewer:
 
         self.tracks = []
 
-        display(self.widget)
+        def show():
+            display(self.widget)
 
-        if pinning:
-            image_id = "img_" + str(uuid.uuid4())
-            html = "<div></div>"
-            display(HTML(html), display_id=image_id)
-            self.widget.image_id = image_id
+            if pinning:
+                image_id = "img_" + str(uuid.uuid4())
+                html = "<div></div>"
+                display(HTML(html), display_id=image_id)
+                self.widget.image_id = image_id
+
+        if sidecar is None:
+            show()
+        else:
+            with sidecar:
+                show()
 
     def _parse(self, string):
         try:
@@ -1162,5 +1164,49 @@ class CadViewer:
             args = [args]
         return wrapper()
 
-    def _ipython_display_(self):
-        display(self.widget)
+
+def open_viewer(
+    cad_width=800,
+    height=600,
+    tree_width=240,
+    theme="light",
+    tools=True,
+    pinning=None,
+    sidecar=None,
+    anchor="right",
+):
+    """Open a CAD viewer"""
+
+    if sidecar is None:
+        if get_sidecar() is not None:
+            use_sidecar = open_sidecar(get_sidecar(), new=True, anchor=anchor)
+        else:
+            use_sidecar = None
+    else:
+        use_sidecar = open_sidecar(sidecar, new=True, anchor=anchor)
+
+    if pinning is None:
+        pinning = use_sidecar is None
+
+    viewer = CadViewer(
+        cad_width=cad_width,
+        height=height,
+        tree_width=tree_width,
+        theme=theme,
+        tools=tools,
+        pinning=pinning,
+        sidecar=use_sidecar,
+    )
+    return viewer
+
+
+def close_viewer(sidecar):
+    """Close a CAD viewer"""
+
+    close_sidecar(sidecar)
+
+
+def close_viewers():
+    """Close all CAD viewer"""
+
+    close_sidecars()
