@@ -1,6 +1,7 @@
+import uuid
 from ._version import __version__
 
-from IPython.display import display
+from IPython.display import display, HTML
 
 from .widget import AnimationTrack, CadViewer
 from .sidecar import (
@@ -91,6 +92,12 @@ def show(shapes, states, sidecar=None, anchor="split-right", **kwargs):
             cv = CadViewer(**create_args)
             display(cv.widget)
             cv.add_shapes(shapes, states, **add_shape_args)
+
+            if kwargs.get("pinning") is not None:
+                image_id = "img_" + str(uuid.uuid4())
+                html = "<div></div>"
+                display(HTML(html), display_id=image_id)
+                cv.widget.image_id = image_id
         else:
             if create_args:
                 print(f"For an existing sidecar the create view arguments {create_args} are ignored")

@@ -322,15 +322,6 @@ class CadViewer:
 
         self.tracks = []
 
-        def show():
-            display(self.widget)
-
-            if pinning:
-                image_id = "img_" + str(uuid.uuid4())
-                html = "<div></div>"
-                display(HTML(html), display_id=image_id)
-                self.widget.image_id = image_id
-
     def _parse(self, string):
         try:
             return self.parser.parseString(string).asList()
