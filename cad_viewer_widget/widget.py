@@ -578,7 +578,7 @@ class CadViewer:
         # If one changes the control type, override reset_camera with "True"
         if self.widget.control != control:
             reset_camera = True
-            print("Camera control changed, so camera was resetted")
+            # print("Camera control changed, so camera was resetted")
 
         if control == "orbit" and quaternion is not None:
             quaternion = None
