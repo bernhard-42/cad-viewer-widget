@@ -344,6 +344,13 @@ class CadViewer:
         except ParseException:
             return None
 
+    def dispose(self):
+        """
+        Dispose the CAD Viewer
+        """
+
+        self.execute("viewer.dispose")
+
     def add_shapes(
         self,
         shapes,
