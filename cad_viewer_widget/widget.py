@@ -10,7 +10,6 @@ from IPython.display import display, HTML, update_display
 from pyparsing import ParseException
 
 from .utils import serializer, check, check_list, get_parser
-from .sidecar import close_sidecars, set_sidecar, get_sidecar, sidecar as open_sidecar, close_sidecar
 
 
 class AnimationTrack:
