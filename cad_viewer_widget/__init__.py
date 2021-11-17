@@ -17,7 +17,8 @@ from .utils import split_args
 
 
 def _jupyter_labextension_paths():
-    """Called by Jupyter Lab Server to detect if it is a valid labextension and
+    """
+    Called by Jupyter Lab Server to detect if it is a valid labextension and
     to install the widget
 
     Returns
@@ -38,7 +39,8 @@ def _jupyter_labextension_paths():
 
 
 def _jupyter_nbextension_paths():
-    """Called by Jupyter Notebook Server to detect if it is a valid nbextension and
+    """
+    Called by Jupyter Notebook Server to detect if it is a valid nbextension and
     to install the widget
 
     Returns
