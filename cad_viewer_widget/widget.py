@@ -357,6 +357,7 @@ class CadViewer:
         ticks=10,
         transparent=False,
         black_edges=False,
+        normal_len=0,
         edge_color="#707070",
         ambient_intensity=0.9,
         direct_intensity=0.12,
