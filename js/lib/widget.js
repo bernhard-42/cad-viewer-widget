@@ -68,8 +68,8 @@ export var CadViewerModel = DOMWidgetModel.extend({
     _view_name: "CadViewerView",
     _model_module: "cad-viewer-widget",
     _view_module: "cad-viewer-widget",
-    _model_module_version: "0.9.9",
-    _view_module_version: "0.9.9",
+    _model_module_version: "0.9.10",
+    _view_module_version: "0.9.10",
 
     // Display traits
 
