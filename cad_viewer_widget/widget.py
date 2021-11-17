@@ -3,6 +3,7 @@
 import json
 import ipywidgets as widgets
 import uuid
+import numpy as np
 
 from traitlets import Unicode, Dict, Tuple, Integer, Float, Any, Bool, observe
 from IPython.display import display, HTML, update_display
@@ -87,7 +88,12 @@ class AnimationTrack:
             The 4 dim array comprising of the instance variables `path`, `action`, `times` and `values`
         """
 
-        return [self.path, self.action, self.times, self.values]
+        def tolist(array):
+            if isinstance(array, np.ndarray):
+                return array.tolist()
+            return [tolist(subarray) for subarray in array]
+
+        return [self.path, self.action, tolist(self.times), tolist(self.values)]
 
 
 @widgets.register
