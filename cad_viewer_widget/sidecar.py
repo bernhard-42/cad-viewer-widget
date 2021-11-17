@@ -5,62 +5,103 @@ SIDECARS = {}
 DEFAULT = None
 
 
-def sidecar(name, clean=False, new=False, anchor="right"):
-    sc = SIDECARS.get(name)
+class Viewer:
+    def __init__(self, view, show, clean=None, close=None):
+        self.view = view
+        self._show = show
+        self._clean = clean
+        self._close = close
 
-    if sc is not None:
-        if clean:
-            sc.outputs = ()
-        elif new:
-            sc.close()
-            sc = None
+    def show(self, *args, **kwargs):
+        self._show(*args, **kwargs)
 
-    if sc is None:
-        sc = Sidecar(title=name, anchor=anchor)
-        SIDECARS[name] = sc
+    def clean(self):
+        if self._clean is not None:
+            self._clean()
 
-    return sc
-
-
-def close_sidecar(title):
-    if SIDECARS.get(title) is not None:
-        SIDECARS[title].close()
-        del SIDECARS[title]
+    def close(self):
+        if self._close is not None:
+            self._close()
 
 
-def close_sidecars():
-    global SIDECARS
+class ViewerSidecar:
+    def __init__(self, title, anchor="split-right"):
+        sc = Sidecar(title=title, anchor=anchor)
+        SIDECARS[title] = self
 
-    Sidecar.close_all()
-    SIDECARS = {}
+        self.title = title
+        self.sidecar = sc
+        self.viewer = None
+
+    def attach(self, viewer):
+        self.viewer = viewer
+        with self.sidecar:
+            display(viewer.view)
+
+    def clean(self, sidecar=False):
+        if self.viewer:
+            self.viewer.clean()
+
+        if sidecar:
+            self.sidecar.outputs = ()
+
+    def close(self):
+        global DEFAULT
+
+        if self.viewer:
+            self.viewer.close()
+
+        self.sidecar.close()
+
+        if SIDECARS.get(self.title) is not None:
+            del SIDECARS[self.title]
+
+        if DEFAULT == self.title:
+            DEFAULT = None
+
+    def show(self, *args, **kwargs):
+        if self.viewer is None:
+            raise ValueError("viewer needs to be attached")
+        else:
+            self.viewer.show(*args, **kwargs)
 
 
-def get_sidecar(title=None):
+def get_viewer(title=None):
     if title is None:
-        return DEFAULT
+        return SIDECARS.get(DEFAULT)
     else:
         return SIDECARS.get(title)
 
 
-def set_sidecar(name):
+def get_viewers():
+    return SIDECARS
+
+
+def get_default():
+    return DEFAULT
+
+
+def set_viewer(title, anchor="split-right"):
     global DEFAULT
 
-    DEFAULT = name
-    sidecar(name, clean=True)
+    DEFAULT = title
+    if get_viewer(title) is None:
+        SIDECARS[title] = ViewerSidecar(title, anchor=anchor)
 
 
-def show(val, /, anchor="right", sidecar_name=None, clean=False, new=False):
-    def _display(obj):
-        if isinstance(obj, (int, float, str, bool)):
-            print(obj)
-        else:
-            display(obj)
+def close_viewers():
+    global SIDECARS
+    global DEFAULT
 
-    if sidecar_name is None and DEFAULT is not None:
-        sidecar_name = DEFAULT
+    Sidecar.close_all()
+    SIDECARS = {}
+    DEFAULT = None
 
-    if sidecar_name is None:
-        _display(val)
-    else:
-        with sidecar(sidecar_name, clean=clean, new=new, anchor=anchor):
-            _display(val)
+
+def close_viewer(title):
+    global DEFAULT
+    global SIDECARS
+
+    scv = SIDECARS.get(title)
+    if scv is not None:
+        scv.close(sidecar=True)

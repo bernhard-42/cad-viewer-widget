@@ -108,3 +108,52 @@ def get_parser():
     index = lbrack + delimitedList(integer) + rbrack
     obj = Word(alphanums + "_$") + ZeroOrMore(index)
     return obj + ZeroOrMore(dot + obj)
+
+
+def split_args(config):
+    create_args = {
+        k: v
+        for k, v in config.items()
+        if k
+        in [
+            "cad_width",
+            "height",
+            "tree_width",
+            "theme",
+            "tools",
+            "pinning",
+        ]
+    }
+    add_shape_args = {
+        k: v
+        for k, v in config.items()
+        if k
+        in [
+            "ortho",
+            "control",
+            "axes",
+            "axes0",
+            "grid",
+            "ticks",
+            "transparent",
+            "black_edges",
+            "normal_len",
+            "edge_color",
+            "ambient_intensity",
+            "direct_intensity",
+            "position",
+            "quaternion",
+            "zoom",
+            "reset_camera",
+            "zoom_speed",
+            "pan_speed",
+            "rotate_speed",
+            "timeit",
+        ]
+    }
+
+    unknown = {k: config[k] for k in set(config) - set(create_args) - set(add_shape_args)}
+    if unknown:
+        print(f"Parameters {unknown} unknown and ignored")
+
+    return create_args, add_shape_args

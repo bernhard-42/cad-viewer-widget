@@ -291,7 +291,13 @@ class CadViewer:
     """
 
     def __init__(
-        self, cad_width=800, height=600, tree_width=240, theme="light", tools=True, pinning=False, sidecar=None
+        self,
+        cad_width=800,
+        height=600,
+        tree_width=240,
+        theme="light",
+        tools=True,
+        pinning=False,
     ):
         if cad_width < 640:
             raise ValueError("Ensure cad_width >= 640")
