@@ -163,6 +163,9 @@ class CadViewerWidget(widgets.Widget):  # pylint: disable-msg=too-many-instance-
     black_edges = Bool(allow_none=True).tag(sync=True)
     "bool: Whether to shows the edges in black (True) or not(False)"
 
+    normal_len = Float(allow_none=True).tag(sync=True)
+    "float: If > 0, the vertex normals will be rendered with the length given be this parameter"
+
     edge_color = Unicode(allow_none=True).tag(sync=True)
     "unicode: The default edge color in web format, e.g. '#ffaa88'"
 
@@ -382,6 +385,8 @@ class CadViewer:
             Whether to show the CAD objetcs transparently (True) or not (False)
         black_edges : bool, default False
             Whether to shows the edges in black (True) or not(False)
+        normal_Len : int, default 0
+            If > 0, the vertex normals will be rendered with the length given be this parameter
         edge_color : string, default "#707070"
             The default edge color in web format, e.g. '#ffaa88'
         ambient_intensity : float, default 0.9
@@ -580,6 +585,7 @@ class CadViewer:
             self.widget.control = control
             self.widget.transparent = transparent
             self.widget.black_edges = black_edges
+            self.widget.normal_len = normal_len
             self.widget.zoom_speed = zoom_speed
             self.widget.pan_speed = pan_speed
             self.widget.rotate_speed = rotate_speed
@@ -714,6 +720,14 @@ class CadViewer:
     @black_edges.setter
     def black_edges(self, value):
         self.widget.black_edges = check("black_edges", value, bool)
+
+    @property
+    def normal_len(self):
+        """
+        Get or set the CadViewerWidget traitlet `normal_len`
+        """
+
+        return self.widget.black_edges
 
     @property
     def edge_color(self):

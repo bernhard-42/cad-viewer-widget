@@ -95,6 +95,7 @@ export var CadViewerModel = DOMWidgetModel.extend({
     ticks: null,
     transparent: null,
     black_edges: null,
+    normal_len: null,
 
     edge_color: null,
     ambient_intensity: null,
@@ -260,6 +261,7 @@ export var CadViewerView = DOMWidgetView.extend({
       ticks: this.model.get("ticks"),
       transparent: this.model.get("transparent"),
       blackEdges: this.model.get("black_edges"),
+      normalLen: this.model.get("normal_len"),
       edgeColor: this.model.get("edge_color"),
       ambientIntensity: this.model.get("ambient_intensity"),
       directIntensity: this.model.get("direct_intensity"),
