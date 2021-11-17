@@ -1,6 +1,6 @@
 {
   "name": "cad-viewer-widget",
-  "version": "0.9.9",
+  "version": "0.9.10",
   "description": "A Jupyter widget to view cad objects",
   "license": "MIT",
   "author": "Bernhard Walter",
@@ -41,13 +41,13 @@
   },
   "devDependencies": {
     "@jupyterlab/builder": "^3.0.0",
-    "terser-webpack-plugin": "^5.2.4",
     "css-loader": "^6.4.0",
     "eslint": "^7.31.0",
     "eslint-config-prettier": "^8.3.0",
     "prettier": "2.3.2",
     "rimraf": "^2.6.1",
     "style-loader": "^3.3.1",
+    "terser-webpack-plugin": "^5.2.4",
     "webpack": "^5"
   },
   "jupyterlab": {
