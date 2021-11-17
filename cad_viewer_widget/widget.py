@@ -332,12 +332,6 @@ class CadViewer:
                 display(HTML(html), display_id=image_id)
                 self.widget.image_id = image_id
 
-        if sidecar is None:
-            show()
-        else:
-            with sidecar:
-                show()
-
     def _parse(self, string):
         try:
             return self.parser.parseString(string).asList()
