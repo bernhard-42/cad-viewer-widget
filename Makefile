@@ -12,7 +12,7 @@ JQ_RULES := '(.cells[] | select(has("outputs")) | .outputs) = [] \
 } \
 | .cells[].metadata = {}'
 
-clean_notebooks: ./test.ipynb
+clean_notebooks: ./notebooks/*
 	@for file in $^ ; do \
 		echo "$${file}" ; \
 		jq --indent 1 $(JQ_RULES) "$${file}" > "$${file}_clean"; \
