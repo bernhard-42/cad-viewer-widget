@@ -36,7 +36,7 @@ class ViewerSidecar:
     def attach(self, viewer):
         self.viewer = viewer
         with self.sidecar:
-            display(viewer.view)
+            display(viewer.view.widget)
 
     def clean(self, sidecar=False):
         if self.viewer:
@@ -104,4 +104,4 @@ def close_viewer(title):
 
     scv = SIDECARS.get(title)
     if scv is not None:
-        scv.close(sidecar=True)
+        scv.close()

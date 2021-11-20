@@ -67,6 +67,14 @@ def _jupyter_nbextension_paths():
     ]
 
 
+def open_viewer(sidecar, anchor="split-right", **kwargs):
+    cv = CadViewer(**kwargs)
+    viewer = Viewer(cv, cv.add_shapes, None, cv.dispose)
+    scv = ViewerSidecar(sidecar, anchor=anchor)
+    scv.attach(viewer)
+    return cv
+
+
 def show(shapes, states, sidecar=None, anchor="split-right", **kwargs):
     """
     Will handle sidecar before showing the CAD objects
@@ -107,7 +115,7 @@ def show(shapes, states, sidecar=None, anchor="split-right", **kwargs):
         scv = get_viewer(sidecar)
         if scv is None:
             cv = CadViewer(**create_args)
-            viewer = Viewer(cv.widget, cv.add_shapes, None, cv.dispose)
+            viewer = Viewer(cv, cv.add_shapes, None, cv.dispose)
             scv = ViewerSidecar(sidecar, anchor=anchor)
             scv.attach(viewer)
         else:
