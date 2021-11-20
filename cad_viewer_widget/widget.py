@@ -2,11 +2,10 @@
 
 import json
 import ipywidgets as widgets
-import uuid
 import numpy as np
 
 from traitlets import Unicode, Dict, Tuple, Integer, Float, Any, Bool, observe
-from IPython.display import display, HTML, update_display
+from IPython.display import HTML, update_display
 from pyparsing import ParseException
 
 from .utils import serializer, check, check_list, get_parser
@@ -87,10 +86,13 @@ class AnimationTrack:
             The 4 dim array comprising of the instance variables `path`, `action`, `times` and `values`
         """
 
-        def tolist(array):
-            if isinstance(array, np.ndarray):
-                return array.tolist()
-            return [tolist(subarray) for subarray in array]
+        def tolist(obj):
+            if isinstance(obj, np.ndarray):
+                return obj.tolist()
+            elif isinstance(obj, (list, tuple)):
+                return [tolist(subarray) for subarray in obj]
+            else:
+                return obj
 
         return [self.path, self.action, tolist(self.times), tolist(self.values)]
 
