@@ -288,6 +288,8 @@ class CadViewer:
         UI theme, can be 'dark' or 'light' (default)
     tools : bool, default: True
         Whether to show CAD tools (True) or not (False)
+    pinning: bool, default: False
+        Whether to allow replacing the CAD View by a canvas screenshot
 
     See also
     --------
