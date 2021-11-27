@@ -1,107 +1,79 @@
 from IPython.display import display
-from sidecar import Sidecar
+from .widget import CadViewer
+import time
 
 SIDECARS = {}
 DEFAULT = None
 
 
-class Viewer:
-    def __init__(self, view, show, clean=None, close=None):
-        self.view = view
-        self._show = show
-        self._clean = clean
-        self._close = close
-
-    def show(self, *args, **kwargs):
-        self._show(*args, **kwargs)
-
-    def clean(self):
-        if self._clean is not None:
-            self._clean()
-
-    def close(self):
-        if self._close is not None:
-            self._close()
-
-
-class ViewerSidecar:
-    def __init__(self, title, anchor="split-right"):
-        sc = Sidecar(title=title, anchor=anchor)
-        SIDECARS[title] = self
-
-        self.title = title
-        self.sidecar = sc
-        self.viewer = None
-
-    def attach(self, viewer):
-        self.viewer = viewer
-        with self.sidecar:
-            display(viewer.view.widget)
-
-    def clean(self, sidecar=False):
-        if self.viewer:
-            self.viewer.clean()
-
-        if sidecar:
-            self.sidecar.outputs = ()
-
-    def close(self):
-        global DEFAULT
-
-        if self.viewer:
-            self.viewer.close()
-
-        self.sidecar.close()
-
-        if SIDECARS.get(self.title) is not None:
-            del SIDECARS[self.title]
-
-        if DEFAULT == self.title:
-            DEFAULT = None
-
-    def show(self, *args, **kwargs):
-        if self.viewer is None:
-            raise ValueError("viewer needs to be attached")
-        else:
-            self.viewer.show(*args, **kwargs)
+def open_viewer(title, anchor="right", **kwargs):
+    cv = CadViewer(sidecar=title, anchor=anchor, **kwargs)
+    SIDECARS[title] = cv
+    display(cv.widget)
+    print(f'Done, see viewer {title}. To access the viewer, use get_viewer("{title}")')
 
 
 def get_viewer(title=None):
     if title is None:
-        return SIDECARS.get(DEFAULT)
-    else:
-        return SIDECARS.get(title)
+        if DEFAULT is None:
+            print("No default viewer found")
+            return
+        else:
+            title = DEFAULT
 
+    viewer = SIDECARS.get(title)
+    if viewer is None:
+        print(f'There is no viewer "{title}"')
+        return
+
+    if viewer.disposed:
+        del SIDECARS[title]
+        print(f'There is no viewer "{title}"')
+        return
+    
+    return viewer
 
 def get_viewers():
-    return SIDECARS
+    viewers = {}
+    deletions = []
+    for title, viewer in SIDECARS.items():
+        if viewer.disposed:
+            deletions.append(title)
+        else:
+            viewers[title] = viewer
+    
+    for title in deletions:
+        del SIDECARS[title]
+
+    return viewers
 
 
 def get_default():
     return DEFAULT
 
 
-def set_viewer(title, anchor="split-right"):
+def set_viewer(title, anchor="right"):
     global DEFAULT
 
     DEFAULT = title
     if get_viewer(title) is None:
-        SIDECARS[title] = ViewerSidecar(title, anchor=anchor)
+        open_viewer(title, anchor=anchor)
 
 
 def close_viewers():
     global SIDECARS
     global DEFAULT
 
-    Sidecar.close_all()
+    for title, viewer in get_viewers().items():
+        viewer.close()
+        print(f'Closed viewer "{title}"')
+
     SIDECARS = {}
     DEFAULT = None
 
 
 def close_viewer(title):
-    global DEFAULT
-    global SIDECARS
-
-    scv = SIDECARS.get(title)
-    if scv is not None:
-        scv.close()
+    viewer = SIDECARS.get(title)
+    if viewer is not None:
+        viewer.close()
+        print(f'Closed viewer "{title}"')

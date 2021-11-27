@@ -35,9 +35,10 @@
   },
   "dependencies": {
     "@jupyter-widgets/base": "^1.1 || ^2 || ^3 || ^4",
+    "@jupyterlab/apputils": "^3.2.4",
     "js-base64": "^3.7.2",
     "pako": "^2.0.4",
-    "three-cad-viewer": "1.1.2"
+    "three-cad-viewer": "1.1.4"
   },
   "devDependencies": {
     "@jupyterlab/builder": "^3.0.0",
@@ -47,6 +48,7 @@
     "prettier": "2.3.2",
     "rimraf": "^2.6.1",
     "style-loader": "^3.3.1",
+    "svg-inline-loader": "^0.8.2",
     "terser-webpack-plugin": "^5.2.4",
     "webpack": "^5"
   },

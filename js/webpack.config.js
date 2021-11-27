@@ -5,7 +5,10 @@ var version = require("./package.json").version;
 
 // Custom webpack rules are generally the same for all webpack bundles, hence
 // stored in a separate local variable.
-var rules = [{ test: /\.css$/, use: ["style-loader", "css-loader"] }];
+var rules = [
+  { test: /\.css$/, use: ["style-loader", "css-loader"] },
+  { test: /\.svg$/, use: ["svg-inline-loader"] }
+];
 
 module.exports = (env, argv) => {
   var devtool = argv.mode === "development" ? "source-map" : false;

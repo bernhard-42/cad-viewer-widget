@@ -1,66 +1,12 @@
 import "../style/index.css";
 
+import { MainAreaWidget } from "@jupyterlab/apputils";
+import { Widget } from "@lumino/widgets";
 import { DOMWidgetModel, DOMWidgetView } from "@jupyter-widgets/base";
-import { Viewer, Display, Timer } from "three-cad-viewer";
+import { Viewer, Timer } from "three-cad-viewer";
 import { decode } from "./serializer.js";
-
-// avoid loading lodash for "extend" function only
-function extend(a, b) {
-  Object.keys(b).forEach((key) => {
-    a[key] = b[key];
-  });
-  return a;
-}
-
-function isThreeType(obj, type) {
-  return (
-    obj != null &&
-    typeof obj === "object" &&
-    obj.constructor != null &&
-    obj.constructor.name === type
-  );
-}
-
-function isTolEqual(obj1, obj2, tol = 1e-9) {
-  // tolerant comparison
-
-  // Convert three's Vector3 to arrays
-  if (isThreeType(obj1, "Vector3")) {
-    obj1 = obj1.toArray();
-  }
-  if (isThreeType(obj2, "Vector3")) {
-    obj2 = obj2.toArray();
-  }
-
-  if (Array.isArray(obj1) && Array.isArray(obj2)) {
-    return (
-      obj1.length === obj2.length &&
-      obj1.every((v, i) => isTolEqual(v, obj2[i]))
-    );
-  } else if (
-    obj1 != null &&
-    obj2 != null &&
-    typeof obj1 === "object" &&
-    typeof obj2 === "object"
-  ) {
-    var keys1 = Object.keys(obj1);
-    var keys2 = Object.keys(obj2);
-
-    if (
-      keys1.length == keys2.length &&
-      keys1.every((key) => Object.prototype.hasOwnProperty.call(obj2, key))
-    ) {
-      return keys1.every((key) => isTolEqual(obj1[key], obj2[key]));
-    } else {
-      return false;
-    }
-  } else {
-    if (Number(obj1) === obj1 && Number(obj2) === obj2) {
-      return Math.abs(obj1 - obj2) < tol;
-    }
-    return obj1 === obj2;
-  }
-}
+import { extend, isTolEqual } from "./utils.js";
+import App from "./app.js";
 
 export var CadViewerModel = DOMWidgetModel.extend({
   defaults: extend(DOMWidgetModel.prototype.defaults(), {
@@ -78,6 +24,8 @@ export var CadViewerModel = DOMWidgetModel.extend({
     treeWidth: null,
     theme: null,
     pinning: null,
+    sidecar: null,
+    anchor: null,
 
     // View traits
 
@@ -132,14 +80,13 @@ export var CadViewerModel = DOMWidgetModel.extend({
     initialize: null,
     image_id: null,
 
-    result: ""
+    result: "",
+    disposed: false
   })
 });
 
 export var CadViewerView = DOMWidgetView.extend({
   render: function () {
-    this.createDisplay();
-
     this.model.on("change:tracks", this.handle_change, this);
     this.model.on("change:position", this.handle_change, this);
     this.model.on("change:quaternion", this.handle_change, this);
@@ -169,35 +116,155 @@ export var CadViewerView = DOMWidgetView.extend({
     this.model.on("change:clip_slider_2", this.handle_change, this);
     this.model.on("change:initialize", this.initialize, this);
     this.model.on("change:js_debug", this.handle_change, this);
+    this.model.on("change:disposed", this.handle_change, this);
 
     // this.model.on("change:bb_factor", this.handle_change, this);
 
     this.listenTo(this.model, "msg:custom", this.onCustomMessage.bind(this));
 
+    this.shell = App.getShell();
+
     this.init = false;
-    this.is_empty = true;
+    this.empty = true;
+    this.disposed = false;
     this.debug = this.model.get("js_debug");
 
-    // for embedding into other webpages, when widget state is provided
+    this.sidecar = this.model.get("sidecar");
+    this.anchor = this.model.get("anchor");
+
+    if(App.getCadViewer(this.sidecar) != null) {
+      App.getCadViewer(this.sidecar).widget.title.owner.dispose();
+    }
+
+    this.createDisplay();
+
     if (this.model.get("shapes") != "") {
       this.addShapes();
+    }
+
+    window.getCadViewer = App.getCadViewer;
+    window.getCadViewers = App.getCadViewers;
+  },
+
+  dispose: function () {
+    if (!this.disposed) {
+      
+      if (!this.empty) {
+        this.viewer.dispose();
+      }
+      
+      this.widget.dispose();
+      
+      if (this.sidecar != null) {
+        App.removeCadViewer(this.sidecar);
+        console.debug(
+          `cad-viewer-widget: Viewer in sidecar "${this.sidecar}" closed`
+          );
+      } else {
+        console.debug("cad-viewer-widget: Viewer in cell closed");
+      }
+      
+      // first set disposed to true
+      this.disposed = true;
+
+      // then set model widget, to block additional triggered dispose call
+      this.widget.title.owner.disposed.disconnect(this.dispose, this);
+      this.model.set("disposed", true);
+      this.model.save_changes();      
+    }
+  },
+
+  _barHandler: function (index, tab) {
+    if (this.sidecar === tab.title.label) {
+      this.shell._rightHandler.sideBar.tabCloseRequested.disconnect(
+        this._barHandler,
+        this
+      );
+      // this will trigger dispose()
+      this.widget.title.owner.dispose();
     }
   },
 
   createDisplay: function () {
+    const cadWidth = this.model.get("cad_width");
+    const height = this.model.get("height");
+    const treeWidth = this.model.get("tree_width");
     this.options = {
-      cadWidth: this.model.get("cad_width"),
-      height: this.model.get("height"),
-      treeWidth: this.model.get("tree_width"),
+      cadWidth: cadWidth,
+      height: height,
+      treeWidth: treeWidth,
       theme: this.model.get("theme"),
       tools: this.model.get("tools"),
       pinning: this.model.get("pinning")
     };
+
     const container = document.createElement("div");
-    this.el.appendChild(container);
-    this.display = new Display(container, this.options);
-    this.display.setAnimationControl(false);
-    this.display.setTools(this.options.tools);
+
+    App.addCadViewer(this);
+
+    if (this.sidecar == null) {
+      this.el.appendChild(container);
+    } else {
+      App.addCadViewer(this, this.sidecar);
+
+      const content = new Widget();
+      this.widget = new MainAreaWidget({ content });
+      this.widget.addClass("cvw-sidecar");
+      this.widget.id = "cad-viewer-widget";
+      this.widget.title.label = this.sidecar;
+      this.widget.title.closable = true;
+      this.widget.id = "cvw_" + `${Math.random()}`.slice(2);
+
+      content.node.appendChild(container);
+
+      if (this.anchor == "tab") {
+        this.shell.add(this.widget, "main", {
+          mode: "split-right"
+        });
+
+      } else {
+        this.shell.add(this.widget, "right");
+        this.shell._rightHandler.sideBar.tabCloseRequested.connect(
+          this._barHandler,
+          this
+        );
+
+        const hSplitPanel = this.shell._hsplitPanel;
+        const relSizes = hSplitPanel.relativeSizes();
+        const rect = hSplitPanel.node.getBoundingClientRect();
+        const width = rect.width;
+        const absLeft = width * relSizes[0];
+        var absRight = cadWidth + treeWidth + 12;
+        var absMain = width - absRight - absLeft;
+
+        if (absMain < 0) {
+          absMain = 400;
+          absRight -= 400;
+        }
+
+        hSplitPanel.setRelativeSizes([
+          absLeft / width,
+          absMain / width,
+          absRight / width
+        ]);
+      }
+      this.widget.title.owner.disposed.connect(this.dispose, this);
+
+      const currentWidget = this.shell.currentWidget;
+      // activate sidebar
+      this.shell.activateById(this.widget.id);
+      // and switch back to notebook
+      this.shell.activateById(currentWidget.id);
+    }
+
+    this.viewer = new Viewer(
+      container,
+      this.options,
+      this.handleNotification.bind(this),
+      this.pinAsPng.bind(this)
+    );
+    this.viewer.display.setAnimationControl(false);
+    this.viewer.display.setTools(this.options.tools);
   },
 
   handleNotification: function (change) {
@@ -209,8 +276,8 @@ export var CadViewerView = DOMWidgetView.extend({
         this.model.set(key, new_value);
         changed = true;
         if (this.debug) {
-          console.log(
-            `Setting Python attribute ${key} to ${JSON.stringify(
+          console.debug(
+            `cad-viewer-widget: : Setting Python attribute ${key} to ${JSON.stringify(
               new_value,
               null,
               2
@@ -224,16 +291,21 @@ export var CadViewerView = DOMWidgetView.extend({
     }
   },
 
+  clear: function () {
+    this.viewer.clear();
+  },
+
   initialize: function () {
     this.init = this.model.get("initialize");
-    if (this.init && this.viewer != null) {
-      console.log("Dispose CAD object");
-      this.viewer.dispose();
-      this.is_empty = true;
-    }
 
-    if (!this.init && this.is_empty) {
-      this.addShapes();
+    if (this.init) {
+      this.clear();
+      // this.disposeRenderers();
+    } else {
+      const states = this.model.get("states");
+      if (Object.keys(states).length > 0) {
+        this.addShapes();
+      }
     }
   },
 
@@ -270,13 +342,6 @@ export var CadViewerView = DOMWidgetView.extend({
     };
     this.tracks = [];
 
-    this.viewer = new Viewer(
-      this.display,
-      this.options,
-      this.handleNotification.bind(this),
-      this.pinAsPng.bind(this)
-    );
-
     const timer = new Timer("addShapes", this.options.timeit);
 
     timer.split("viewer");
@@ -292,9 +357,8 @@ export var CadViewerView = DOMWidgetView.extend({
       quaternion,
       zoom
     );
-    timer.split("renderer");
 
-    this.is_empty = false;
+    timer.split("renderer");
 
     this.model.set("target", this.viewer.controls.target);
     this.model.set("clip_slider_0", this.viewer.getClipSlider(0));
@@ -309,9 +373,8 @@ export var CadViewerView = DOMWidgetView.extend({
       this.animate();
     }
 
+    this.empty = false;
     timer.stop();
-
-    window.cadViewer = this;
 
     return true;
   },
@@ -351,8 +414,8 @@ export var CadViewerView = DOMWidgetView.extend({
         arg == null ? this.viewer[getter]() : this.viewer[getter](arg);
       if (!isTolEqual(oldValue, value)) {
         if (this.debug) {
-          console.log(
-            `Setting Javascript attribute ${key} to ${JSON.stringify(
+          console.debug(
+            `cad-viewer-widget: Setting Javascript attribute ${key} to ${JSON.stringify(
               value,
               null,
               2
@@ -371,7 +434,7 @@ export var CadViewerView = DOMWidgetView.extend({
 
     if (this.init) {
       if (this.debug) {
-        console.log("Ignore message");
+        console.debug("cad-viewer-widget: Ignore message");
       }
       return;
     }
@@ -444,7 +507,7 @@ export var CadViewerView = DOMWidgetView.extend({
         if (value === "tree" || value == "clip") {
           this.viewer.display.selectTabByName(value);
         } else {
-          console.error(`unkonwn tab name ${value}`);
+          console.error(`cad-viewer-widget: unkonwn tab name ${value}`);
         }
         break;
       case "clip_intersection":
@@ -474,7 +537,14 @@ export var CadViewerView = DOMWidgetView.extend({
       case "js_debug":
         this.debug = change.changed[key];
         break;
-    }
+      case "disposed":
+        if (this.anchor === "right") {
+          this._barHandler(0, this.widget);
+        } else {
+          this.widget.title.owner.dispose();
+        }
+        break;    
+      }
   },
 
   pinAsPng: function (image) {
@@ -494,8 +564,8 @@ export var CadViewerView = DOMWidgetView.extend({
 
   onCustomMessage: function (msg, buffers) {
     if (this.debug) {
-      console.log(
-        "New message with msgType:",
+      console.debug(
+        "cad-viewer-widget: New message with msgType:",
         msg.type,
         "msgId:",
         msg.id,
@@ -515,7 +585,7 @@ export var CadViewerView = DOMWidgetView.extend({
     try {
       path.forEach((o) => (object = object[o]));
       if (this.debug) {
-        console.log("object:", object, "method:", method);
+        console.debug("cad-viewer-widget: object:", object, "method:", method);
       }
     } catch (error) {
       console.error(error);
@@ -526,7 +596,7 @@ export var CadViewerView = DOMWidgetView.extend({
     try {
       args = JSON.parse(msg.args);
       if (this.debug) {
-        console.log("args:", args);
+        console.debug("cad-viewer-widget: args:", args);
       }
     } catch (error) {
       console.error(error);
@@ -540,7 +610,7 @@ export var CadViewerView = DOMWidgetView.extend({
         result = object[method](...args);
       }
       if (this.debug) {
-        console.log("method executed, result: ", result);
+        console.debug("cad-viewer-widget: method executed, result: ", result);
       }
     } catch (error) {
       console.log(error);

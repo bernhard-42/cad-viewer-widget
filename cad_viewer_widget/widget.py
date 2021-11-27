@@ -115,14 +115,20 @@ class CadViewerWidget(widgets.Widget):  # pylint: disable-msg=too-many-instance-
     cad_width = Integer().tag(sync=True)
     "unicode string: Width of the canvas element"
 
-    height = Integer().tag(sync=True)
+    height = Integer(allow_none=True).tag(sync=True)
     "int: Heigth of the canvas element"
 
-    tree_width = Integer().tag(sync=True)
+    tree_width = Integer(allow_none=True).tag(sync=True)
     "int: Width of the navigatoin tree element"
 
-    theme = Unicode().tag(sync=True)
+    theme = Unicode(allow_none=True).tag(sync=True)
     "unicode string: UI theme, can be 'dark' or 'light' (default)"
+
+    sidecar = Unicode(allow_none=True).tag(sync=True)
+    "unicode string of the title of the sidecar to be used. None means CAD view will be opened in cell"
+
+    anchor = Unicode(allow_none=True).tag(sync=True)
+    "unicode string whether to add a view to the right sidebar ('right') or as a tab to the main window ('tab')"
 
     pinning = Bool(allow_none=True).tag(sync=True)
     "bool: WHether to show the pin a png button or not"
@@ -249,12 +255,15 @@ class CadViewerWidget(widgets.Widget):  # pylint: disable-msg=too-many-instance-
     target = Tuple(Float(), Float(), Float(), allow_none=True, read_only=True).tag(sync=True)
     "tuple: Camera target as a 3-dim tuple of float (x,y,z)"
 
-    result = Unicode(allow_none=True).tag(sync=True)
+    result = Unicode(allow_none=True, read_only=True).tag(sync=True)
     "unicode string: JSON serialiued result from Javascript"
 
     #
     # Internal traitlets
     #
+
+    disposed = Bool(default=False, allow_none=True).tag(sync=True)
+    "unicode string: Whether the Javascript viewer is disposed"
 
     initialize = Bool(allow_none=True).tag(sync=True)
     "bool: internally used to control initialisation of view. Do not use!"
@@ -307,6 +316,8 @@ class CadViewer:
         theme="light",
         tools=True,
         pinning=False,
+        sidecar=None,
+        anchor=None,
     ):
         if cad_width < 640:
             raise ValueError("Ensure cad_width >= 640")
@@ -320,6 +331,8 @@ class CadViewer:
             theme=theme,
             tools=tools,
             pinning=pinning,
+            sidecar=sidecar,
+            anchor=anchor,
         )
         self.msg_id = 0
         self.parser = get_parser()
@@ -344,6 +357,7 @@ class CadViewer:
         shapes,
         states,
         tracks=None,
+        sidecar=None,
         ortho=True,
         control="trackball",
         axes=False,
@@ -377,6 +391,8 @@ class CadViewer:
             State of the nested cad objects, key = object path, value = 2-dim tuple of 0/1 (hidden/visible) for object and edges
         tracks : list or tuple, default None
             List of animation track arrays, see [AnimationTrack.to_array](/widget.html#cad_viewer_widget.widget.AnimationTrack.to_array)
+        sidecar: str, default: None
+            Name of the sidecar view to display the shapes.
         ortho : bool, default True
             Whether to use orthographic view (True) or perspective view (False)
         control : string, default 'trackball'
@@ -582,6 +598,7 @@ class CadViewer:
         with self.widget.hold_trait_notifications():
             self.widget.shapes = json.dumps(shapes, default=serializer)
             self.widget.states = states
+            self.widget.sidecar = sidecar
             self.widget.edge_color = edge_color
             self.widget.ambient_intensity = ambient_intensity
             self.widget.direct_intensity = direct_intensity
@@ -620,6 +637,21 @@ class CadViewer:
         """Set navigation tree states for a CAD view"""
 
         self.widget.state_updates = states
+
+    def close(self):
+        """
+        Close the underlying Javascript viewer
+        """
+        print(f"Triggering close for {self.widget.sidecar}")
+        self.widget.disposed = True
+
+    @property
+    def disposed(self):
+        """
+        Whether the Javascript viewer is disposed
+        """
+
+        return self.widget.disposed
 
     #
     # UI and scene accessors
@@ -1056,6 +1088,13 @@ class CadViewer:
 
         self.execute("viewer.controlAnimation", ["pause"])
 
+    def pin_as_png(self):
+        """
+        Pin CAD View as PNG
+        """
+
+        self.execute("viewer.pinAsPng", None)
+
     #
     # Tab handling
     #
@@ -1177,7 +1216,7 @@ class CadViewer:
                     "method": json.dumps(path),
                     "args": json.dumps(args),
                 }
-
+                print("content", content)
                 self.widget.send(content=content, buffers=None)
 
                 return self.msg_id

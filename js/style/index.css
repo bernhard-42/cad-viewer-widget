@@ -1,1 +1,15 @@
 @import '~three-cad-viewer/dist/three-cad-viewer.css';
+
+.cvw-sidecar {
+    background: var(--jp-layout-color0);
+    display: flex;
+    flex-direction: row;
+}
+
+.cvw-sidecar > .jp-Toolbar {
+    display: none;
+}
+
+.cvw-sidecar > .p-Widget {
+    top: 0px !important;
+}
