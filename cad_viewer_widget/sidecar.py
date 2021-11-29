@@ -1,16 +1,33 @@
-from IPython.display import display
+from IPython.display import display, HTML
 from .widget import CadViewer
 import time
+import uuid
 
 SIDECARS = {}
 DEFAULT = None
 
 
-def open_viewer(title, anchor="right", **kwargs):
-    cv = CadViewer(sidecar=title, anchor=anchor, **kwargs)
-    SIDECARS[title] = cv
-    display(cv.widget)
-    print(f'Done, see viewer {title}. To access the viewer, use get_viewer("{title}")')
+def open_viewer(title=None, anchor="right", **kwargs):
+    if title is None:
+        kwargs["pinning"] = True
+
+        cv = CadViewer(**kwargs)
+        display(cv.widget)
+
+        image_id = "img_" + str(uuid.uuid4())
+        html = "<div></div>"
+        display(HTML(html), display_id=image_id)
+        cv.widget.image_id = image_id
+
+        return cv
+    else:
+        kwargs["pinning"] = False
+
+        cv = CadViewer(sidecar=title, anchor=anchor, **kwargs)
+        SIDECARS[title] = cv
+        display(cv.widget)
+
+        print(f'Done, see viewer {title}. To access the viewer, use get_viewer("{title}")')
 
 
 def get_viewer(title=None):
@@ -30,8 +47,9 @@ def get_viewer(title=None):
         del SIDECARS[title]
         print(f'There is no viewer "{title}"')
         return
-    
+
     return viewer
+
 
 def get_viewers():
     viewers = {}
@@ -41,7 +59,7 @@ def get_viewers():
             deletions.append(title)
         else:
             viewers[title] = viewer
-    
+
     for title in deletions:
         del SIDECARS[title]
 

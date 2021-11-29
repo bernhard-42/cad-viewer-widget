@@ -125,16 +125,18 @@ export var CadViewerView = DOMWidgetView.extend({
     this.shell = App.getShell();
 
     this.init = false;
-    this.empty = true;
     this.disposed = false;
     this.debug = this.model.get("js_debug");
 
     this.sidecar = this.model.get("sidecar");
     this.anchor = this.model.get("anchor");
 
-    if(App.getCadViewer(this.sidecar) != null) {
-      App.getCadViewer(this.sidecar).widget.title.owner.dispose();
+    // old sidecar needs to be destroyed
+    if (this.sidecar != null && App.getSidecarViewer(this.sidecar) != null) {
+      App.getSidecarViewer(this.sidecar).widget.title.owner.dispose();
     }
+    // find and remove old cell viewers, e.g. when run the same cell
+    App.cleanupCellViewers();
 
     this.createDisplay();
 
@@ -148,29 +150,26 @@ export var CadViewerView = DOMWidgetView.extend({
 
   dispose: function () {
     if (!this.disposed) {
-      
-      if (!this.empty) {
-        this.viewer.dispose();
-      }
-      
-      this.widget.dispose();
-      
-      if (this.sidecar != null) {
-        App.removeCadViewer(this.sidecar);
-        console.debug(
-          `cad-viewer-widget: Viewer in sidecar "${this.sidecar}" closed`
-          );
-      } else {
-        console.debug("cad-viewer-widget: Viewer in cell closed");
-      }
-      
-      // first set disposed to true
+      this.viewer.dispose();
+
+      // first set disposed to true to avoid double dispose call
       this.disposed = true;
 
-      // then set model widget, to block additional triggered dispose call
-      this.widget.title.owner.disposed.disconnect(this.dispose, this);
+      if (this.sidecar != null) {
+        this.widget.dispose();
+
+        App.removeSidecarViewer(this.sidecar);
+
+        // then set model widget, to block additional triggered dispose call
+        this.widget.title.owner.disposed.disconnect(this.dispose, this);
+
+        console.debug(
+          `cad-viewer-widget: Sidecar viewer "${this.sidecar}" removed`
+        );
+      }
+
       this.model.set("disposed", true);
-      this.model.save_changes();      
+      this.model.save_changes();
     }
   },
 
@@ -180,6 +179,7 @@ export var CadViewerView = DOMWidgetView.extend({
         this._barHandler,
         this
       );
+
       // this will trigger dispose()
       this.widget.title.owner.dispose();
     }
@@ -199,13 +199,14 @@ export var CadViewerView = DOMWidgetView.extend({
     };
 
     const container = document.createElement("div");
-
-    App.addCadViewer(this);
+    container.id = `cvw_${Math.random().toString().slice(2)}`; // sufficient or uuid?
 
     if (this.sidecar == null) {
+      App.addCellViewer(container.id, this);
+
       this.el.appendChild(container);
     } else {
-      App.addCadViewer(this, this.sidecar);
+      App.addSidecarViewer(this.sidecar, this);
 
       const content = new Widget();
       this.widget = new MainAreaWidget({ content });
@@ -213,7 +214,7 @@ export var CadViewerView = DOMWidgetView.extend({
       this.widget.id = "cad-viewer-widget";
       this.widget.title.label = this.sidecar;
       this.widget.title.closable = true;
-      this.widget.id = "cvw_" + `${Math.random()}`.slice(2);
+      // this.widget.id = "cvw_" + `${Math.random()}`.slice(2);
 
       content.node.appendChild(container);
 
@@ -221,7 +222,6 @@ export var CadViewerView = DOMWidgetView.extend({
         this.shell.add(this.widget, "main", {
           mode: "split-right"
         });
-
       } else {
         this.shell.add(this.widget, "right");
         this.shell._rightHandler.sideBar.tabCloseRequested.connect(
@@ -373,7 +373,6 @@ export var CadViewerView = DOMWidgetView.extend({
       this.animate();
     }
 
-    this.empty = false;
     timer.stop();
 
     return true;
@@ -538,13 +537,15 @@ export var CadViewerView = DOMWidgetView.extend({
         this.debug = change.changed[key];
         break;
       case "disposed":
-        if (this.anchor === "right") {
-          this._barHandler(0, this.widget);
-        } else {
-          this.widget.title.owner.dispose();
+        if (this.sidecar != null) {
+          if (this.anchor === "right") {
+            this._barHandler(0, this.widget);
+          } else {
+            this.widget.title.owner.dispose();
+          }
         }
-        break;    
-      }
+        break;
+    }
   },
 
   pinAsPng: function (image) {
@@ -559,7 +560,7 @@ export var CadViewerView = DOMWidgetView.extend({
     );
     this.model.save_changes();
     // and remove itself
-    this.remove();
+    this.dispose();
   },
 
   onCustomMessage: function (msg, buffers) {

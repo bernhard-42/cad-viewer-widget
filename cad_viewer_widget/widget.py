@@ -277,6 +277,7 @@ class CadViewerWidget(widgets.Widget):  # pylint: disable-msg=too-many-instance-
     @observe("result")
     def func(self, change):
         data = json.loads(change["new"])
+        print(data)
         html = f"""<img src="{data['src']}" width="{data['width']}px" height="{data['height']}px"/>"""
         update_display(HTML(html), display_id=data["display_id"])
 
