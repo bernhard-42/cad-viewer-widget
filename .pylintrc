@@ -1,2 +1,5 @@
+[BASIC]
+good-names-rgxs=^[_a-z][_a-z0-9]?$
+
 [FORMAT]
 max-line-length=120
