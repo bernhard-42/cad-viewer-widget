@@ -85,12 +85,17 @@ export class CadViewerModel extends DOMWidgetModel {
       image_id: null,
 
       result: "",
-      disposed: false
+      disposed: false,
+      rendered: false
     };
   }
 }
 
 export class CadViewerView extends DOMWidgetView {
+  initialize(...args) {
+    super.initialize(...args);
+  }
+
   render() {
     if (!this.model.rendered) {
       super.render();
@@ -122,7 +127,7 @@ export class CadViewerView extends DOMWidgetView {
       this.model.on("change:clip_slider_0", this.handle_change, this);
       this.model.on("change:clip_slider_1", this.handle_change, this);
       this.model.on("change:clip_slider_2", this.handle_change, this);
-      this.model.on("change:initialize", this.initialize, this);
+      this.model.on("change:initialize", this.clearOrAddShapes, this);
       this.model.on("change:js_debug", this.handle_change, this);
       this.model.on("change:disposed", this.handle_change, this);
 
@@ -139,6 +144,8 @@ export class CadViewerView extends DOMWidgetView {
       this.title = this.model.get("title");
       this.anchor = this.model.get("anchor");
 
+      this.container_id = null;
+
       // find and remove old cell viewers, e.g. when run the same cell
       App.cleanupCellViewers();
 
@@ -150,6 +157,7 @@ export class CadViewerView extends DOMWidgetView {
 
       window.getCadViewer = App.getCadViewer;
       window.getCadViewers = App.getCadViewers;
+      this.model.rendered = true;
     }
   }
 
@@ -193,6 +201,7 @@ export class CadViewerView extends DOMWidgetView {
 
     const container = document.createElement("div");
     container.id = `cvw_${Math.random().toString().slice(2)}`; // sufficient or uuid?
+    this.container_id = container.id;
 
     if (this.title == null) {
       App.addCellViewer(container.id, this);
@@ -241,12 +250,11 @@ export class CadViewerView extends DOMWidgetView {
     this.viewer.clear();
   }
 
-  initialize() {
+  clearOrAddShapes() {
     this.init = this.model.get("initialize");
 
     if (this.init) {
       this.clear();
-      // this.disposeRenderers();
     } else {
       const states = this.model.get("states");
       if (Object.keys(states).length > 0) {
@@ -512,6 +520,7 @@ export class CadViewerView extends DOMWidgetView {
     this.model.save_changes();
     // and remove itself
     this.dispose();
+    App.removeCellViewer(this.container_id);
   }
 
   onCustomMessage(msg, buffers) {
