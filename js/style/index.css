@@ -1,6 +1,6 @@
-@import '~three-cad-viewer/dist/three-cad-viewer.css';
+@import "~three-cad-viewer/dist/three-cad-viewer.css";
 
-.cvw-sidecar {
+/* .cvw-sidecar {
     background: var(--jp-layout-color0);
     display: flex;
     flex-direction: row;
@@ -12,22 +12,33 @@
 
 .cvw-sidecar > .p-Widget {
     top: 0px !important;
+} */
+
+.jupyterlab-sidecar {
+  background: var(--jp-layout-color0);
+  display: flex;
+}
+
+.jupyterlab-sidecar .jp-OutputPrompt.jp-OutputArea-prompt {
+  display: none;
+}
+
+.jupyterlab-sidecar > .jp-OutputArea-child {
+  flex: 1;
 }
 
 .jp-SideBar.jp-mod-right .p-TabBar-tabCloseIcon {
-    padding: 4px 0px 4px 4px;
-    background-size: 16px;
-    height: 16px;
-    width: 16px;
-    background-image: var(--jp-icon-close);
-    background-position: center;
-    background-repeat: no-repeat;
-    align-self: center;
-    box-shadow: inset 0 0 100px 100px rgba(255, 255, 255, 0.5);
+  padding: 4px 0px 4px 4px;
+  background-size: 16px;
+  height: 16px;
+  width: 16px;
+  background-image: var(--jp-icon-close);
+  background-position: center;
+  background-repeat: no-repeat;
+  align-self: center;
 }
 
 .jp-SideBar.jp-mod-right .p-TabBar-tabCloseIcon:hover {
-    background-size: 16px;
-    background-image: var(--jp-icon-close);
-    box-shadow: none;
+  background-size: 16px;
+  background-image: var(--jp-icon-inverse-close-circle);
 }

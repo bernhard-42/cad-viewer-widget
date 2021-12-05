@@ -1,23 +1,27 @@
 var _shell = null;
-var _sidecarViewers = {};
+var _sidecars = {};
 var _cellViewers = {};
 var _currentCadViewer = null;
 
 export default {
   getCadViewers() {
     return {
-      sidecar: _sidecarViewers,
+      sidecar: _sidecars,
       cell: _cellViewers
     };
   },
 
-  getSidecarViewer(title) {
-    return _sidecarViewers[title];
+  getSidecar(title) {
+    return _sidecars[title];
   },
 
-  addSidecarViewer(title, viewer) {
+  addSidecar(title, viewer) {
     _currentCadViewer = viewer;
-    _sidecarViewers[title] = viewer;
+    _sidecars[title] = viewer;
+  },
+
+  removeSidecar(title) {
+    delete _sidecars[title];
   },
 
   getCurrentViewer() {
@@ -32,10 +36,6 @@ export default {
     _currentCadViewer = viewer;
     _cellViewers[id] = viewer;
     console.log(`cad-viewer-widget: Cell viewer ${id} created`);
-  },
-
-  removeSidecarViewer(title) {
-    delete _sidecarViewers[title];
   },
 
   cleanupCellViewers() {

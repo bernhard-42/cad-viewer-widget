@@ -98,7 +98,7 @@ class AnimationTrack:
 
 
 @widgets.register
-class CadViewerWidget(widgets.Widget):  # pylint: disable-msg=too-many-instance-attributes
+class CadViewerWidget(widgets.Output):  # pylint: disable-msg=too-many-instance-attributes
     """The CAD Viewer widget."""
 
     _view_name = Unicode("CadViewerView").tag(sync=True)
@@ -112,6 +112,12 @@ class CadViewerWidget(widgets.Widget):  # pylint: disable-msg=too-many-instance-
     # Display traits
     #
 
+    title = Unicode(allow_none=True).tag(sync=True)
+    "unicode string of the title of the sidecar to be used. None means CAD view will be opened in cell"
+
+    anchor = Unicode(allow_none=True).tag(sync=True)
+    "unicode string whether to add a view to the right sidebar ('right') or as a tab to the main window ('tab')"
+
     cad_width = Integer().tag(sync=True)
     "unicode string: Width of the canvas element"
 
@@ -124,14 +130,8 @@ class CadViewerWidget(widgets.Widget):  # pylint: disable-msg=too-many-instance-
     theme = Unicode(allow_none=True).tag(sync=True)
     "unicode string: UI theme, can be 'dark' or 'light' (default)"
 
-    sidecar = Unicode(allow_none=True).tag(sync=True)
-    "unicode string of the title of the sidecar to be used. None means CAD view will be opened in cell"
-
-    anchor = Unicode(allow_none=True).tag(sync=True)
-    "unicode string whether to add a view to the right sidebar ('right') or as a tab to the main window ('tab')"
-
     pinning = Bool(allow_none=True).tag(sync=True)
-    "bool: WHether to show the pin a png button or not"
+    "bool: Whether to show the pin a png button or not"
 
     #
     # Viewer traits
@@ -277,7 +277,6 @@ class CadViewerWidget(widgets.Widget):  # pylint: disable-msg=too-many-instance-
     @observe("result")
     def func(self, change):
         data = json.loads(change["new"])
-        print(data)
         html = f"""<img src="{data['src']}" width="{data['width']}px" height="{data['height']}px"/>"""
         update_display(HTML(html), display_id=data["display_id"])
 
@@ -317,7 +316,7 @@ class CadViewer:
         theme="light",
         tools=True,
         pinning=False,
-        sidecar=None,
+        title=None,
         anchor=None,
     ):
         if cad_width < 640:
@@ -332,7 +331,7 @@ class CadViewer:
             theme=theme,
             tools=tools,
             pinning=pinning,
-            sidecar=sidecar,
+            title=title,
             anchor=anchor,
         )
         self.msg_id = 0
@@ -358,7 +357,7 @@ class CadViewer:
         shapes,
         states,
         tracks=None,
-        sidecar=None,
+        title=None,
         ortho=True,
         control="trackball",
         axes=False,
@@ -392,8 +391,8 @@ class CadViewer:
             State of the nested cad objects, key = object path, value = 2-dim tuple of 0/1 (hidden/visible) for object and edges
         tracks : list or tuple, default None
             List of animation track arrays, see [AnimationTrack.to_array](/widget.html#cad_viewer_widget.widget.AnimationTrack.to_array)
-        sidecar: str, default: None
-            Name of the sidecar view to display the shapes.
+        title: str, default: None
+            Name of the title view to display the shapes.
         ortho : bool, default True
             Whether to use orthographic view (True) or perspective view (False)
         control : string, default 'trackball'
@@ -599,7 +598,7 @@ class CadViewer:
         with self.widget.hold_trait_notifications():
             self.widget.shapes = json.dumps(shapes, default=serializer)
             self.widget.states = states
-            self.widget.sidecar = sidecar
+            self.widget.title = title
             self.widget.edge_color = edge_color
             self.widget.ambient_intensity = ambient_intensity
             self.widget.direct_intensity = direct_intensity
@@ -643,7 +642,6 @@ class CadViewer:
         """
         Close the underlying Javascript viewer
         """
-        print(f"Triggering close for {self.widget.sidecar}")
         self.widget.disposed = True
 
     @property
