@@ -598,7 +598,6 @@ class CadViewer:
         with self.widget.hold_trait_notifications():
             self.widget.shapes = json.dumps(shapes, default=serializer)
             self.widget.states = states
-            self.widget.title = title
             self.widget.edge_color = edge_color
             self.widget.ambient_intensity = ambient_intensity
             self.widget.direct_intensity = direct_intensity

@@ -51,7 +51,7 @@ def open_viewer(title=None, anchor="right", cad_width=800, tree_width=250, heigh
                 height=height,
                 cad_width=cad_width,
                 tree_width=tree_width,
-                title=out.title,
+                title=title,
                 anchor=anchor,
                 **kwargs
             )
