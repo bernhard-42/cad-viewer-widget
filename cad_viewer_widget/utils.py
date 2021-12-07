@@ -110,8 +110,8 @@ def get_parser():
     return obj + ZeroOrMore(dot + obj)
 
 
-def split_args(config):
-    create_args = {
+def create_args(config):
+    return {
         k: v
         for k, v in config.items()
         if k
@@ -121,16 +121,19 @@ def split_args(config):
             "tree_width",
             "theme",
             "tools",
+            "control",
             "pinning",
         ]
     }
-    add_shape_args = {
+
+
+def shape_args(config):
+    return {
         k: v
         for k, v in config.items()
         if k
         in [
             "ortho",
-            "control",
             "axes",
             "axes0",
             "grid",
@@ -152,8 +155,8 @@ def split_args(config):
         ]
     }
 
-    unknown = {k: config[k] for k in set(config) - set(create_args) - set(add_shape_args)}
-    if unknown:
-        print(f"Parameters {unknown} unknown and ignored")
+    # unknown = {k: config[k] for k in set(config) - set(create_args) - set(add_shape_args)}
+    # if unknown:
+    #     print(f"Parameters {unknown} unknown and ignored")
 
-    return create_args, add_shape_args
+    # return create_args, add_shape_args

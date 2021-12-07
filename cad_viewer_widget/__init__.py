@@ -7,15 +7,16 @@ from .widget import AnimationTrack, CadViewer
 from .sidecar import Sidecar
 
 from .sidecar import (
-    open_viewer,
     get_sidecar,
     get_sidecars,
-    get_default,
     set_sidecar,
     close_sidecars,
     close_sidecar,
+    get_default,
+    set_default as _set_default,
 )
-from .utils import split_args
+
+from .utils import create_args, shape_args
 
 
 def _jupyter_labextension_paths():
@@ -66,3 +67,132 @@ def _jupyter_nbextension_paths():
             "require": "cad-viewer-widget/extension",
         }
     ]
+
+
+def open_viewer(
+    title=None,
+    anchor="right",
+    cad_width=800,
+    tree_width=250,
+    height=600,
+    theme="light",
+    tools=True,
+    control="trackball",
+):
+    if title is None:
+        viewer = CadViewer(
+            title=title,
+            anchor=anchor,
+            cad_width=cad_width,
+            tree_width=tree_width,
+            height=height,
+            theme=theme,
+            tools=tools,
+            control=control,
+            pinning=True,
+        )
+        display(viewer.widget)
+
+        image_id = "img_" + str(uuid.uuid4())
+        html = "<div></div>"
+        display(HTML(html), display_id=image_id)
+        viewer.widget.image_id = image_id
+
+    else:
+
+        out = Sidecar(title=title, anchor=anchor)
+        with out:
+            viewer = CadViewer(
+                title=title,
+                anchor=anchor,
+                cad_width=cad_width,
+                tree_width=tree_width,
+                height=height,
+                theme=theme,
+                tools=tools,
+                control=control,
+                pinning=False,
+            )
+            display(viewer.widget)
+
+        out.resizeSidebar(cad_width + tree_width + 12)
+
+        set_sidecar(title, viewer)
+
+    return viewer
+
+
+def show(
+    shapes,
+    states,
+    # Viewer options
+    title=None,
+    anchor="right",
+    cad_width=800,
+    tree_width=250,
+    height=600,
+    theme="light",
+    tools=True,
+    control="trackball",
+    # add_shapes options
+    ortho=True,
+    axes=False,
+    axes0=False,
+    grid=None,
+    ticks=10,
+    transparent=False,
+    black_edges=False,
+    normal_len=0,
+    edge_color=0x707070,
+    ambient_intensity=0.5,
+    direct_intensity=0.3,
+    reset_camera=True,
+    zoom_speed=0.5,
+    pan_speed=0.5,
+    rotate_speed=1.0,
+    timeit=False,
+):
+    kwargs = {
+        "title": title,
+        "anchor": anchor,
+        "cad_width": cad_width,
+        "tree_width": tree_width,
+        "height": height,
+        "theme": theme,
+        "tools": tools,
+        "control": control,
+        "ortho": ortho,
+        "axes": axes,
+        "axes0": axes0,
+        "grid": grid,
+        "ticks": ticks,
+        "transparent": transparent,
+        "black_edges": black_edges,
+        "normal_len": normal_len,
+        "edge_color": edge_color,
+        "ambient_intensity": ambient_intensity,
+        "direct_intensity": direct_intensity,
+        "reset_camera": reset_camera,
+        "zoom_speed": zoom_speed,
+        "pan_speed": pan_speed,
+        "rotate_speed": rotate_speed,
+        "timeit": timeit,
+    }
+
+    if grid is None:
+        grid = [False, False, False]
+    if title is None:
+        viewer = open_viewer(title=None, anchor=None, **create_args(kwargs))
+    else:
+        viewer = get_sidecar(title)
+        if viewer is None:
+            viewer = open_viewer(title=title, anchor=anchor, **create_args(kwargs))
+
+    viewer.add_shapes(shapes, states, **shape_args(kwargs))
+    return viewer
+
+
+def set_default(title, anchor="right"):
+    _set_default(title)
+    if get_sidecar(title) is None:
+        open_viewer(title, anchor=anchor)

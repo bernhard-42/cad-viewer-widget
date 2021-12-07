@@ -53,8 +53,6 @@ export class CadViewerModel extends DOMWidgetModel {
       ambient_intensity: null,
       direct_intensity: null,
 
-      // bb_factor: null,
-
       // Generic UI traits
 
       tab: null,
@@ -196,6 +194,7 @@ export class CadViewerView extends DOMWidgetView {
       treeWidth: treeWidth,
       theme: this.model.get("theme"),
       tools: this.model.get("tools"),
+      control: this.model.get("control"),
       pinning: this.model.get("pinning")
     };
 
@@ -272,37 +271,39 @@ export class CadViewerView extends DOMWidgetView {
     return states2;
   }
 
+  setOptions() {
+    this.viewer.ortho = this.model.get("ortho");
+    this.viewer.axes = this.model.get("axes");
+    this.viewer.axes0 = this.model.get("axes0");
+    this.viewer.grid = this.model.get("grid").slice(); // clone the array to ensure changes get detected
+    this.viewer.ticks = this.model.get("ticks");
+    this.viewer.transparent = this.model.get("transparent");
+    this.viewer.blackEdges = this.model.get("black_edges");
+    this.viewer.normalLen = this.model.get("normal_len");
+    this.viewer.edgeColor = this.model.get("edge_color");
+    this.viewer.ambientIntensity = this.model.get("ambient_intensity");
+    this.viewer.directIntensity = this.model.get("direct_intensity");
+    this.viewer.timeit = this.model.get("timeit");
+    this.viewer.setZoomSpeed = this.model.get("zoom_speed");
+    this.viewer.setPanSpeed = this.model.get("pan_speed");
+    this.viewer.setRotateSpeed = this.model.get("rotate_speed");
+  }
+
   addShapes() {
+    const timer = new Timer("addShapes", this.model.get("timeit"));
+
     this.shapes = decode(this.model.get("shapes"));
     this.states = this.clone_states();
-    this.options = {
-      cadWidth: this.model.get("cad_width"),
-      height: this.model.get("height"),
-      treeWidth: this.model.get("tree_width"),
-      ortho: this.model.get("ortho"),
-      control: this.model.get("control"),
-      axes: this.model.get("axes"),
-      axes0: this.model.get("axes0"),
-      grid: this.model.get("grid").slice(), // clone the array to ensure changes get detected
-      ticks: this.model.get("ticks"),
-      transparent: this.model.get("transparent"),
-      blackEdges: this.model.get("black_edges"),
-      normalLen: this.model.get("normal_len"),
-      edgeColor: this.model.get("edge_color"),
-      ambientIntensity: this.model.get("ambient_intensity"),
-      directIntensity: this.model.get("direct_intensity"),
-      timeit: this.model.get("timeit")
-      // bbFactor: this.model.get("bb_factor"),
-    };
+
     this.tracks = [];
-
-    const timer = new Timer("addShapes", this.options.timeit);
-
-    timer.split("viewer");
 
     const position = this.model.get("position");
     const quaternion = this.model.get("quaternion");
     const zoom = this.model.get("zoom");
+
+    timer.split("viewer");
+
+    this.setOptions();
 
     this.viewer.render(
       ...this.viewer.renderTessellatedShapes(this.shapes, this.states),

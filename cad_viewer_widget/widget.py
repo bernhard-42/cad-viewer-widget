@@ -230,6 +230,15 @@ class CadViewerWidget(widgets.Output):  # pylint: disable-msg=too-many-instance-
     zoom = Float(allow_none=True).tag(sync=True)
     "float: Zoom value of the camera"
 
+    # position0 = Tuple(Float(), Float(), Float(), allow_none=True).tag(sync=True)
+    # "tuple: Initial position of the camera as a 3-dim tuple of float (x,y,z)"
+
+    # quaternion0 = Tuple(Float(), Float(), Float(), Float(), allow_none=True).tag(sync=True)
+    # "tuple: Initial rotation of the camera as 4-dim quaternion (x,y,z,w)"
+
+    # zoom0 = Float(allow_none=True).tag(sync=True)
+    # "float: Inital zoom value of the camera"
+
     zoom_speed = Float(allow_none=True).tag(sync=True)
     "float: Speed of zooming with the mouse"
 
@@ -315,6 +324,7 @@ class CadViewer:
         tree_width=240,
         theme="light",
         tools=True,
+        control="trackball",
         pinning=False,
         title=None,
         anchor=None,
@@ -330,12 +340,17 @@ class CadViewer:
             tree_width=tree_width,
             theme=theme,
             tools=tools,
+            control=control,
             pinning=pinning,
             title=title,
             anchor=anchor,
         )
         self.msg_id = 0
         self.parser = get_parser()
+
+        self.widget.position0 = None
+        self.widget.quaternion0 = None
+        self.widget.zoom0 = None
 
         self.tracks = []
 
@@ -357,7 +372,7 @@ class CadViewer:
         shapes,
         states,
         tracks=None,
-        title=None,
+        # title=None,
         ortho=True,
         control="trackball",
         axes=False,
