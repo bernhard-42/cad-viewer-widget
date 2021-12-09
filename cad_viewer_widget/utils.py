@@ -133,7 +133,8 @@ def shape_args(config):
         for k, v in config.items()
         if k
         in [
-            "ortho",
+            "default_edge_color",
+            "default_opacity",
             "axes",
             "axes0",
             "grid",

@@ -179,8 +179,11 @@ class CadViewerWidget(widgets.Output):  # pylint: disable-msg=too-many-instance-
     normal_len = Float(allow_none=True).tag(sync=True)
     "float: If > 0, the vertex normals will be rendered with the length given be this parameter"
 
-    edge_color = Unicode(allow_none=True).tag(sync=True)
+    default_edge_color = Unicode(allow_none=True).tag(sync=True)
     "unicode: The default edge color in web format, e.g. '#ffaa88'"
+
+    default_opacity = Float(allow_none=True).tag(sync=True)
+    "unicode: The default opacity for transparent objects"
 
     ambient_intensity = Float(allow_none=True).tag(sync=True)
     "float: The intensity of the ambient light"
@@ -372,8 +375,8 @@ class CadViewer:
         shapes,
         states,
         tracks=None,
-        # title=None,
-        ortho=True,
+        default_edge_color="#707070",
+        default_opacity=0.5,
         control="trackball",
         axes=False,
         axes0=False,
@@ -426,8 +429,10 @@ class CadViewer:
             Whether to shows the edges in black (True) or not(False)
         normal_Len : int, default 0
             If > 0, the vertex normals will be rendered with the length given be this parameter
-        edge_color : string, default "#707070"
+        default_edge_color : string, default "#707070"
             The default edge color in web format, e.g. '#ffaa88'
+        default_opacity : float, default 0.5
+            The default opacity level for transparency between 0.0 an 1.0
         ambient_intensity : float, default 0.9
             The intensity of the ambient light
         direct_intensity : float, default 0.12
@@ -613,7 +618,9 @@ class CadViewer:
         with self.widget.hold_trait_notifications():
             self.widget.shapes = json.dumps(shapes, default=serializer)
             self.widget.states = states
-            self.widget.edge_color = edge_color
+
+            self.widget.default_edge_color = default_edge_color
+            self.widget.default_opacity = default_opacity
             self.widget.ambient_intensity = ambient_intensity
             self.widget.direct_intensity = direct_intensity
             self.widget.axes = axes
@@ -783,21 +790,38 @@ class CadViewer:
         return self.widget.black_edges
 
     @property
-    def edge_color(self):
+    def default_edge_color(self):
         """
-        Get or set the CadViewerWidget traitlet `edge_color`
-        see [CadViewerWidget.edge_color](./widget.html#cad_viewer_widget.widget.CadViewerWidget.edge_color)
+        Get or set the CadViewerWidget traitlet `default_edge_color`
+        see [CadViewerWidget.default_edge_color](./widget.html#cad_viewer_widget.widget.CadViewerWidget.default_edge_color)
         """
 
-        return self.widget.edge_color
+        return self.widget.default_edge_color
 
-    @edge_color.setter
-    def edge_color(self, value):
-        check("edge_color", value, str)
+    @default_edge_color.setter
+    def default_edge_color(self, value):
+        check("default_edge_color", value, str)
         if value.startswith("#"):
-            self.widget.edge_color = value
+            self.widget.default_edge_color = value
         else:
-            self.widget.edge_color = f"#{value}"
+            self.widget.default_edge_color = f"#{value}"
+
+    @property
+    def default_opacity(self):
+        """
+        Get or set the CadViewerWidget traitlet `default_opacity`
+        see [CadViewerWidget.default_opacity](./widget.html#cad_viewer_widget.widget.CadViewerWidget.default_opacity)
+        """
+
+        return self.widget.default_opacity
+
+    @default_opacity.setter
+    def default_opacity(self, value):
+        check("default_opacity", value, str)
+        if value.startswith("#"):
+            self.widget.default_opacity = value
+        else:
+            self.widget.default_opacity = f"#{value}"
 
     @property
     def clip_intersection(self):

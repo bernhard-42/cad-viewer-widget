@@ -49,7 +49,8 @@ export class CadViewerModel extends DOMWidgetModel {
       black_edges: null,
       normal_len: null,
 
-      edge_color: null,
+      default_edge_color: null,
+      default_opacity: null,
       ambient_intensity: null,
       direct_intensity: null,
 
@@ -109,7 +110,8 @@ export class CadViewerView extends DOMWidgetView {
       this.model.on("change:transparent", this.handle_change, this);
       this.model.on("change:black_edges", this.handle_change, this);
       this.model.on("change:tools", this.handle_change, this);
-      this.model.on("change:edge_color", this.handle_change, this);
+      this.model.on("change:default_edge_color", this.handle_change, this);
+      this.model.on("change:default_opacity", this.handle_change, this);
       this.model.on("change:ambient_intensity", this.handle_change, this);
       this.model.on("change:direct_intensity", this.handle_change, this);
       this.model.on("change:zoom_speed", this.handle_change, this);
@@ -159,6 +161,8 @@ export class CadViewerView extends DOMWidgetView {
     }
   }
 
+      edgeColor: this.model.get("default_edge_color"),
+      defaultOpacity: this.model.get("default_opacity"),
   dispose() {
     if (!this.disposed) {
       this.viewer.dispose();
@@ -427,8 +431,11 @@ export class CadViewerView extends DOMWidgetView {
       case "tools":
         setKey("getTools", "setTools", key);
         break;
-      case "edge_color":
+      case "default_edge_color":
         setKey("getEdgeColor", "setEdgeColor", key);
+        break;
+      case "default_opacity":
+        setKey("getOpacity", "setOpacity", key);
         break;
       case "ambient_intensity":
         setKey("getAmbientLight", "setAmbientLight", key);
