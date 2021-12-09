@@ -110,7 +110,7 @@ def get_parser():
     return obj + ZeroOrMore(dot + obj)
 
 
-def create_args(config):
+def display_args(config):
     return {
         k: v
         for k, v in config.items()
@@ -120,14 +120,12 @@ def create_args(config):
             "height",
             "tree_width",
             "theme",
-            "tools",
-            "control",
             "pinning",
         ]
     }
 
 
-def shape_args(config):
+def viewer_args(config):
     return {
         k: v
         for k, v in config.items()
@@ -135,16 +133,21 @@ def shape_args(config):
         in [
             "default_edge_color",
             "default_opacity",
+            "ambient_intensity",
+            "direct_intensity",
+            "normal_len",
+            "control",
+            "tools",
+            "ticks",
             "axes",
             "axes0",
             "grid",
-            "ticks",
+            "ortho",
             "transparent",
             "black_edges",
-            "normal_len",
-            "edge_color",
-            "ambient_intensity",
-            "direct_intensity",
+            "clipIntersection",
+            "clipPlaneHelpers",
+            "clipNormal",
             "position",
             "quaternion",
             "zoom",
@@ -155,9 +158,3 @@ def shape_args(config):
             "timeit",
         ]
     }
-
-    # unknown = {k: config[k] for k in set(config) - set(create_args) - set(add_shape_args)}
-    # if unknown:
-    #     print(f"Parameters {unknown} unknown and ignored")
-
-    # return create_args, add_shape_args

@@ -161,8 +161,49 @@ export class CadViewerView extends DOMWidgetView {
     }
   }
 
+  getDisplayOptions() {
+    return {
+      cadWidth: this.model.get("cad_width"),
+      height: this.model.get("height"),
+      treeWidth: this.model.get("tree_width"),
+      theme: this.model.get("theme"),
+      pinning: this.model.get("pinning")
+    };
+  }
+
+  getRenderOptions() {
+    return {
+      normalLen: this.model.get("normal_len"),
       edgeColor: this.model.get("default_edge_color"),
       defaultOpacity: this.model.get("default_opacity"),
+      ambientIntensity: this.model.get("ambient_intensity"),
+      directIntensity: this.model.get("direct_intensity")
+    };
+  }
+
+  getViewerOptions() {
+    var options = {
+      control: this.model.get("control"),
+      tools: this.model.get("tools"),
+      axes: this.model.get("axes"),
+      axes0: this.model.get("axes0"),
+      grid: this.model.get("grid").slice(), // clone the array to ensure changes get detected
+      ortho: this.model.get("ortho"),
+      ticks: this.model.get("ticks"),
+      transparent: this.model.get("transparent"),
+      blackEdges: this.model.get("black_edges"),
+      timeit: this.model.get("timeit"),
+      zoomSpeed: this.model.get("zoom_speed"),
+      panSpeed: this.model.get("pan_speed"),
+      rotateSpeed: this.model.get("rotate_speed"),
+      position: this.model.get("position"),
+      quaternion: this.model.get("quaternion"),
+      zoom: this.model.get("zoom")
+    };
+
+    return options;
+  }
+
   dispose() {
     if (!this.disposed) {
       this.viewer.dispose();
@@ -189,18 +230,7 @@ export class CadViewerView extends DOMWidgetView {
   }
 
   createDisplay() {
-    const cadWidth = this.model.get("cad_width");
-    const height = this.model.get("height");
-    const treeWidth = this.model.get("tree_width");
-    this.options = {
-      cadWidth: cadWidth,
-      height: height,
-      treeWidth: treeWidth,
-      theme: this.model.get("theme"),
-      tools: this.model.get("tools"),
-      control: this.model.get("control"),
-      pinning: this.model.get("pinning")
-    };
+    const options = this.getDisplayOptions();
 
     const container = document.createElement("div");
     container.id = `cvw_${Math.random().toString().slice(2)}`; // sufficient or uuid?
@@ -216,13 +246,13 @@ export class CadViewerView extends DOMWidgetView {
 
     this.viewer = new Viewer(
       container,
-      this.options,
+      options,
       this.handleNotification.bind(this),
       this.pinAsPng.bind(this)
     );
 
     this.viewer.display.setAnimationControl(false);
-    this.viewer.display.setTools(this.options.tools);
+    this.viewer.display.setTools(options.tools);
   }
 
   handleNotification(change) {

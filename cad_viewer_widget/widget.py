@@ -326,8 +326,6 @@ class CadViewer:
         height=600,
         tree_width=240,
         theme="light",
-        tools=True,
-        control="trackball",
         pinning=False,
         title=None,
         anchor=None,
@@ -342,8 +340,6 @@ class CadViewer:
             height=height,
             tree_width=tree_width,
             theme=theme,
-            tools=tools,
-            control=control,
             pinning=pinning,
             title=title,
             anchor=anchor,
@@ -375,19 +371,22 @@ class CadViewer:
         shapes,
         states,
         tracks=None,
+        # render options
+        normal_len=0,
         default_edge_color="#707070",
         default_opacity=0.5,
+        ambient_intensity=0.5,
+        direct_intensity=0.3,
+        # viewer options
+        tools=True,
         control="trackball",
+        ortho=True,
         axes=False,
         axes0=False,
         grid=None,
         ticks=10,
         transparent=False,
         black_edges=False,
-        normal_len=0,
-        edge_color="#707070",
-        ambient_intensity=0.9,
-        direct_intensity=0.12,
         position=None,
         quaternion=None,
         zoom=None,
@@ -623,6 +622,10 @@ class CadViewer:
             self.widget.default_opacity = default_opacity
             self.widget.ambient_intensity = ambient_intensity
             self.widget.direct_intensity = direct_intensity
+            self.widget.normal_len = normal_len
+
+            self.widget.tools = tools
+            self.widget.control = control
             self.widget.axes = axes
             self.widget.axes0 = axes0
             self.widget.grid = grid

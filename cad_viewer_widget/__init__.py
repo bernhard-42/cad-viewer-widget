@@ -16,7 +16,7 @@ from .sidecar import (
     set_default as _set_default,
 )
 
-from .utils import create_args, shape_args
+from .utils import display_args, viewer_args
 
 
 def _jupyter_labextension_paths():
@@ -76,8 +76,6 @@ def open_viewer(
     tree_width=250,
     height=600,
     theme="light",
-    tools=True,
-    control="trackball",
 ):
     if title is None:
         viewer = CadViewer(
@@ -87,8 +85,6 @@ def open_viewer(
             tree_width=tree_width,
             height=height,
             theme=theme,
-            tools=tools,
-            control=control,
             pinning=True,
         )
         display(viewer.widget)
@@ -109,8 +105,6 @@ def open_viewer(
                 tree_width=tree_width,
                 height=height,
                 theme=theme,
-                tools=tools,
-                control=control,
                 pinning=False,
             )
             display(viewer.widget)
@@ -183,14 +177,15 @@ def show(
 
     if grid is None:
         grid = [False, False, False]
+
     if title is None:
-        viewer = open_viewer(title=None, anchor=None, **create_args(kwargs))
+        viewer = open_viewer(title=None, anchor=None, **display_args(kwargs))
     else:
         viewer = get_sidecar(title)
         if viewer is None:
-            viewer = open_viewer(title=title, anchor=anchor, **create_args(kwargs))
+            viewer = open_viewer(title=title, anchor=anchor, **display_args(kwargs))
 
-    viewer.add_shapes(shapes, states, **shape_args(kwargs))
+    viewer.add_shapes(shapes, states, **viewer_args(kwargs))
     return viewer
 
 
