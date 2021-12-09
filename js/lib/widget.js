@@ -159,8 +159,8 @@ export class CadViewerView extends DOMWidgetView {
         this.addShapes();
       }
 
-      window.getCadViewer = App.getCadViewer;
       window.getCadViewers = App.getCadViewers;
+      window.currentCadViewer = this;
       this.model.rendered = true;
     }
   }
