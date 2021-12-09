@@ -70,6 +70,10 @@ export class CadViewerModel extends DOMWidgetModel {
       quaternion: null,
       zoom: null,
 
+      position0: null,
+      quaternion0: null,
+      zoom0: null,
+
       zoom_speed: null,
       pan_speed: null,
       rotate_speed: null,
@@ -305,24 +309,6 @@ export class CadViewerView extends DOMWidgetView {
     return states2;
   }
 
-  setOptions() {
-    this.viewer.ortho = this.model.get("ortho");
-    this.viewer.axes = this.model.get("axes");
-    this.viewer.axes0 = this.model.get("axes0");
-    this.viewer.grid = this.model.get("grid").slice(); // clone the array to ensure changes get detected
-    this.viewer.ticks = this.model.get("ticks");
-    this.viewer.transparent = this.model.get("transparent");
-    this.viewer.blackEdges = this.model.get("black_edges");
-    this.viewer.normalLen = this.model.get("normal_len");
-    this.viewer.edgeColor = this.model.get("edge_color");
-    this.viewer.ambientIntensity = this.model.get("ambient_intensity");
-    this.viewer.directIntensity = this.model.get("direct_intensity");
-    this.viewer.timeit = this.model.get("timeit");
-    this.viewer.setZoomSpeed = this.model.get("zoom_speed");
-    this.viewer.setPanSpeed = this.model.get("pan_speed");
-    this.viewer.setRotateSpeed = this.model.get("rotate_speed");
-  }
-
   addShapes() {
     const timer = new Timer("addShapes", this.model.get("timeit"));
 
@@ -331,28 +317,61 @@ export class CadViewerView extends DOMWidgetView {
 
     this.tracks = [];
 
-    const position = this.model.get("position");
-    const quaternion = this.model.get("quaternion");
-    const zoom = this.model.get("zoom");
+    var viewerOptions = this.getViewerOptions();
+    var lastLocation = null;
+
+    if (this.model.get("position0") != null) {
+      // browser refresh
+
+      // store last location
+      lastLocation = {
+        position: viewerOptions.position,
+        quaternion: viewerOptions.quaternion,
+        zoom: viewerOptions.zoom
+      };
+
+      // and use initial location for the camera so that reset button works as expected
+      viewerOptions.position = this.model.get("position0");
+      viewerOptions.quaternion = this.model.get("quaternion0");
+      viewerOptions.zoom = this.model.get("zoom0");
+    }
 
     timer.split("viewer");
-
-    this.setOptions();
-
     this.viewer.render(
-      ...this.viewer.renderTessellatedShapes(this.shapes, this.states),
+      ...this.viewer.renderTessellatedShapes(
+        this.shapes,
+        this.states,
+        this.getRenderOptions()
+      ),
       this.states,
-      position,
-      quaternion,
-      zoom
+      viewerOptions
     );
 
     timer.split("renderer");
 
+    if (this.model.get("position0") == null) {
+      // after the first view store inital camera location
+      this.model.set("zoom0", this.viewer.camera.getZoom());
+      this.model.set("position0", this.viewer.camera.getPosition().toArray());
+      this.model.set(
+        "quaternion0",
+        this.viewer.camera.getQuaternion().toArray()
+      );
+    }
+
+    if (lastLocation != null) {
+      // now move camera to the last location
+      this.viewer.setCameraPosition(lastLocation["position"]);
+      this.viewer.setCameraQuaternion(lastLocation["quaternion"]);
+      this.viewer.setCameraZoom(lastLocation["zoom"]);
+    }
+
     this.model.set("target", this.viewer.controls.target);
-    this.model.set("clip_slider_0", this.viewer.getClipSlider(0));
-    this.model.set("clip_slider_1", this.viewer.getClipSlider(1));
-    this.model.set("clip_slider_2", this.viewer.getClipSlider(2));
+
+    // this.model.set("clip_slider_0", this.viewer.getClipSlider(0));
+    // this.model.set("clip_slider_1", this.viewer.getClipSlider(1));
+    // this.model.set("clip_slider_2", this.viewer.getClipSlider(2));
+
     this.model.save_changes();
 
     // add animation tracks if exist

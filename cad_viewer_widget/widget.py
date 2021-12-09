@@ -233,14 +233,14 @@ class CadViewerWidget(widgets.Output):  # pylint: disable-msg=too-many-instance-
     zoom = Float(allow_none=True).tag(sync=True)
     "float: Zoom value of the camera"
 
-    # position0 = Tuple(Float(), Float(), Float(), allow_none=True).tag(sync=True)
-    # "tuple: Initial position of the camera as a 3-dim tuple of float (x,y,z)"
+    position0 = Tuple(Float(), Float(), Float(), allow_none=True).tag(sync=True)
+    "tuple: Initial position of the camera as a 3-dim tuple of float (x,y,z)"
 
-    # quaternion0 = Tuple(Float(), Float(), Float(), Float(), allow_none=True).tag(sync=True)
-    # "tuple: Initial rotation of the camera as 4-dim quaternion (x,y,z,w)"
+    quaternion0 = Tuple(Float(), Float(), Float(), Float(), allow_none=True).tag(sync=True)
+    "tuple: Initial rotation of the camera as 4-dim quaternion (x,y,z,w)"
 
-    # zoom0 = Float(allow_none=True).tag(sync=True)
-    # "float: Inital zoom value of the camera"
+    zoom0 = Float(allow_none=True).tag(sync=True)
+    "float: Inital zoom value of the camera"
 
     zoom_speed = Float(allow_none=True).tag(sync=True)
     "float: Speed of zooming with the mouse"
@@ -608,7 +608,9 @@ class CadViewer:
         # If one changes the control type, override reset_camera with "True"
         if self.widget.control != control:
             reset_camera = True
-            # print("Camera control changed, so camera was resetted")
+            # Don't show warning on first call
+            if self.widget.control != "":
+                print("Camera control changed, so camera was resetted")
 
         if control == "orbit" and quaternion is not None:
             quaternion = None
@@ -631,17 +633,15 @@ class CadViewer:
             self.widget.grid = grid
             self.widget.ticks = ticks
             self.widget.ortho = ortho
-            self.widget.control = control
             self.widget.transparent = transparent
             self.widget.black_edges = black_edges
-            self.widget.normal_len = normal_len
             self.widget.zoom_speed = zoom_speed
             self.widget.pan_speed = pan_speed
             self.widget.rotate_speed = rotate_speed
             self.widget.timeit = timeit
             self.add_tracks(tracks)
-            # reset camera if requested
-            if reset_camera:
+
+            if reset_camera:  # reset camera if requested
                 self.widget.position = position
                 self.widget.quaternion = quaternion
                 self.widget.zoom = zoom
