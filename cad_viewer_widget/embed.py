@@ -1,6 +1,5 @@
 import json
 from IPython.display import Javascript, HTML, display
-from cad_viewer_widget.utils import serializer
 from uuid import uuid4
 
 
@@ -29,23 +28,13 @@ def embed(
     position=None,
     quaternion=None,
     zoom=None,
-    reset_camera=True,
     zoom_speed=1.0,
     pan_speed=1.0,
     rotate_speed=1.0,
 ):
 
     uid = str(uuid4())
-    display(
-        HTML(
-            f"""
-        <div id='cad_view_{uid}'></div>
-        <script type="text/javascript">
-           console.log("XXX");
-        </script>
-    """
-        )
-    )
+    display(HTML(f"""<div id='cad_view_{uid}'></div>"""))
     if grid is None:
         grid_js = "[false, false, false]"
     else:
@@ -73,6 +62,7 @@ def embed(
             transparent: {json.dumps(transparent)},
             blackEdges: {json.dumps(black_edges)},
             axes: {json.dumps(axes)},
+            axes0: {axes0},
             grid: {grid_js}, 
             rotateSpeed: {rotate_speed},
             panSpeed: {pan_speed},
