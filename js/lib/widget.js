@@ -321,23 +321,6 @@ export class CadViewerView extends DOMWidgetView {
     this.tracks = [];
 
     var viewerOptions = this.getViewerOptions();
-    var lastLocation = null;
-
-    if (this.model.get("position0") != null) {
-      // browser refresh
-
-      // store last location
-      lastLocation = {
-        position: viewerOptions.position,
-        quaternion: viewerOptions.quaternion,
-        zoom: viewerOptions.zoom
-      };
-
-      // and use initial location for the camera so that reset button works as expected
-      viewerOptions.position = this.model.get("position0");
-      viewerOptions.quaternion = this.model.get("quaternion0");
-      viewerOptions.zoom = this.model.get("zoom0");
-    }
 
     timer.split("viewer");
     this.viewer.render(
@@ -360,21 +343,19 @@ export class CadViewerView extends DOMWidgetView {
         "quaternion0",
         this.viewer.camera.getQuaternion().toArray()
       );
+    } else {
+      this.viewer.setResetLocation(
+        this.model.get("target"),
+        this.model.get("position0"),
+        this.model.get("quaternion0"),
+        this.model.get("zoom0")
+      );
     }
 
-    if (lastLocation != null) {
-      // now move camera to the last location
-      this.viewer.setCameraPosition(lastLocation["position"]);
-      this.viewer.setCameraQuaternion(lastLocation["quaternion"]);
-      this.viewer.setCameraZoom(lastLocation["zoom"]);
-    }
-
-    this.model.set("target", this.viewer.controls.target);
-
-    // this.model.set("clip_slider_0", this.viewer.getClipSlider(0));
-    // this.model.set("clip_slider_1", this.viewer.getClipSlider(1));
-    // this.model.set("clip_slider_2", this.viewer.getClipSlider(2));
-
+    // in case it hasn't been notified from the viewer
+    this.model.set("zoom", this.viewer.camera.getZoom());
+    this.model.set("position", this.viewer.camera.getPosition().toArray());
+    this.model.set("quaternion", this.viewer.camera.getQuaternion().toArray());
     this.model.save_changes();
 
     // add animation tracks if exist
