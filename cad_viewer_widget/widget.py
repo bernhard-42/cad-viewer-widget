@@ -1266,3 +1266,70 @@ class CadViewer:
         if args is not None and not isinstance(args, (tuple, list)):
             args = [args]
         return wrapper()
+
+    def dump_model(self, shapes=False):
+        print(
+            f"""
+            DISPLAY
+title:              {self.widget.title}
+anchor:             {self.widget.anchor}
+cad_width:          {self.widget.cad_width}
+height:             {self.widget.height}
+tree_width:         {self.widget.tree_width}
+theme:              {self.widget.theme}
+pinning:            {self.widget.pinning}
+
+            SHAPES
+shapes:             {self.widget.shapes if shapes else (self.widget.shapes[:200] + " ...")}
+states:             {self.widget.states}
+tracks:             {self.widget.tracks}
+            
+            RENDERER
+normal_len:         {self.widget.normal_len}
+default_edge_color: {self.widget.default_edge_color}
+default_opacity:    {self.widget.default_opacity}
+ambient_intensity:  {self.widget.ambient_intensity}
+direct_intensity:   {self.widget.direct_intensity}
+            
+            VIEWER
+timeit:             {self.widget.timeit}
+tools:              {self.widget.tools}
+ortho:              {self.widget.ortho}
+control:            {self.widget.control}
+axes:               {self.widget.axes}
+axes0:              {self.widget.axes0}
+grid:               {self.widget.grid}
+ticks:              {self.widget.ticks}
+transparent:        {self.widget.transparent}
+black_edges:        {self.widget.black_edges}
+tab:                {self.widget.tab}
+clip_intersection:  {self.widget.clip_intersection}
+clip_planes:        {self.widget.clip_planes}
+clip_normal_0:      {self.widget.clip_normal_0}
+clip_normal_1:      {self.widget.clip_normal_1}
+clip_normal_2:      {self.widget.clip_normal_2}
+clip_slider_0:      {self.widget.clip_slider_0}
+clip_slider_1:      {self.widget.clip_slider_1}
+clip_slider_2:      {self.widget.clip_slider_2}
+position:           {self.widget.position}
+quaternion:         {self.widget.quaternion}
+zoom:               {self.widget.zoom}
+position0:          {self.widget.position0}
+quaternion0:        {self.widget.quaternion0}
+zoom0:              {self.widget.zoom0}
+target:             {self.widget.target}
+zoom_speed:         {self.widget.zoom_speed}
+pan_speed:          {self.widget.pan_speed}
+rotate_speed:       {self.widget.rotate_speed}
+animation_speed:    {self.widget.animation_speed}
+state_updates:      {self.widget.state_updates}
+lastPick:           {self.widget.lastPick}
+
+            INTERNAL
+result:             {self.widget.result}
+disposed:           {self.widget.disposed}
+initialize:         {self.widget.initialize}
+js_debug:           {self.widget.js_debug}
+image_id:           {self.widget.image_id}
+"""
+        )
