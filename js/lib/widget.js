@@ -88,6 +88,7 @@ export class CadViewerModel extends DOMWidgetModel {
       image_id: null,
 
       result: "",
+      js_debug: false,
       disposed: false,
       rendered: false
     };
@@ -97,6 +98,12 @@ export class CadViewerModel extends DOMWidgetModel {
 export class CadViewerView extends DOMWidgetView {
   initialize(...args) {
     super.initialize(...args);
+  }
+
+  debug(...args) {
+    if (this._debug) {
+      console.debug(...args);
+    }
   }
 
   render() {
@@ -143,7 +150,6 @@ export class CadViewerView extends DOMWidgetView {
 
       this.init = false;
       this.disposed = false;
-      this.debug = this.model.get("js_debug");
 
       this.title = this.model.get("title");
       this.anchor = this.model.get("anchor");
@@ -267,15 +273,10 @@ export class CadViewerView extends DOMWidgetView {
       if (!isTolEqual(old_value, new_value)) {
         this.model.set(key, new_value);
         changed = true;
-        if (this.debug) {
-          console.debug(
-            `cad-viewer-widget: : Setting Python attribute ${key} to ${JSON.stringify(
-              new_value,
-              null,
-              2
-            )}`
-          );
-        }
+        this.debug(
+          `cad-viewer-widget: : Setting Python attribute ${key} to`,
+          new_value
+        );
       }
     });
     if (changed) {
@@ -311,6 +312,7 @@ export class CadViewerView extends DOMWidgetView {
 
   addShapes() {
     const timer = new Timer("addShapes", this.model.get("timeit"));
+    this._debug = this.model.get("js_debug");
 
     this.shapes = decode(this.model.get("shapes"));
     this.states = this.clone_states();
@@ -420,15 +422,10 @@ export class CadViewerView extends DOMWidgetView {
       const oldValue =
         arg == null ? this.viewer[getter]() : this.viewer[getter](arg);
       if (!isTolEqual(oldValue, value)) {
-        if (this.debug) {
-          console.debug(
-            `cad-viewer-widget: Setting Javascript attribute ${key} to ${JSON.stringify(
-              value,
-              null,
-              2
-            )}`
-          );
-        }
+        this.debug(
+          `cad-viewer-widget: Setting Javascript attribute ${key} to`,
+          value
+        );
         if (arg == null) {
           this.viewer[setter](value, false);
         } else {
@@ -440,9 +437,7 @@ export class CadViewerView extends DOMWidgetView {
     const key = Object.keys(change.changed)[0];
 
     if (this.init) {
-      if (this.debug) {
-        console.debug("cad-viewer-widget: Ignore message");
-      }
+      this.debug("cad-viewer-widget: Ignore message");
       return;
     }
 
@@ -545,7 +540,7 @@ export class CadViewerView extends DOMWidgetView {
         setKey("getClipSlider", "setClipSlider", key, 2);
         break;
       case "js_debug":
-        this.debug = change.changed[key];
+        this._debug = change.changed[key];
         break;
       case "disposed":
         if (this.title != null) {
@@ -581,20 +576,18 @@ export class CadViewerView extends DOMWidgetView {
   }
 
   onCustomMessage(msg, buffers) {
-    if (this.debug) {
-      console.debug(
-        "cad-viewer-widget: New message with msgType:",
-        msg.type,
-        "msgId:",
-        msg.id,
-        ", method:",
-        msg.method,
-        ", args:",
-        msg.args,
-        ", buffers:",
-        buffers
-      );
-    }
+    this.debug(
+      "cad-viewer-widget: New message with msgType:",
+      msg.type,
+      "msgId:",
+      msg.id,
+      ", method:",
+      msg.method,
+      ", args:",
+      msg.args,
+      ", buffers:",
+      buffers
+    );
 
     var object = this;
     var path = JSON.parse(msg.method);
@@ -602,9 +595,7 @@ export class CadViewerView extends DOMWidgetView {
 
     try {
       path.forEach((o) => (object = object[o]));
-      if (this.debug) {
-        console.debug("cad-viewer-widget: object:", object, "method:", method);
-      }
+      this.debug("cad-viewer-widget: object:", object, "method:", method);
     } catch (error) {
       console.error(error);
       return;
@@ -613,9 +604,7 @@ export class CadViewerView extends DOMWidgetView {
     var args = null;
     try {
       args = JSON.parse(msg.args);
-      if (this.debug) {
-        console.debug("cad-viewer-widget: args:", args);
-      }
+      this.debug("cad-viewer-widget: args:", args);
     } catch (error) {
       console.error(error);
     }
@@ -627,9 +616,7 @@ export class CadViewerView extends DOMWidgetView {
       } else {
         result = object[method](...args);
       }
-      if (this.debug) {
-        console.debug("cad-viewer-widget: method executed, result: ", result);
-      }
+      this.debug("cad-viewer-widget: method executed, result: ", result);
     } catch (error) {
       console.log(error);
     }

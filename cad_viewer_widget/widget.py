@@ -395,6 +395,7 @@ class CadViewer:
         pan_speed=1.0,
         rotate_speed=1.0,
         timeit=False,
+        js_debug=False,
         # bb_factor=1.0,
     ):
         """
@@ -639,6 +640,7 @@ class CadViewer:
             self.widget.pan_speed = pan_speed
             self.widget.rotate_speed = rotate_speed
             self.widget.timeit = timeit
+            self.widget.js_debug = js_debug
             self.add_tracks(tracks)
 
             if reset_camera:  # reset camera if requested
