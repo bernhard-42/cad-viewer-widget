@@ -258,7 +258,8 @@ export class CadViewerView extends DOMWidgetView {
       container,
       options,
       this.handleNotification.bind(this),
-      this.pinAsPng.bind(this)
+      this.pinAsPng.bind(this),
+      true
     );
 
     this.viewer.display.setAnimationControl(false);
