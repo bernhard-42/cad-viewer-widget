@@ -1258,7 +1258,6 @@ class CadViewer:
                     "method": json.dumps(path),
                     "args": json.dumps(args),
                 }
-                print("content", content)
                 self.widget.send(content=content, buffers=None)
 
                 return self.msg_id
