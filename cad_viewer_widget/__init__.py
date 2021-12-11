@@ -179,7 +179,10 @@ def show(
         grid = [False, False, False]
 
     if title is None:
-        viewer = open_viewer(title=None, anchor=None, **display_args(kwargs))
+        if get_default() is None:
+            viewer = open_viewer(title=None, anchor=None, **display_args(kwargs))
+        else:
+            viewer = open_viewer(title=get_default(), anchor=None, **display_args(kwargs))
     else:
         viewer = get_sidecar(title)
         if viewer is None:
