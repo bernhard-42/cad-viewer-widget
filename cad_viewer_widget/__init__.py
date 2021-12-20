@@ -119,6 +119,8 @@ def open_viewer(
 def show(
     shapes,
     states,
+    tracks=None,
+    #
     # Viewer options
     title=None,
     anchor="right",
@@ -126,9 +128,17 @@ def show(
     tree_width=250,
     height=600,
     theme="light",
+    #
+    # render oprions
+    normal_len=0,
+    default_edge_color="#707070",
+    default_opacity=0.5,
+    ambient_intensity=0.5,
+    direct_intensity=0.3,
+    #
+    # add_shapes options
     tools=True,
     control="trackball",
-    # add_shapes options
     ortho=True,
     axes=False,
     axes0=False,
@@ -136,12 +146,10 @@ def show(
     ticks=10,
     transparent=False,
     black_edges=False,
-    normal_len=0,
-    default_edge_color="#707070",
-    default_opacity=0.5,
-    ambient_intensity=0.5,
-    direct_intensity=0.3,
     reset_camera=True,
+    position=None,
+    quaternion=None,
+    zoom=None,
     zoom_speed=0.5,
     pan_speed=0.5,
     rotate_speed=1.0,
@@ -155,6 +163,11 @@ def show(
         "tree_width": tree_width,
         "height": height,
         "theme": theme,
+        "normal_len": normal_len,
+        "default_edge_color": default_edge_color,
+        "default_opacity": default_opacity,
+        "ambient_intensity": ambient_intensity,
+        "direct_intensity": direct_intensity,
         "tools": tools,
         "control": control,
         "ortho": ortho,
@@ -164,12 +177,10 @@ def show(
         "ticks": ticks,
         "transparent": transparent,
         "black_edges": black_edges,
-        "normal_len": normal_len,
-        "default_edge_color": default_edge_color,
-        "default_opacity": default_opacity,
-        "ambient_intensity": ambient_intensity,
-        "direct_intensity": direct_intensity,
         "reset_camera": reset_camera,
+        "position": position,
+        "quaternion": quaternion,
+        "zoom": zoom,
         "zoom_speed": zoom_speed,
         "pan_speed": pan_speed,
         "rotate_speed": rotate_speed,
@@ -190,7 +201,7 @@ def show(
         if viewer is None:
             viewer = open_viewer(title=title, anchor=anchor, **display_args(kwargs))
 
-    viewer.add_shapes(shapes, states, **viewer_args(kwargs))
+    viewer.add_shapes(shapes, states, tracks, **viewer_args(kwargs))
     return viewer
 
 
