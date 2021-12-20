@@ -156,5 +156,6 @@ def viewer_args(config):
             "pan_speed",
             "rotate_speed",
             "timeit",
+            "js_debug",
         ]
     }

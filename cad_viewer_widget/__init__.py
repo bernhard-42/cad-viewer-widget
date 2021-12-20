@@ -146,6 +146,7 @@ def show(
     pan_speed=0.5,
     rotate_speed=1.0,
     timeit=False,
+    js_debug=False,
 ):
     kwargs = {
         "title": title,
@@ -173,6 +174,7 @@ def show(
         "pan_speed": pan_speed,
         "rotate_speed": rotate_speed,
         "timeit": timeit,
+        "js_debug": js_debug,
     }
 
     if grid is None:
