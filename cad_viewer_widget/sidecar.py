@@ -27,13 +27,15 @@ class Sidecar(Output):
     def resizeSidebar(self, width):
         self.width = width
 
+
 def set_sidecar(title, viewer):
     SIDECARS[title] = viewer
-    
+
+
 def get_sidecar(title=None):
     if title is None:
         if DEFAULT is None:
-            print("No default viewer found")
+            # print("No default viewer found")
             return
         else:
             title = DEFAULT
@@ -68,6 +70,7 @@ def get_sidecars():
 
 def get_default():
     return DEFAULT
+
 
 def set_default(title):
     global DEFAULT
