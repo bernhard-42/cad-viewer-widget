@@ -1,22 +1,49 @@
-- To release a new version of cad_viewer_widget on PyPI:
+To release a new version of cad_viewer_widget on PyPI:
 
-Update _version.py (set release version, remove 'dev')
-git add the _version.py file and git commit
-`python setup.py sdist upload`
-`python setup.py bdist_wheel upload`
-`git tag -a X.X.X -m 'comment'`
-Update _version.py (add 'dev' and increment minor)
-git add and git commit
-git push
-git push --tags
+1. Either clean working folder
 
-- To release a new version of cad-viewer-widget on NPM:
+   ```shell
+   make clean
+   ```
 
-Update `js/package.json` with new npm package version
+   or prepare for a new release
 
-```
-# clean out the `dist` and `node_modules` directories
-git clean -fdx
-npm install
-npm publish
-```
+   ```shell
+   make prepare
+   ```
+
+2. Bump version
+
+   ```shell
+   make bump part=[major|minor|patch|build|release]
+   ```
+
+3. Make distribution
+
+   ```shell
+   make dist
+   ```
+
+4. Update docs
+
+   ```shell
+   make docs
+   ```
+
+5. Commit and tag release
+
+   ```shell
+   make release
+   ```
+
+6. Upload to pypi
+
+   ```shell
+   make upload
+   ```
+
+7. Upload javascript package to npm
+
+   ```shell
+   make upload_js
+   ```
