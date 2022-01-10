@@ -73,7 +73,7 @@ def get_default():
 
 
 def set_default(title):
-    global DEFAULT
+    global DEFAULT  # pylint: disable=global-statement
 
     DEFAULT = title
 
