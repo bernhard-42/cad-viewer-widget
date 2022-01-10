@@ -30,14 +30,14 @@
 <section>
 <h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
-<dt id="cad_viewer_widget.sidecar.close_viewer"><code class="name flex">
-<span>def <span class="ident">close_viewer</span></span>(<span>title)</span>
+<dt id="cad_viewer_widget.sidecar.close_sidecar"><code class="name flex">
+<span>def <span class="ident">close_sidecar</span></span>(<span>title)</span>
 </code></dt>
 <dd>
 <div class="desc"></div>
 </dd>
-<dt id="cad_viewer_widget.sidecar.close_viewers"><code class="name flex">
-<span>def <span class="ident">close_viewers</span></span>(<span>)</span>
+<dt id="cad_viewer_widget.sidecar.close_sidecars"><code class="name flex">
+<span>def <span class="ident">close_sidecars</span></span>(<span>)</span>
 </code></dt>
 <dd>
 <div class="desc"></div>
@@ -48,20 +48,26 @@
 <dd>
 <div class="desc"></div>
 </dd>
-<dt id="cad_viewer_widget.sidecar.get_viewer"><code class="name flex">
-<span>def <span class="ident">get_viewer</span></span>(<span>title=None)</span>
+<dt id="cad_viewer_widget.sidecar.get_sidecar"><code class="name flex">
+<span>def <span class="ident">get_sidecar</span></span>(<span>title=None)</span>
 </code></dt>
 <dd>
 <div class="desc"></div>
 </dd>
-<dt id="cad_viewer_widget.sidecar.get_viewers"><code class="name flex">
-<span>def <span class="ident">get_viewers</span></span>(<span>)</span>
+<dt id="cad_viewer_widget.sidecar.get_sidecars"><code class="name flex">
+<span>def <span class="ident">get_sidecars</span></span>(<span>)</span>
 </code></dt>
 <dd>
 <div class="desc"></div>
 </dd>
-<dt id="cad_viewer_widget.sidecar.set_viewer"><code class="name flex">
-<span>def <span class="ident">set_viewer</span></span>(<span>title, anchor='split-right')</span>
+<dt id="cad_viewer_widget.sidecar.set_default"><code class="name flex">
+<span>def <span class="ident">set_default</span></span>(<span>title)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="cad_viewer_widget.sidecar.set_sidecar"><code class="name flex">
+<span>def <span class="ident">set_sidecar</span></span>(<span>title, viewer)</span>
 </code></dt>
 <dd>
 <div class="desc"></div>
@@ -71,62 +77,64 @@
 <section>
 <h2 class="section-title" id="header-classes">Classes</h2>
 <dl>
-<dt id="cad_viewer_widget.sidecar.Viewer"><code class="flex name class">
-<span>class <span class="ident">Viewer</span></span>
-<span>(</span><span>view, show, clean=None, close=None)</span>
+<dt id="cad_viewer_widget.sidecar.Sidecar"><code class="flex name class">
+<span>class <span class="ident">Sidecar</span></span>
+<span>(</span><span>**kwargs)</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
-<h3>Methods</h3>
+<div class="desc"><p>Widget used as a context manager to display output.</p>
+<p>This widget can capture and display stdout, stderr, and rich output.
+To use
+it, create an instance of it and display it.</p>
+<p>You can then use the widget as a context manager: any output produced while in the
+context will be captured and displayed in the widget instead of the standard output
+area.</p>
+<p>You can also use the .capture() method to decorate a function or a method. Any output
+produced by the function will then go to the output widget. This is useful for
+debugging widget callbacks, for example.</p>
+<p>Example::
+import ipywidgets as widgets
+from IPython.display import display
+out = widgets.Output()
+display(out)</p>
+<pre><code>print('prints to output area')
+
+with out:
+    print('prints to output widget')
+
+@out.capture()
+def func():
+    print('prints to output widget')
+</code></pre>
+<p>Public constructor</p></div>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>ipywidgets.widgets.widget_output.Output</li>
+<li>ipywidgets.widgets.domwidget.DOMWidget</li>
+<li>ipywidgets.widgets.widget.Widget</li>
+<li>ipywidgets.widgets.widget.LoggingHasTraits</li>
+<li>traitlets.traitlets.HasTraits</li>
+<li>traitlets.traitlets.HasDescriptors</li>
+</ul>
+<h3>Instance variables</h3>
 <dl>
-<dt id="cad_viewer_widget.sidecar.Viewer.clean"><code class="name flex">
-<span>def <span class="ident">clean</span></span>(<span>self)</span>
-</code></dt>
+<dt id="cad_viewer_widget.sidecar.Sidecar.anchor"><code class="name">var <span class="ident">anchor</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>An enum of strings where the case should be ignored.</p></div>
 </dd>
-<dt id="cad_viewer_widget.sidecar.Viewer.close"><code class="name flex">
-<span>def <span class="ident">close</span></span>(<span>self)</span>
-</code></dt>
+<dt id="cad_viewer_widget.sidecar.Sidecar.title"><code class="name">var <span class="ident">title</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>A trait for unicode strings.</p></div>
 </dd>
-<dt id="cad_viewer_widget.sidecar.Viewer.show"><code class="name flex">
-<span>def <span class="ident">show</span></span>(<span>self, *args, **kwargs)</span>
-</code></dt>
+<dt id="cad_viewer_widget.sidecar.Sidecar.width"><code class="name">var <span class="ident">width</span></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>An int trait.</p></div>
 </dd>
 </dl>
-</dd>
-<dt id="cad_viewer_widget.sidecar.ViewerSidecar"><code class="flex name class">
-<span>class <span class="ident">ViewerSidecar</span></span>
-<span>(</span><span>title, anchor='split-right')</span>
-</code></dt>
-<dd>
-<div class="desc"></div>
 <h3>Methods</h3>
 <dl>
-<dt id="cad_viewer_widget.sidecar.ViewerSidecar.attach"><code class="name flex">
-<span>def <span class="ident">attach</span></span>(<span>self, viewer)</span>
-</code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt id="cad_viewer_widget.sidecar.ViewerSidecar.clean"><code class="name flex">
-<span>def <span class="ident">clean</span></span>(<span>self, sidecar=False)</span>
-</code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt id="cad_viewer_widget.sidecar.ViewerSidecar.close"><code class="name flex">
-<span>def <span class="ident">close</span></span>(<span>self)</span>
-</code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt id="cad_viewer_widget.sidecar.ViewerSidecar.show"><code class="name flex">
-<span>def <span class="ident">show</span></span>(<span>self, *args, **kwargs)</span>
+<dt id="cad_viewer_widget.sidecar.Sidecar.resize_sidebar"><code class="name flex">
+<span>def <span class="ident">resize_sidebar</span></span>(<span>self, width)</span>
 </code></dt>
 <dd>
 <div class="desc"></div>
@@ -149,31 +157,24 @@
 </li>
 <li><h3><a href="#header-functions">Functions</a></h3>
 <ul class="two-column">
-<li><code><a title="cad_viewer_widget.sidecar.close_viewer" href="#cad_viewer_widget.sidecar.close_viewer">close_viewer</a></code></li>
-<li><code><a title="cad_viewer_widget.sidecar.close_viewers" href="#cad_viewer_widget.sidecar.close_viewers">close_viewers</a></code></li>
+<li><code><a title="cad_viewer_widget.sidecar.close_sidecar" href="#cad_viewer_widget.sidecar.close_sidecar">close_sidecar</a></code></li>
+<li><code><a title="cad_viewer_widget.sidecar.close_sidecars" href="#cad_viewer_widget.sidecar.close_sidecars">close_sidecars</a></code></li>
 <li><code><a title="cad_viewer_widget.sidecar.get_default" href="#cad_viewer_widget.sidecar.get_default">get_default</a></code></li>
-<li><code><a title="cad_viewer_widget.sidecar.get_viewer" href="#cad_viewer_widget.sidecar.get_viewer">get_viewer</a></code></li>
-<li><code><a title="cad_viewer_widget.sidecar.get_viewers" href="#cad_viewer_widget.sidecar.get_viewers">get_viewers</a></code></li>
-<li><code><a title="cad_viewer_widget.sidecar.set_viewer" href="#cad_viewer_widget.sidecar.set_viewer">set_viewer</a></code></li>
+<li><code><a title="cad_viewer_widget.sidecar.get_sidecar" href="#cad_viewer_widget.sidecar.get_sidecar">get_sidecar</a></code></li>
+<li><code><a title="cad_viewer_widget.sidecar.get_sidecars" href="#cad_viewer_widget.sidecar.get_sidecars">get_sidecars</a></code></li>
+<li><code><a title="cad_viewer_widget.sidecar.set_default" href="#cad_viewer_widget.sidecar.set_default">set_default</a></code></li>
+<li><code><a title="cad_viewer_widget.sidecar.set_sidecar" href="#cad_viewer_widget.sidecar.set_sidecar">set_sidecar</a></code></li>
 </ul>
 </li>
 <li><h3><a href="#header-classes">Classes</a></h3>
 <ul>
 <li>
-<h4><code><a title="cad_viewer_widget.sidecar.Viewer" href="#cad_viewer_widget.sidecar.Viewer">Viewer</a></code></h4>
+<h4><code><a title="cad_viewer_widget.sidecar.Sidecar" href="#cad_viewer_widget.sidecar.Sidecar">Sidecar</a></code></h4>
 <ul class="">
-<li><code><a title="cad_viewer_widget.sidecar.Viewer.clean" href="#cad_viewer_widget.sidecar.Viewer.clean">clean</a></code></li>
-<li><code><a title="cad_viewer_widget.sidecar.Viewer.close" href="#cad_viewer_widget.sidecar.Viewer.close">close</a></code></li>
-<li><code><a title="cad_viewer_widget.sidecar.Viewer.show" href="#cad_viewer_widget.sidecar.Viewer.show">show</a></code></li>
-</ul>
-</li>
-<li>
-<h4><code><a title="cad_viewer_widget.sidecar.ViewerSidecar" href="#cad_viewer_widget.sidecar.ViewerSidecar">ViewerSidecar</a></code></h4>
-<ul class="">
-<li><code><a title="cad_viewer_widget.sidecar.ViewerSidecar.attach" href="#cad_viewer_widget.sidecar.ViewerSidecar.attach">attach</a></code></li>
-<li><code><a title="cad_viewer_widget.sidecar.ViewerSidecar.clean" href="#cad_viewer_widget.sidecar.ViewerSidecar.clean">clean</a></code></li>
-<li><code><a title="cad_viewer_widget.sidecar.ViewerSidecar.close" href="#cad_viewer_widget.sidecar.ViewerSidecar.close">close</a></code></li>
-<li><code><a title="cad_viewer_widget.sidecar.ViewerSidecar.show" href="#cad_viewer_widget.sidecar.ViewerSidecar.show">show</a></code></li>
+<li><code><a title="cad_viewer_widget.sidecar.Sidecar.anchor" href="#cad_viewer_widget.sidecar.Sidecar.anchor">anchor</a></code></li>
+<li><code><a title="cad_viewer_widget.sidecar.Sidecar.resize_sidebar" href="#cad_viewer_widget.sidecar.Sidecar.resize_sidebar">resize_sidebar</a></code></li>
+<li><code><a title="cad_viewer_widget.sidecar.Sidecar.title" href="#cad_viewer_widget.sidecar.Sidecar.title">title</a></code></li>
+<li><code><a title="cad_viewer_widget.sidecar.Sidecar.width" href="#cad_viewer_widget.sidecar.Sidecar.width">width</a></code></li>
 </ul>
 </li>
 </ul>
