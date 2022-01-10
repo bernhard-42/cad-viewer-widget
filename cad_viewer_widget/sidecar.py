@@ -24,7 +24,7 @@ class Sidecar(Output):
     ).tag(sync=True)
     width = Integer(allow_none=True).tag(sync=True)
 
-    def resizeSidebar(self, width):
+    def resize_sidebar(self, width):
         self.width = width
 
 

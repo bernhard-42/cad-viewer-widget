@@ -109,7 +109,7 @@ def open_viewer(
             )
             display(viewer.widget)
 
-        out.resizeSidebar(cad_width + tree_width + 12)
+        out.resize_sidebar(cad_width + tree_width + 12)
 
         set_sidecar(title, viewer)
 
