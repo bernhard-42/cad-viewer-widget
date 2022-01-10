@@ -630,10 +630,6 @@ class CadViewer:
             if self.widget.control != "":
                 print("Camera control changed, so camera was resetted")
 
-        if control == "orbit" and quaternion is not None:
-            quaternion = None
-            print("Camera quaternion cannot be used with Orbit camera control")
-
         with self.widget.hold_trait_notifications():
             self.widget.shapes = json.dumps(shapes, default=serializer)
             self.widget.states = states
