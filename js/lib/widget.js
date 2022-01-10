@@ -66,6 +66,8 @@ export class CadViewerModel extends DOMWidgetModel {
       clip_slider_1: null,
       clip_slider_2: null,
 
+      reset_camera: true,
+      
       position: null,
       quaternion: null,
       zoom: null,
@@ -405,7 +407,7 @@ export class CadViewerView extends DOMWidgetView {
   }
 
   handle_change(change) {
-    const setKey = (getter, setter, key, arg = null) => {
+    const setKey = (getter, setter, key, arg = null, arg2 = null) => {
       const value = change.changed[key];
       const oldValue =
         arg == null ? this.viewer[getter]() : this.viewer[getter](arg);
@@ -414,10 +416,12 @@ export class CadViewerView extends DOMWidgetView {
           `cad-viewer-widget: Setting Javascript attribute ${key} to`,
           value
         );
-        if (arg == null) {
-          this.viewer[setter](value, false);
-        } else {
-          this.viewer[setter](arg, value, false);
+        if (arg == null && arg2 == null) {
+          this.viewer[setter](value, true);
+        } else if(arg != null) {
+          this.viewer[setter](arg, value, true);
+        } else if(arg2 != null) {
+          this.viewer[setter](value, arg2, true);
         }
       }
     };
@@ -437,7 +441,7 @@ export class CadViewerView extends DOMWidgetView {
         setKey("getCameraZoom", "setCameraZoom", key);
         break;
       case "position":
-        setKey("getCameraPosition", "setCameraPosition", key);
+        setKey("getCameraPosition", "setCameraPosition", key, null, false);
         break;
       case "quaternion":
         setKey("getCameraQuaternion", "setCameraQuaternion", key);
