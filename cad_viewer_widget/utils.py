@@ -52,48 +52,6 @@ def serializer(obj):
     raise TypeError("Unknown type:", type(obj))
 
 
-def check(name, var, types):
-    """
-    Check variable type
-
-    Parameters
-    ----------
-    name : string
-        Name of the variable to check
-    var : any
-        Value of the variable
-    types
-        Allowed Python types
-    """
-
-    if isinstance(var, types):
-        return var
-    else:
-        raise ValueError(f"Variable {name} should be of type {types}, but is {type(var)}")
-
-
-def check_list(name, var, types, length):
-    """
-    Check type of list elements
-
-    Parameters
-    ----------
-    name : string
-        Name of the variable to check
-    var : any
-        List value of the variable
-    types
-        Allowed Python types for every element of the list
-    length
-        Required length of the list
-    """
-
-    if isinstance(var, (list, tuple)) and len(var) == length and all(isinstance(v, types) for v in var):
-        return var
-    else:
-        raise ValueError(f"Variable {name} should be a {length} dim list of type {types}, but is {var}")
-
-
 def get_parser():
     """
     A parser for nested json objects

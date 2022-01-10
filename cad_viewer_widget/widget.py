@@ -8,7 +8,7 @@ from traitlets import Unicode, Dict, Tuple, Integer, Float, Any, Bool, observe
 from IPython.display import HTML, update_display
 from pyparsing import ParseException
 
-from .utils import serializer, check, check_list, get_parser
+from .utils import serializer, get_parser
 
 
 class AnimationTrack:
@@ -693,7 +693,7 @@ class CadViewer:
 
     @ambient_intensity.setter
     def ambient_intensity(self, value):
-        self.widget.ambient_intensity = check("ambient_intensity", value, (int, float))
+        self.widget.ambient_intensity = value
 
     @property
     def direct_intensity(self):
@@ -706,7 +706,7 @@ class CadViewer:
 
     @direct_intensity.setter
     def direct_intensity(self, value):
-        self.widget.direct_intensity = check("direct_intensity", value, (int, float))
+        self.widget.direct_intensity = value
 
     @property
     def axes(self):
@@ -719,7 +719,7 @@ class CadViewer:
 
     @axes.setter
     def axes(self, value):
-        self.widget.axes = check("axes", value, bool)
+        self.widget.axes = value
 
     @property
     def axes0(self):
@@ -732,7 +732,7 @@ class CadViewer:
 
     @axes0.setter
     def axes0(self, value):
-        self.widget.axes0 = check("axes0", value, bool)
+        self.widget.axes0 = value
 
     @property
     def grid(self):
@@ -745,7 +745,7 @@ class CadViewer:
 
     @grid.setter
     def grid(self, value):
-        self.widget.grid = check_list("grid", value, bool, 3)
+        self.widget.grid = value
 
     @property
     def ortho(self):
@@ -758,7 +758,7 @@ class CadViewer:
 
     @ortho.setter
     def ortho(self, value):
-        self.widget.ortho = check("ortho", value, bool)
+        self.widget.ortho = value
 
     @property
     def transparent(self):
@@ -771,7 +771,7 @@ class CadViewer:
 
     @transparent.setter
     def transparent(self, value):
-        self.widget.transparent = check("transparent", value, bool)
+        self.widget.transparent = value
 
     @property
     def black_edges(self):
@@ -784,7 +784,7 @@ class CadViewer:
 
     @black_edges.setter
     def black_edges(self, value):
-        self.widget.black_edges = check("black_edges", value, bool)
+        self.widget.black_edges = value
 
     @property
     def normal_len(self):
@@ -805,7 +805,7 @@ class CadViewer:
 
     @default_edge_color.setter
     def default_edge_color(self, value):
-        check("default_edge_color", value, str)
+        value
         if value.startswith("#"):
             self.widget.default_edge_color = value
         else:
@@ -822,7 +822,7 @@ class CadViewer:
 
     @default_opacity.setter
     def default_opacity(self, value):
-        check("default_opacity", value, str)
+        value
         if value.startswith("#"):
             self.widget.default_opacity = value
         else:
@@ -839,7 +839,7 @@ class CadViewer:
 
     @clip_intersection.setter
     def clip_intersection(self, value):
-        self.widget.clip_intersection = check("clip_intersection", value, bool)
+        self.widget.clip_intersection = value
 
     @property
     def clip_normal_0(self):
@@ -852,7 +852,7 @@ class CadViewer:
 
     @clip_normal_0.setter
     def clip_normal_0(self, value):
-        self.widget.clip_normal_0 = check_list("clip_normal_0", value, (int, float), 3)
+        self.widget.clip_normal_0 = value
 
     @property
     def clip_normal_1(self):
@@ -865,7 +865,7 @@ class CadViewer:
 
     @clip_normal_1.setter
     def clip_normal_1(self, value):
-        self.widget.clip_normal_1 = check_list("clip_normal_1", value, (int, float), 3)
+        self.widget.clip_normal_1 = value
 
     @property
     def clip_normal_2(self):
@@ -878,7 +878,7 @@ class CadViewer:
 
     @clip_normal_2.setter
     def clip_normal_2(self, value):
-        self.widget.clip_normal_2 = check_list("clip_normal_2", value, (int, float), 3)
+        self.widget.clip_normal_2 = value
 
     @property
     def clip_value_0(self):
@@ -891,7 +891,7 @@ class CadViewer:
 
     @clip_value_0.setter
     def clip_value_0(self, value):
-        self.widget.clip_slider_0 = check("clip_value_0", value, (int, float))
+        self.widget.clip_slider_0 = value
 
     @property
     def clip_value_1(self):
@@ -904,7 +904,7 @@ class CadViewer:
 
     @clip_value_1.setter
     def clip_value_1(self, value):
-        self.widget.clip_slider_1 = check("clip_value_1", value, (int, float))
+        self.widget.clip_slider_1 = value
 
     @property
     def clip_value_2(self):
@@ -917,7 +917,7 @@ class CadViewer:
 
     @clip_value_2.setter
     def clip_value_2(self, value):
-        self.widget.clip_slider_2 = check("clip_value_2", value, (int, float))
+        self.widget.clip_slider_2 = value
 
     @property
     def clip_planes(self):
@@ -930,7 +930,7 @@ class CadViewer:
 
     @clip_planes.setter
     def clip_planes(self, value):
-        self.widget.clip_planes = check("clip_planes", value, bool)
+        self.widget.clip_planes = value
 
     @property
     def js_debug(self):
@@ -943,7 +943,7 @@ class CadViewer:
 
     @js_debug.setter
     def js_debug(self, value):
-        self.widget.js_debug = check("js_debug", value, bool)
+        self.widget.js_debug = value
 
     @property
     def tools(self):
@@ -956,7 +956,7 @@ class CadViewer:
 
     @tools.setter
     def tools(self, value):
-        self.widget.tools = check("tools", value, bool)
+        self.widget.tools = value
 
     @property
     def pan_speed(self):
@@ -969,7 +969,7 @@ class CadViewer:
 
     @pan_speed.setter
     def pan_speed(self, value):
-        self.widget.pan_speed = check("pan_speed", value, (int, float))
+        self.widget.pan_speed = value
 
     @property
     def rotate_speed(self):
@@ -982,7 +982,7 @@ class CadViewer:
 
     @rotate_speed.setter
     def rotate_speed(self, value):
-        self.widget.rotate_speed = check("rotate_speed", value, (int, float))
+        self.widget.rotate_speed = value
 
     @property
     def zoom_speed(self):
@@ -995,7 +995,7 @@ class CadViewer:
 
     @zoom_speed.setter
     def zoom_speed(self, value):
-        self.widget.zoom_speed = check("zoom_speed", value, (int, float))
+        self.widget.zoom_speed = value
 
     #
     # Camera position handling
@@ -1012,7 +1012,7 @@ class CadViewer:
 
     @zoom.setter
     def zoom(self, value):
-        self.widget.zoom = check("zoom", value, (int, float))
+        self.widget.zoom = value
 
     @property
     def position(self):
@@ -1025,7 +1025,7 @@ class CadViewer:
 
     @position.setter
     def position(self, value):
-        self.widget.position = check_list("position", value, (int, float), 3)
+        self.widget.position = value
 
     @property
     def quaternion(self):
@@ -1038,7 +1038,7 @@ class CadViewer:
 
     @quaternion.setter
     def quaternion(self, value):
-        self.widget.quaternion = check_list("quaternion", value, (int, float), 4)
+        self.widget.quaternion = value
 
     @property
     def last_pick(self):
