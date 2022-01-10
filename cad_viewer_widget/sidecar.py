@@ -1,5 +1,3 @@
-import uuid
-
 from ipywidgets import Output
 from traitlets import Unicode, CaselessStrEnum, Integer
 
