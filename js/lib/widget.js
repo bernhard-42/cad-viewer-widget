@@ -335,7 +335,7 @@ export class CadViewerView extends DOMWidgetView {
 
     timer.split("renderer");
 
-    if (this.model.get("position0") == null) {
+    if (this.model.get("reset_camera")) {
       // after the first view store inital camera location
       this.model.set("zoom0", this.viewer.camera.getZoom());
       this.model.set("position0", this.viewer.camera.getPosition().toArray());
@@ -344,6 +344,12 @@ export class CadViewerView extends DOMWidgetView {
         this.viewer.camera.getQuaternion().toArray()
       );
     } else {
+      if (this.model.get("quaternion0") == null) {
+        this.model.set(
+          "quaternion0",
+          this.viewer.camera.getQuaternion().toArray()
+        );
+      }
       this.viewer.setResetLocation(
         this.model.get("target"),
         this.model.get("position0"),

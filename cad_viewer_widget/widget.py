@@ -224,6 +224,9 @@ class CadViewerWidget(widgets.Output):  # pylint: disable-msg=too-many-instance-
     clip_slider_2 = Float(allow_none=True).tag(sync=True)
     "float: Slider value of clipping plane 3"
 
+    reset_camera = Bool(allow_none=True).tag(sync=True)
+    "bool: Whether to reset camera (True) or not (False)"
+
     position = Tuple(Float(), Float(), Float(), allow_none=True).tag(sync=True)
     "tuple: Position of the camera as a 3-dim tuple of float (x,y,z)"
 
@@ -601,6 +604,20 @@ class CadViewer:
         }
         """
 
+        if not reset_camera:
+            if position is not None:
+                raise ValueError("Parameter 'position' needs 'reset_camera=True'")
+            if quaternion is not None:
+                raise ValueError("Parameter 'quaternion' needs 'reset_camera=True'")
+            if zoom is not None:
+                raise ValueError("Parameter 'zoom' needs 'reset_camera=True'")
+
+        if control == "orbit" and quaternion is not None:
+            raise ValueError("Camera quaternion cannot be used with Orbit camera control")
+
+        if control == "trackball" and position is not None and quaternion is None:
+            raise ValueError("For Trackball camera control, position paramater also needs quaternion parameter")
+
         if grid is None:
             grid = [False, False, False]
 
@@ -636,26 +653,16 @@ class CadViewer:
             self.widget.ortho = ortho
             self.widget.transparent = transparent
             self.widget.black_edges = black_edges
+            self.widget.reset_camera = reset_camera
+            self.widget.position = position
+            self.widget.quaternion = quaternion
+            self.widget.zoom = zoom
             self.widget.zoom_speed = zoom_speed
             self.widget.pan_speed = pan_speed
             self.widget.rotate_speed = rotate_speed
             self.widget.timeit = timeit
             self.widget.js_debug = js_debug
             self.add_tracks(tracks)
-
-            if reset_camera:  # reset camera if requested
-                self.widget.position = position
-                self.widget.quaternion = quaternion
-                self.widget.zoom = zoom
-            else:
-                if position is not None:
-                    print("Parameter 'position' needs 'reset_camera=True'")
-                if quaternion is not None:
-                    print("Parameter 'quaternion' needs 'reset_camera=True'")
-                if zoom is not None:
-                    print("Parameter 'zoom' needs 'reset_camera=True'")
-
-            # self.widget.bb_factor = bb_factor
 
         self.widget.initialize = False
 
@@ -1310,6 +1317,7 @@ clip_normal_2:      {self.widget.clip_normal_2}
 clip_slider_0:      {self.widget.clip_slider_0}
 clip_slider_1:      {self.widget.clip_slider_1}
 clip_slider_2:      {self.widget.clip_slider_2}
+reset_camera:       {self.widget.reset_camera}
 position:           {self.widget.position}
 quaternion:         {self.widget.quaternion}
 zoom:               {self.widget.zoom}
