@@ -808,7 +808,6 @@ class CadViewer:
 
     @default_edge_color.setter
     def default_edge_color(self, value):
-        value
         if value.startswith("#"):
             self.widget.default_edge_color = value
         else:
@@ -825,7 +824,6 @@ class CadViewer:
 
     @default_opacity.setter
     def default_opacity(self, value):
-        value
         if value.startswith("#"):
             self.widget.default_opacity = value
         else:
