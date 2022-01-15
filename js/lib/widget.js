@@ -67,7 +67,7 @@ export class CadViewerModel extends DOMWidgetModel {
       clip_slider_2: null,
 
       reset_camera: true,
-      
+
       position: null,
       quaternion: null,
       zoom: null,
@@ -104,7 +104,7 @@ export class CadViewerView extends DOMWidgetView {
 
   debug(...args) {
     if (this._debug) {
-      console.debug(...args);
+      console.debug("cad-viewer-widget: ", ...args);
     }
   }
 
@@ -276,10 +276,7 @@ export class CadViewerView extends DOMWidgetView {
       if (!isTolEqual(old_value, new_value)) {
         this.model.set(key, new_value);
         changed = true;
-        this.debug(
-          `cad-viewer-widget: : Setting Python attribute ${key} to`,
-          new_value
-        );
+        this.debug(`Setting Python attribute ${key} to`, new_value);
       }
     });
     if (changed) {
@@ -398,7 +395,6 @@ export class CadViewerView extends DOMWidgetView {
   }
 
   clearAnimation() {
-    // TODO: add clear to animation of three-cad-viewer
     if (this.viewer.clipAction) {
       this.viewer.controlAnimation("stop");
     }
@@ -412,15 +408,12 @@ export class CadViewerView extends DOMWidgetView {
       const oldValue =
         arg == null ? this.viewer[getter]() : this.viewer[getter](arg);
       if (!isTolEqual(oldValue, value)) {
-        this.debug(
-          `cad-viewer-widget: Setting Javascript attribute ${key} to`,
-          value
-        );
+        this.debug(`Setting Javascript attribute ${key} to`, value);
         if (arg == null && arg2 == null) {
           this.viewer[setter](value, true);
-        } else if(arg != null) {
+        } else if (arg != null) {
           this.viewer[setter](arg, value, true);
-        } else if(arg2 != null) {
+        } else if (arg2 != null) {
           this.viewer[setter](value, arg2, true);
         }
       }
@@ -429,7 +422,7 @@ export class CadViewerView extends DOMWidgetView {
     const key = Object.keys(change.changed)[0];
 
     if (this.init) {
-      this.debug("cad-viewer-widget: Ignore message");
+      this.debug("Ignore message");
       return;
     }
 
@@ -569,7 +562,7 @@ export class CadViewerView extends DOMWidgetView {
 
   onCustomMessage(msg, buffers) {
     this.debug(
-      "cad-viewer-widget: New message with msgType:",
+      "New message with msgType:",
       msg.type,
       "msgId:",
       msg.id,
@@ -587,7 +580,7 @@ export class CadViewerView extends DOMWidgetView {
 
     try {
       path.forEach((o) => (object = object[o]));
-      this.debug("cad-viewer-widget: object:", object, "method:", method);
+      this.debug("object:", object, "method:", method);
     } catch (error) {
       console.error(error);
       return;
@@ -596,7 +589,7 @@ export class CadViewerView extends DOMWidgetView {
     var args = null;
     try {
       args = JSON.parse(msg.args);
-      this.debug("cad-viewer-widget: args:", args);
+      this.debug("args:", args);
     } catch (error) {
       console.error(error);
     }
@@ -608,7 +601,7 @@ export class CadViewerView extends DOMWidgetView {
       } else {
         result = object[method](...args);
       }
-      this.debug("cad-viewer-widget: method executed, result: ", result);
+      this.debug("method executed, result: ", result);
     } catch (error) {
       console.log(error);
     }
