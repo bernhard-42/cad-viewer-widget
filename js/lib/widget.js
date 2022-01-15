@@ -269,19 +269,12 @@ export class CadViewerView extends DOMWidgetView {
   }
 
   handleNotification(change) {
-    var changed = false;
     Object.keys(change).forEach((key) => {
-      const old_value = this.model.get(key);
       const new_value = change[key]["new"];
-      if (!isTolEqual(old_value, new_value)) {
-        this.model.set(key, new_value);
-        changed = true;
-        this.debug(`Setting Python attribute ${key} to`, new_value);
-      }
+      this.model.set(key, new_value);
+      this.debug(`Setting Python attribute ${key} to`, new_value);
     });
-    if (changed) {
-      this.model.save_changes();
-    }
+    this.model.save_changes();
   }
 
   clear() {
@@ -334,33 +327,37 @@ export class CadViewerView extends DOMWidgetView {
 
     timer.split("renderer");
 
+    var position, quaternion, zoom;
+
     if (this.model.get("reset_camera")) {
       // after the first view store inital camera location
-      this.model.set("zoom0", this.viewer.camera.getZoom());
-      this.model.set("position0", this.viewer.camera.getPosition().toArray());
-      this.model.set(
-        "quaternion0",
-        this.viewer.camera.getQuaternion().toArray()
-      );
+      zoom = this.viewer.getCameraZoom();
+      position = this.viewer.getCameraPosition();
+      quaternion = this.viewer.getCameraQuaternion();
+
+      this.model.set("zoom0", zoom);
+      this.model.set("position0", position);
+      this.model.set("quaternion0", quaternion);
     } else {
-      if (this.model.get("quaternion0") == null) {
-        this.model.set(
-          "quaternion0",
-          this.viewer.camera.getQuaternion().toArray()
-        );
-      }
+      position = this.model.get("position0");
+      quaternion =
+        this.model.get("quaternion0") == null
+          ? this.viewer.getCameraQuaternion()
+          : this.model.get("quaternion0");
+      zoom = this.model.get("zoom0");
+
       this.viewer.setResetLocation(
         this.model.get("target"),
-        this.model.get("position0"),
-        this.model.get("quaternion0"),
-        this.model.get("zoom0")
+        position,
+        quaternion,
+        zoom
       );
     }
 
-    // in case it hasn't been notified from the viewer
-    this.model.set("zoom", this.viewer.camera.getZoom());
-    this.model.set("position", this.viewer.camera.getPosition().toArray());
-    this.model.set("quaternion", this.viewer.camera.getQuaternion().toArray());
+    this.model.set("zoom", zoom);
+    this.model.set("position", position);
+    this.model.set("quaternion", quaternion);
+
     this.model.save_changes();
 
     // add animation tracks if exist
