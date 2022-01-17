@@ -286,7 +286,7 @@ see <a href="./widget.html#cad_viewer_widget.widget.CadViewerWidget.zoom_speed">
 <h3>Methods</h3>
 <dl>
 <dt id="cad_viewer_widget.widget.CadViewer.add_shapes"><code class="name flex">
-<span>def <span class="ident">add_shapes</span></span>(<span>self, shapes, states, tracks=None, normal_len=0, default_edge_color='#707070', default_opacity=0.5, ambient_intensity=0.5, direct_intensity=0.3, tools=True, control='trackball', ortho=True, axes=False, axes0=False, grid=None, ticks=10, transparent=False, black_edges=False, position=None, quaternion=None, zoom=None, reset_camera=True, zoom_speed=1.0, pan_speed=1.0, rotate_speed=1.0, timeit=False, js_debug=False)</span>
+<span>def <span class="ident">add_shapes</span></span>(<span>self, shapes, states, tracks=None, normal_len=0, default_edge_color='#707070', default_opacity=0.5, ambient_intensity=0.5, direct_intensity=0.3, tools=True, control='trackball', ortho=True, axes=False, axes0=False, grid=None, ticks=10, transparent=False, black_edges=False, position=None, quaternion=None, zoom=1.0, reset_camera=True, zoom_speed=1.0, pan_speed=1.0, rotate_speed=1.0, timeit=False, js_debug=False)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Adding shapes to the CAD view</p>
@@ -347,24 +347,24 @@ see <a href="./widget.html#cad_viewer_widget.widget.CadViewerWidget.zoom_speed">
 <p>A simple cube with edge len of 1 is tessellated like the <code>shape</code> eloment of the first (and only) element of
 the <code>parts</code> list:</p>
 <pre><code>shapes = {
-    'name': 'Group',
-    'id': '/Group',
-    'loc': None,  # would be (&lt;position&gt;, &lt;quaternion&gt;), e.g. ([0,0,0), (0,0,0,1)])
-    'parts': [{
-        'name': 'Part_0',
-        'id': '/Group/Part_0',
-        'type': 'shapes',
-        'shape': {'vertices': [
+    &quot;name&quot;: &quot;Group&quot;,
+    &quot;id&quot;: &quot;/Group&quot;,
+    &quot;loc&quot;: None,  # would be (&lt;position&gt;, &lt;quaternion&gt;), e.g. ([0,0,0), (0,0,0,1)])
+    &quot;parts&quot;: [{
+        &quot;name&quot;: &quot;Part_0&quot;,
+        &quot;id&quot;: &quot;/Group/Part_0&quot;,
+        &quot;type&quot;: &quot;shapes&quot;,
+        &quot;shape&quot;: {&quot;vertices&quot;: [
             [-0.5, -0.5, -0.5], [-0.5, -0.5, 0.5], [-0.5, 0.5, -0.5], [-0.5, 0.5, 0.5],
             [0.5, -0.5, -0.5], [0.5, -0.5, 0.5], [0.5, 0.5, -0.5], [0.5, 0.5, 0.5],
             [-0.5, -0.5, -0.5], [0.5, -0.5, -0.5], [-0.5, -0.5, 0.5], [0.5, -0.5, 0.5],
             [-0.5, 0.5, -0.5], [0.5, 0.5, -0.5], [-0.5, 0.5, 0.5], [0.5, 0.5, 0.5],
             [-0.5, -0.5, -0.5], [-0.5, 0.5, -0.5], [0.5, -0.5, -0.5], [0.5, 0.5, -0.5],
             [-0.5, -0.5, 0.5], [-0.5, 0.5, 0.5], [0.5, -0.5, 0.5], [0.5, 0.5, 0.5]],
-        'triangles': [
+        &quot;triangles&quot;: [
             1, 2, 0, 1, 3, 2, 5, 4, 6, 5, 6, 7, 11, 8, 9, 11, 10, 8, 15, 13,
             12, 15, 12, 14, 19, 16, 17, 19, 18, 16, 23, 21, 20, 23, 20, 22 ],
-        'normals': [
+        &quot;normals&quot;: [
             [-1, 0, 0], [-1, 0, 0], [-1, 0, 0], [-1, 0, 0],
             [1, 0, 0], [1, 0, 0], [1, 0, 0], [1, 0, 0],
             [0, -1, 0], [0, -1, 0], [0, -1, 0], [0, -1, 0],
@@ -372,7 +372,7 @@ the <code>parts</code> list:</p>
             [0, 0, -1], [0, 0, -1], [0, 0, -1], [0, 0, -1],
             [0, 0, 1], [0, 0, 1], [0, 0, 1], [0, 0, 1]
         ],
-        'edges': [
+        &quot;edges&quot;: [
             [[-0.5, -0.5, -0.5], [-0.5, -0.5, 0.5]],
             [[-0.5, -0.5, 0.5], [-0.5, 0.5, 0.5]],
             [[-0.5, 0.5, -0.5], [-0.5, 0.5, 0.5]],
@@ -386,7 +386,13 @@ the <code>parts</code> list:</p>
             [[-0.5, 0.5, -0.5], [0.5, 0.5, -0.5]],
             [[-0.5, 0.5, 0.5], [0.5, 0.5, 0.5]]
         ]},
-        'color': '#e8b024'
+        &quot;color&quot;: &quot;#e8b024&quot;,
+        &quot;renderback&quot;: false,
+        &quot;bb&quot;: {
+            &quot;xmin&quot;: -0.5, &quot;xmax&quot;: 0.5,
+            &quot;ymin&quot;: -0.5, &quot;ymax&quot;: 0.5,
+            &quot;zmin&quot;: -0.5, &quot;zmax&quot;: 0.5
+        }
     }]
 }
 states = {'/Group/Part_0': [1, 1]}
@@ -461,6 +467,12 @@ EdgeList
 "name": "<str>",
 "type": "shapes",
 "color": "#ffffff",
+"renderback": false,
+"bb": {
+"xmin": -0.5, "xmax": 0.5,
+"ymin": -0.5, "ymax": 0.5,
+"zmin": -0.5, "zmax": 0.5
+},
 "shape": {
 "vertices": <VectorList>,
 "triangles": <Index>,
@@ -474,6 +486,12 @@ EdgeList
 "type": "edges",
 "color": "#ffffff",
 "width": 3,
+"renderback": false,
+"bb": {
+"xmin": -0.5, "xmax": 0.5,
+"ymin": -0.5, "ymax": 0.5,
+"zmin": -0.5, "zmax": 0.5
+},
 "shape": <EdgeList>
 }</p>
 <p>Vertices := {
@@ -482,6 +500,12 @@ EdgeList
 "type": "vertices",
 "color": "#ffffff",
 "size": 6,
+"bb": {
+"xmin":
+-5.0, "xmax": 5.0,
+"ymin": -10.0, "ymax": 10.0,
+"zmin": -15.0, "zmax": 15.0
+},
 "shape": <VectorList>
 }</p></div>
 </dd>
@@ -646,6 +670,12 @@ object notation relative to the 'CadViewer' object and <code>method</code> is th
 </code></dt>
 <dd>
 <div class="desc"><p>Stop animation</p></div>
+</dd>
+<dt id="cad_viewer_widget.widget.CadViewer.update_camera_location"><code class="name flex">
+<span>def <span class="ident">update_camera_location</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Sync position, quaternion and zoom of camer to Python</p></div>
 </dd>
 <dt id="cad_viewer_widget.widget.CadViewer.update_states"><code class="name flex">
 <span>def <span class="ident">update_states</span></span>(<span>self, states)</span>
@@ -920,7 +950,7 @@ object notation relative to the 'CadViewer' object and <code>method</code> is th
 </li>
 <li>
 <h4><code><a title="cad_viewer_widget.widget.CadViewer" href="#cad_viewer_widget.widget.CadViewer">CadViewer</a></code></h4>
-<ul class="two-column">
+<ul class="">
 <li><code><a title="cad_viewer_widget.widget.CadViewer.add_shapes" href="#cad_viewer_widget.widget.CadViewer.add_shapes">add_shapes</a></code></li>
 <li><code><a title="cad_viewer_widget.widget.CadViewer.add_track" href="#cad_viewer_widget.widget.CadViewer.add_track">add_track</a></code></li>
 <li><code><a title="cad_viewer_widget.widget.CadViewer.add_tracks" href="#cad_viewer_widget.widget.CadViewer.add_tracks">add_tracks</a></code></li>
@@ -969,6 +999,7 @@ object notation relative to the 'CadViewer' object and <code>method</code> is th
 <li><code><a title="cad_viewer_widget.widget.CadViewer.stop" href="#cad_viewer_widget.widget.CadViewer.stop">stop</a></code></li>
 <li><code><a title="cad_viewer_widget.widget.CadViewer.tools" href="#cad_viewer_widget.widget.CadViewer.tools">tools</a></code></li>
 <li><code><a title="cad_viewer_widget.widget.CadViewer.transparent" href="#cad_viewer_widget.widget.CadViewer.transparent">transparent</a></code></li>
+<li><code><a title="cad_viewer_widget.widget.CadViewer.update_camera_location" href="#cad_viewer_widget.widget.CadViewer.update_camera_location">update_camera_location</a></code></li>
 <li><code><a title="cad_viewer_widget.widget.CadViewer.update_states" href="#cad_viewer_widget.widget.CadViewer.update_states">update_states</a></code></li>
 <li><code><a title="cad_viewer_widget.widget.CadViewer.zoom" href="#cad_viewer_widget.widget.CadViewer.zoom">zoom</a></code></li>
 <li><code><a title="cad_viewer_widget.widget.CadViewer.zoom_speed" href="#cad_viewer_widget.widget.CadViewer.zoom_speed">zoom_speed</a></code></li>
