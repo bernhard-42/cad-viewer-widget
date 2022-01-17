@@ -1,6 +1,7 @@
 """This module is the Python part of the CAD Viewer widget"""
 
 import json
+from textwrap import dedent
 import ipywidgets as widgets
 import numpy as np
 
@@ -464,24 +465,24 @@ class CadViewer:
 
         ```
         shapes = {
-            'name': 'Group',
-            'id': '/Group',
-            'loc': None,  # would be (<position>, <quaternion>), e.g. ([0,0,0), (0,0,0,1)])
-            'parts': [{
-                'name': 'Part_0',
-                'id': '/Group/Part_0',
-                'type': 'shapes',
-                'shape': {'vertices': [
+            "name": "Group",
+            "id": "/Group",
+            "loc": None,  # would be (<position>, <quaternion>), e.g. ([0,0,0), (0,0,0,1)])
+            "parts": [{
+                "name": "Part_0",
+                "id": "/Group/Part_0",
+                "type": "shapes",
+                "shape": {"vertices": [
                     [-0.5, -0.5, -0.5], [-0.5, -0.5, 0.5], [-0.5, 0.5, -0.5], [-0.5, 0.5, 0.5],
                     [0.5, -0.5, -0.5], [0.5, -0.5, 0.5], [0.5, 0.5, -0.5], [0.5, 0.5, 0.5],
                     [-0.5, -0.5, -0.5], [0.5, -0.5, -0.5], [-0.5, -0.5, 0.5], [0.5, -0.5, 0.5],
                     [-0.5, 0.5, -0.5], [0.5, 0.5, -0.5], [-0.5, 0.5, 0.5], [0.5, 0.5, 0.5],
                     [-0.5, -0.5, -0.5], [-0.5, 0.5, -0.5], [0.5, -0.5, -0.5], [0.5, 0.5, -0.5],
                     [-0.5, -0.5, 0.5], [-0.5, 0.5, 0.5], [0.5, -0.5, 0.5], [0.5, 0.5, 0.5]],
-                'triangles': [
+                "triangles": [
                     1, 2, 0, 1, 3, 2, 5, 4, 6, 5, 6, 7, 11, 8, 9, 11, 10, 8, 15, 13,
                     12, 15, 12, 14, 19, 16, 17, 19, 18, 16, 23, 21, 20, 23, 20, 22 ],
-                'normals': [
+                "normals": [
                     [-1, 0, 0], [-1, 0, 0], [-1, 0, 0], [-1, 0, 0],
                     [1, 0, 0], [1, 0, 0], [1, 0, 0], [1, 0, 0],
                     [0, -1, 0], [0, -1, 0], [0, -1, 0], [0, -1, 0],
@@ -489,7 +490,7 @@ class CadViewer:
                     [0, 0, -1], [0, 0, -1], [0, 0, -1], [0, 0, -1],
                     [0, 0, 1], [0, 0, 1], [0, 0, 1], [0, 0, 1]
                 ],
-                'edges': [
+                "edges": [
                     [[-0.5, -0.5, -0.5], [-0.5, -0.5, 0.5]],
                     [[-0.5, -0.5, 0.5], [-0.5, 0.5, 0.5]],
                     [[-0.5, 0.5, -0.5], [-0.5, 0.5, 0.5]],
@@ -503,7 +504,13 @@ class CadViewer:
                     [[-0.5, 0.5, -0.5], [0.5, 0.5, -0.5]],
                     [[-0.5, 0.5, 0.5], [0.5, 0.5, 0.5]]
                 ]},
-                'color': '#e8b024'
+                "color": "#e8b024",
+                "renderback": false,
+                "bb": {
+                    "xmin": -0.5, "xmax": 0.5,
+                    "ymin": -0.5, "ymax": 0.5,
+                    "zmin": -0.5, "zmax": 0.5
+                }
             }]
         }
         states = {'/Group/Part_0': [1, 1]}
@@ -576,6 +583,12 @@ class CadViewer:
             "name": "<str>",
             "type": "shapes",
             "color": "#ffffff",
+            "renderback": false,
+            "bb": {
+                "xmin": -0.5, "xmax": 0.5,
+                "ymin": -0.5, "ymax": 0.5,
+                "zmin": -0.5, "zmax": 0.5
+            },
             "shape": {
                 "vertices": <VectorList>,
                 "triangles": <Index>,
@@ -590,6 +603,12 @@ class CadViewer:
             "type": "edges",
             "color": "#ffffff",
             "width": 3,
+            "renderback": false,
+            "bb": {
+                "xmin": -0.5, "xmax": 0.5,
+                "ymin": -0.5, "ymax": 0.5,
+                "zmin": -0.5, "zmax": 0.5
+            },
             "shape": <EdgeList>
         }
 
@@ -599,6 +618,11 @@ class CadViewer:
             "type": "vertices",
             "color": "#ffffff",
             "size": 6,
+            "bb": {
+                "xmin":  -5.0, "xmax": 5.0,
+                "ymin": -10.0, "ymax": 10.0,
+                "zmin": -15.0, "zmax": 15.0
+            },
             "shape": <VectorList>
         }
         """
@@ -1284,68 +1308,70 @@ class CadViewer:
 
     def dump_model(self, shapes=False):
         print(
-            f"""
-            DISPLAY
-title:              {self.widget.title}
-anchor:             {self.widget.anchor}
-cad_width:          {self.widget.cad_width}
-height:             {self.widget.height}
-tree_width:         {self.widget.tree_width}
-theme:              {self.widget.theme}
-pinning:            {self.widget.pinning}
+            dedent(
+                f"""
+                        DISPLAY
+            title:              {self.widget.title}
+            anchor:             {self.widget.anchor}
+            cad_width:          {self.widget.cad_width}
+            height:             {self.widget.height}
+            tree_width:         {self.widget.tree_width}
+            theme:              {self.widget.theme}
+            pinning:            {self.widget.pinning}
 
-            SHAPES
-shapes:             {self.widget.shapes if shapes else (self.widget.shapes[:200] + " ...")}
-states:             {self.widget.states}
-tracks:             {self.widget.tracks}
-            
-            RENDERER
-normal_len:         {self.widget.normal_len}
-default_edge_color: {self.widget.default_edge_color}
-default_opacity:    {self.widget.default_opacity}
-ambient_intensity:  {self.widget.ambient_intensity}
-direct_intensity:   {self.widget.direct_intensity}
-            
-            VIEWER
-timeit:             {self.widget.timeit}
-tools:              {self.widget.tools}
-ortho:              {self.widget.ortho}
-control:            {self.widget.control}
-axes:               {self.widget.axes}
-axes0:              {self.widget.axes0}
-grid:               {self.widget.grid}
-ticks:              {self.widget.ticks}
-transparent:        {self.widget.transparent}
-black_edges:        {self.widget.black_edges}
-tab:                {self.widget.tab}
-clip_intersection:  {self.widget.clip_intersection}
-clip_planes:        {self.widget.clip_planes}
-clip_normal_0:      {self.widget.clip_normal_0}
-clip_normal_1:      {self.widget.clip_normal_1}
-clip_normal_2:      {self.widget.clip_normal_2}
-clip_slider_0:      {self.widget.clip_slider_0}
-clip_slider_1:      {self.widget.clip_slider_1}
-clip_slider_2:      {self.widget.clip_slider_2}
-reset_camera:       {self.widget.reset_camera}
-position:           {self.widget.position}
-quaternion:         {self.widget.quaternion}
-zoom:               {self.widget.zoom}
-position0:          {self.widget.position0}
-quaternion0:        {self.widget.quaternion0}
-zoom0:              {self.widget.zoom0}
-target:             {self.widget.target}
-zoom_speed:         {self.widget.zoom_speed}
-pan_speed:          {self.widget.pan_speed}
-rotate_speed:       {self.widget.rotate_speed}
-animation_speed:    {self.widget.animation_speed}
-state_updates:      {self.widget.state_updates}
-lastPick:           {self.widget.lastPick}
+                        SHAPES
+            shapes:             {self.widget.shapes if shapes else (self.widget.shapes[:200] + " ...")}
+            states:             {self.widget.states}
+            tracks:             {self.widget.tracks}
+                        
+                        RENDERER
+            normal_len:         {self.widget.normal_len}
+            default_edge_color: {self.widget.default_edge_color}
+            default_opacity:    {self.widget.default_opacity}
+            ambient_intensity:  {self.widget.ambient_intensity}
+            direct_intensity:   {self.widget.direct_intensity}
+                        
+                        VIEWER
+            timeit:             {self.widget.timeit}
+            tools:              {self.widget.tools}
+            ortho:              {self.widget.ortho}
+            control:            {self.widget.control}
+            axes:               {self.widget.axes}
+            axes0:              {self.widget.axes0}
+            grid:               {self.widget.grid}
+            ticks:              {self.widget.ticks}
+            transparent:        {self.widget.transparent}
+            black_edges:        {self.widget.black_edges}
+            tab:                {self.widget.tab}
+            clip_intersection:  {self.widget.clip_intersection}
+            clip_planes:        {self.widget.clip_planes}
+            clip_normal_0:      {self.widget.clip_normal_0}
+            clip_normal_1:      {self.widget.clip_normal_1}
+            clip_normal_2:      {self.widget.clip_normal_2}
+            clip_slider_0:      {self.widget.clip_slider_0}
+            clip_slider_1:      {self.widget.clip_slider_1}
+            clip_slider_2:      {self.widget.clip_slider_2}
+            reset_camera:       {self.widget.reset_camera}
+            position:           {self.widget.position}
+            quaternion:         {self.widget.quaternion}
+            zoom:               {self.widget.zoom}
+            position0:          {self.widget.position0}
+            quaternion0:        {self.widget.quaternion0}
+            zoom0:              {self.widget.zoom0}
+            target:             {self.widget.target}
+            zoom_speed:         {self.widget.zoom_speed}
+            pan_speed:          {self.widget.pan_speed}
+            rotate_speed:       {self.widget.rotate_speed}
+            animation_speed:    {self.widget.animation_speed}
+            state_updates:      {self.widget.state_updates}
+            lastPick:           {self.widget.lastPick}
 
-            INTERNAL
-result:             {self.widget.result}
-disposed:           {self.widget.disposed}
-initialize:         {self.widget.initialize}
-js_debug:           {self.widget.js_debug}
-image_id:           {self.widget.image_id}
-"""
+                        INTERNAL
+            result:             {self.widget.result}
+            disposed:           {self.widget.disposed}
+            initialize:         {self.widget.initialize}
+            js_debug:           {self.widget.js_debug}
+            image_id:           {self.widget.image_id}
+            """
+            )
         )
