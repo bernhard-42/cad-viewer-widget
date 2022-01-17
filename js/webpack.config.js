@@ -10,6 +10,8 @@ var rules = [
   { test: /\.svg$/, use: ["svg-inline-loader"] }
 ];
 
+var minimize = false;
+
 module.exports = (env, argv) => {
   var devtool = argv.mode === "development" ? "source-map" : false;
   return [
@@ -30,7 +32,7 @@ module.exports = (env, argv) => {
         publicPath: "" // publicPath is set in extension.js
       },
       optimization: {
-        minimize: true,
+        minimize: minimize,
         minimizer: [
           new TerserPlugin({
             parallel: true,
@@ -59,7 +61,7 @@ module.exports = (env, argv) => {
       },
       devtool,
       optimization: {
-        minimize: true,
+        minimize: minimize,
         minimizer: [
           new TerserPlugin({
             parallel: true,
@@ -99,7 +101,7 @@ module.exports = (env, argv) => {
       },
       devtool,
       optimization: {
-        minimize: true,
+        minimize: minimize,
         minimizer: [
           new TerserPlugin({
             parallel: true,
