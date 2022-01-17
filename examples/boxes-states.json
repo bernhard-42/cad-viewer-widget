@@ -1,1 +1,14 @@
-{"/Group/Part_0":[1,1]}
+{
+  "/Group/example 1/red box": [
+    1,
+    1
+  ],
+  "/Group/example 1/green box": [
+    1,
+    1
+  ],
+  "/Group/example 1/blue box": [
+    1,
+    1
+  ]
+}

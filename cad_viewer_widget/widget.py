@@ -9,6 +9,7 @@ from IPython.display import HTML, update_display
 from pyparsing import ParseException
 
 from .utils import serializer, get_parser
+from .boundingbox import combined_bb, normalize
 
 
 class AnimationTrack:
@@ -190,8 +191,6 @@ class CadViewerWidget(widgets.Output):  # pylint: disable-msg=too-many-instance-
 
     direct_intensity = Float(allow_none=True).tag(sync=True)
     "float: The intensity of the 8 direct lights"
-
-    # bb_factor = Float(allow_none=True).tag(sync=True)
 
     #
     # Generic UI traits
@@ -392,7 +391,7 @@ class CadViewer:
         black_edges=False,
         position=None,
         quaternion=None,
-        zoom=None,
+        zoom=1.0,
         reset_camera=True,
         zoom_speed=1.0,
         pan_speed=1.0,
@@ -604,14 +603,6 @@ class CadViewer:
         }
         """
 
-        if not reset_camera:
-            if position is not None:
-                raise ValueError("Parameter 'position' needs 'reset_camera=True'")
-            if quaternion is not None:
-                raise ValueError("Parameter 'quaternion' needs 'reset_camera=True'")
-            if zoom is not None:
-                raise ValueError("Parameter 'zoom' needs 'reset_camera=True'")
-
         if control == "orbit" and quaternion is not None:
             raise ValueError("Camera quaternion cannot be used with Orbit camera control")
 
@@ -621,14 +612,27 @@ class CadViewer:
         if grid is None:
             grid = [False, False, False]
 
-        self.widget.initialize = True
-
         # If one changes the control type, override reset_camera with "True"
         if self.widget.control != control:
             reset_camera = True
             # Don't show warning on first call
             if self.widget.control != "":
                 print("Camera control changed, so camera was resetted")
+
+        if reset_camera:
+            if position is None:
+                bb = combined_bb(shapes)
+                position = (normalize(np.array((1, 1, 1))) * 5.5 * bb.max_dist_from_center()).tolist()
+            if quaternion is None and control == "trackball":
+                quaternion = (0.1759198966061612, 0.42470820027786693, 0.8204732385702833, 0.33985114297998736)
+            if zoom is None:
+                zoom = 1.0
+        else:
+            position = (*self.widget.position,)
+            quaternion = (*self.widget.quaternion,)
+            zoom = self.widget.zoom
+
+        self.widget.initialize = True
 
         with self.widget.hold_trait_notifications():
             self.widget.shapes = json.dumps(shapes, default=serializer)
@@ -661,11 +665,16 @@ class CadViewer:
             self.add_tracks(tracks)
 
         self.widget.initialize = False
+        self.update_camera_location()
 
     def update_states(self, states):
         """Set navigation tree states for a CAD view"""
 
         self.widget.state_updates = states
+
+    def update_camera_location(self):
+        """Sync position, quaternion and zoom of camer to Python"""
+        self.execute("updateCamera", [])
 
     def close(self):
         """
@@ -1009,6 +1018,7 @@ class CadViewer:
         see [CadViewerWidget.zoom](./widget.html#cad_viewer_widget.widget.CadViewerWidget.zoom)
         """
 
+        self.update_camera_location()
         return self.widget.zoom
 
     @zoom.setter
@@ -1022,6 +1032,7 @@ class CadViewer:
         see [CadViewerWidget.position](./widget.html#cad_viewer_widget.widget.CadViewerWidget.position)
         """
 
+        self.update_camera_location()
         return self.widget.position
 
     @position.setter
@@ -1035,7 +1046,11 @@ class CadViewer:
         see [CadViewerWidget.quaternion](./widget.html#cad_viewer_widget.widget.CadViewerWidget.quaternion)
         """
 
-        return self.widget.quaternion
+        self.update_camera_location()
+        if self.widget.control == "orbit":
+            return None
+        else:
+            return self.widget.quaternion
 
     @quaternion.setter
     def quaternion(self, value):

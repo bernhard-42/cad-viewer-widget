@@ -307,6 +307,27 @@ export class CadViewerView extends DOMWidgetView {
     const timer = new Timer("addShapes", this.model.get("timeit"));
     this._debug = this.model.get("js_debug");
 
+    const resetCamera = this.model.get("reset_camera");
+    var position0 = null;
+    var quaternion0 = null;
+    var zoom0 = null;
+    var position1 = null;
+    var quaternion1 = null;
+    var zoom1 = null;
+    var target = null;
+    
+    if (!resetCamera) {
+      // get both, old reset location and current location of camera
+      position0 = this.model.get("position0");
+      quaternion0 = this.model.get("quaternion0");
+      zoom0 = this.model.get("zoom0");
+      target = this.model.get("target");
+
+      position1 = this.viewer.getCameraPosition();
+      quaternion1 = this.viewer.getCameraQuaternion();
+      zoom1 = this.viewer.getCameraZoom();
+    }
+
     this.shapes = decode(this.model.get("shapes"));
     this.states = this.clone_states();
 
@@ -329,7 +350,7 @@ export class CadViewerView extends DOMWidgetView {
 
     var position, quaternion, zoom;
 
-    if (this.model.get("reset_camera")) {
+    if (resetCamera) {
       // after the first view store inital camera location
       zoom = this.viewer.getCameraZoom();
       position = this.viewer.getCameraPosition();
@@ -339,19 +360,19 @@ export class CadViewerView extends DOMWidgetView {
       this.model.set("position0", position);
       this.model.set("quaternion0", quaternion);
     } else {
-      position = this.model.get("position0");
-      quaternion =
-        this.model.get("quaternion0") == null
-          ? this.viewer.getCameraQuaternion()
-          : this.model.get("quaternion0");
-      zoom = this.model.get("zoom0");
-
       this.viewer.setResetLocation(
-        this.model.get("target"),
-        position,
-        quaternion,
-        zoom
+        target,
+        position0,
+        quaternion0,
+        zoom0
       );
+
+      position = [...position1];
+      quaternion = [...quaternion1];
+      zoom = zoom1;
+      this.viewer.setCameraPosition(position);
+      this.viewer.setCameraQuaternion(quaternion)
+      this.viewer.setCameraZoom(zoom1);
     }
 
     this.model.set("zoom", zoom);
@@ -370,6 +391,17 @@ export class CadViewerView extends DOMWidgetView {
     timer.stop();
 
     return true;
+  }
+  
+  updateCamera() {
+      var zoom = this.viewer.getCameraZoom();
+      var position = this.viewer.getCameraPosition();
+      var quaternion = this.viewer.getCameraQuaternion();
+
+      this.model.set("zoom", zoom);
+      this.model.set("position", position);
+      this.model.set("quaternion", quaternion);
+
   }
 
   addTracks(tracks) {
