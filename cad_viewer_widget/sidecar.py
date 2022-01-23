@@ -9,10 +9,10 @@ DEFAULT = None
 class Sidecar(Output):
     _model_name = Unicode("CadViewerSidecarModel").tag(sync=True)
     _model_module = Unicode("cad-viewer-widget").tag(sync=True)
-    _model_module_version = Unicode("0.10.0").tag(sync=True)
+    _model_module_version = Unicode("0.10.1").tag(sync=True)
     _view_name = Unicode("CadViewerSidecarView").tag(sync=True)
     _view_module = Unicode("cad-viewer-widget").tag(sync=True)
-    _view_module_version = Unicode("0.10.0").tag(sync=True)
+    _view_module_version = Unicode("0.10.1").tag(sync=True)
 
     title = Unicode("CadViewer").tag(sync=True)
     anchor = CaselessStrEnum(
