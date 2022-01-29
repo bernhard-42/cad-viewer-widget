@@ -100,17 +100,15 @@ class AnimationTrack:
 
 
 @widgets.register
-class CadViewerWidget(
-    widgets.Output
-):  # pylint: disable-msg=too-many-instance-attributes
+class CadViewerWidget(widgets.Output):  # pylint: disable-msg=too-many-instance-attributes
     """The CAD Viewer widget."""
 
     _view_name = Unicode("CadViewerView").tag(sync=True)
     _model_name = Unicode("CadViewerModel").tag(sync=True)
     _view_module = Unicode("cad-viewer-widget").tag(sync=True)
     _model_module = Unicode("cad-viewer-widget").tag(sync=True)
-    _view_module_version = Unicode("0.10.1").tag(sync=True)
-    _model_module_version = Unicode("0.10.1").tag(sync=True)
+    _view_module_version = Unicode("0.10.2").tag(sync=True)
+    _model_module_version = Unicode("0.10.2").tag(sync=True)
 
     #
     # Display traits
@@ -232,9 +230,7 @@ class CadViewerWidget(
     position = Tuple(Float(), Float(), Float(), allow_none=True).tag(sync=True)
     "tuple: Position of the camera as a 3-dim tuple of float (x,y,z)"
 
-    quaternion = Tuple(Float(), Float(), Float(), Float(), allow_none=True).tag(
-        sync=True
-    )
+    quaternion = Tuple(Float(), Float(), Float(), Float(), allow_none=True).tag(sync=True)
     "tuple: Rotation of the camera as 4-dim quaternion (x,y,z,w)"
 
     zoom = Float(allow_none=True).tag(sync=True)
@@ -243,9 +239,7 @@ class CadViewerWidget(
     position0 = Tuple(Float(), Float(), Float(), allow_none=True).tag(sync=True)
     "tuple: Initial position of the camera as a 3-dim tuple of float (x,y,z)"
 
-    quaternion0 = Tuple(Float(), Float(), Float(), Float(), allow_none=True).tag(
-        sync=True
-    )
+    quaternion0 = Tuple(Float(), Float(), Float(), Float(), allow_none=True).tag(sync=True)
     "tuple: Initial rotation of the camera as 4-dim quaternion (x,y,z,w)"
 
     zoom0 = Float(allow_none=True).tag(sync=True)
@@ -270,14 +264,10 @@ class CadViewerWidget(
     # Read only traitlets
     #
 
-    lastPick = Dict(
-        key_trait=Unicode(), value_trait=Any(), allow_none=True, read_only=True
-    ).tag(sync=True)
+    lastPick = Dict(key_trait=Unicode(), value_trait=Any(), allow_none=True, read_only=True).tag(sync=True)
     "dict: Describes the last picked element of the CAD view"
 
-    target = Tuple(Float(), Float(), Float(), allow_none=True, read_only=True).tag(
-        sync=True
-    )
+    target = Tuple(Float(), Float(), Float(), allow_none=True, read_only=True).tag(sync=True)
     "tuple: Camera target as a 3-dim tuple of float (x,y,z)"
 
     result = Unicode(allow_none=True, read_only=True).tag(sync=True)
@@ -638,14 +628,10 @@ class CadViewer:
         """
 
         if control == "orbit" and quaternion is not None:
-            raise ValueError(
-                "Camera quaternion cannot be used with Orbit camera control"
-            )
+            raise ValueError("Camera quaternion cannot be used with Orbit camera control")
 
         if control == "trackball" and position is not None and quaternion is None:
-            raise ValueError(
-                "For Trackball camera control, position paramater also needs quaternion parameter"
-            )
+            raise ValueError("For Trackball camera control, position paramater also needs quaternion parameter")
 
         if grid is None:
             grid = [False, False, False]
@@ -661,7 +647,7 @@ class CadViewer:
             if position is None:
                 bb = combined_bb(shapes)
                 position = (
-                    normalize(np.array((1, 1, 1))) * 5.5 * bb.max_dist_from_center()
+                    normalize(np.array((1, 1, 1))) * 5.5 * bb.max_dist_from_center() + np.array(bb.center)
                 ).tolist()
             if quaternion is None and control == "trackball":
                 quaternion = (
@@ -1153,9 +1139,7 @@ class CadViewer:
             List of Animation tracks, see [AnimationTrack](/widget.html#cad_viewer_widget.widget.AnimationTrack)
         """
 
-        self.tracks = (
-            [] if tracks is None else [track for track in tracks]
-        )  # enforce a new array
+        self.tracks = [] if tracks is None else [track for track in tracks]  # enforce a new array
 
     def animate(self, speed=1):
         """
