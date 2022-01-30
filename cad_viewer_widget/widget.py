@@ -1329,6 +1329,9 @@ class CadViewer:
     #
 
     def export_html(self, filename="cadquery.html", title="CadQuery"):
+        if self.widget.title != None:
+            raise RuntimeError("Export_html does not work with sidecar. Show the object again in a cell viewer")
+
         pinning = self.pinning
         self.pinning = False
 
