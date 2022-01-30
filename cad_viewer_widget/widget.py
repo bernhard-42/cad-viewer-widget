@@ -1130,6 +1130,39 @@ class CadViewer:
         self.tracks = []
         self.widget.tracks = ""
 
+    def _check_track(self, track):
+        paths = self.widget.states.keys()
+        if not any([(f"{path}/").startswith(f"{track.path}/") for path in paths]):
+            raise ValueError(f"{track.path} is not a valid subpath of any of {list(paths)}")
+
+        actions = ["t", "tx", "ty", "tz", "q", "rx", "ry", "rz"]
+        if not track.action in actions:
+            raise ValueError(f"{track.action} is not a valid action {list(actions)}")
+
+        if len(track.times) != len(track.values):
+            raise ValueError(f"Track times and values need to have same length")
+
+        if not all([isinstance(t, (int, float)) for t in track.times]):
+            raise ValueError(f"Time values need to be int or float")
+
+        if track.action in ["tx", "ty", "tz", "rx", "ry", "rz"]:
+            if not all([isinstance(t, (int, float)) for t in track.values]):
+                raise ValueError(f"Value values need to be int or float for action '{track.action}'")
+
+        if track.action in ["t", "q"]:
+            size = 3 if track.action == "t" else 4
+            if not all(
+                [
+                    isinstance(v, (list, tuple)) and (len(v) == size) and all([isinstance(x, (int, float)) for x in v])
+                    for v in track.values
+                ]
+            ):
+                raise ValueError(
+                    f"Value values need to be {size} dim lists of int or float for action '{track.action}'"
+                )
+
+        return track
+
     def add_track(self, track):
         """
         Add an animation track to CAD view
@@ -1140,7 +1173,7 @@ class CadViewer:
             Animation track, see [AnimationTrack](/widget.html#cad_viewer_widget.widget.AnimationTrack)
         """
 
-        self.tracks.append(track)
+        self.tracks.append(self._check_track(track))
 
     def add_tracks(self, tracks):
         """
@@ -1151,8 +1184,10 @@ class CadViewer:
         tracks: list of AnimationTrack
             List of Animation tracks, see [AnimationTrack](/widget.html#cad_viewer_widget.widget.AnimationTrack)
         """
-
-        self.tracks = [] if tracks is None else [track for track in tracks]  # enforce a new array
+        checked_tracks = (
+            [] if tracks is None else [self._check_track(track) for track in tracks]
+        )  # enforce a new array
+        self.tracks = checked_tracks
 
     def animate(self, speed=1):
         """
