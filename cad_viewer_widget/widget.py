@@ -124,10 +124,10 @@ class CadViewerWidget(widgets.Output):  # pylint: disable-msg=too-many-instance-
     "unicode string: Width of the canvas element"
 
     height = Integer(allow_none=True).tag(sync=True)
-    "int: Heigth of the canvas element"
+    "int: Height of the canvas element"
 
     tree_width = Integer(allow_none=True).tag(sync=True)
-    "int: Width of the navigatoin tree element"
+    "int: Width of the navigation tree element"
 
     theme = Unicode(allow_none=True).tag(sync=True)
     "unicode string: UI theme, can be 'dark' or 'light' (default)"
@@ -173,7 +173,7 @@ class CadViewerWidget(widgets.Output):  # pylint: disable-msg=too-many-instance-
     "integer: Hint for the number of ticks for the grids (will be adjusted for nice intervals)"
 
     transparent = Bool(allow_none=True).tag(sync=True)
-    "bool: Whether to show the CAD objetcs transparently (True) or not (False)"
+    "bool: Whether to show the CAD objects transparently (True) or not (False)"
 
     black_edges = Bool(allow_none=True).tag(sync=True)
     "bool: Whether to shows the edges in black (True) or not(False)"
@@ -198,7 +198,7 @@ class CadViewerWidget(widgets.Output):  # pylint: disable-msg=too-many-instance-
     #
 
     tab = Unicode(allow_none=True).tag(sync=True)
-    "unicode: Whther to show the navigation tree ('tree') or the clipping UI ('clip')"
+    "unicode: Whether to show the navigation tree ('tree') or the clipping UI ('clip')"
 
     clip_intersection = Bool(allow_none=True).tag(sync=True)
     "bool: Whether to use intersection clipping (True) or not (False)"
@@ -243,7 +243,7 @@ class CadViewerWidget(widgets.Output):  # pylint: disable-msg=too-many-instance-
     "tuple: Initial rotation of the camera as 4-dim quaternion (x,y,z,w)"
 
     zoom0 = Float(allow_none=True).tag(sync=True)
-    "float: Inital zoom value of the camera"
+    "float: Initial zoom value of the camera"
 
     zoom_speed = Float(allow_none=True).tag(sync=True)
     "float: Speed of zooming with the mouse"
@@ -271,7 +271,7 @@ class CadViewerWidget(widgets.Output):  # pylint: disable-msg=too-many-instance-
     "tuple: Camera target as a 3-dim tuple of float (x,y,z)"
 
     result = Unicode(allow_none=True, read_only=True).tag(sync=True)
-    "unicode string: JSON serialiued result from Javascript"
+    "unicode string: JSON serialized result from Javascript"
 
     #
     # Internal traitlets
@@ -281,7 +281,7 @@ class CadViewerWidget(widgets.Output):  # pylint: disable-msg=too-many-instance-
     "unicode string: Whether the Javascript viewer is disposed"
 
     initialize = Bool(allow_none=True).tag(sync=True)
-    "bool: internally used to control initialisation of view. Do not use!"
+    "bool: internally used to control initialization of view. Do not use!"
 
     js_debug = Bool(allow_none=True).tag(sync=True)
     "bool: Whether to show infos in the browser console (True) or not (False)"
@@ -305,9 +305,9 @@ class CadViewer:
     cad_width : int, default: 800
         Width of the canvas element
     height : int, default: 600
-        Heigth of the canvas element
+        Height of the canvas element
     tree_width : int, default: 240
-        Width of the navigatoin tree element
+        Width of the navigation tree element
     theme : string, default: 'light'
         UI theme, can be 'dark' or 'light' (default)
     tools : bool, default: True
@@ -427,7 +427,7 @@ class CadViewer:
         ticks : int, default 10
             Hint for the number of ticks for the grids (will be adjusted for nice intervals)
         transparent : bool, default False
-            Whether to show the CAD objetcs transparently (True) or not (False)
+            Whether to show the CAD objects transparently (True) or not (False)
         black_edges : bool, default False
             Whether to shows the edges in black (True) or not(False)
         normal_Len : int, default 0
@@ -460,7 +460,7 @@ class CadViewer:
         Examples
         --------
 
-        A simple cube with edge len of 1 is tessellated like the `shape` eloment of the first (and only) element of
+        A simple cube with edge len of 1 is tessellated like the `shape` element of the first (and only) element of
         the `parts` list:
 
         ```
@@ -704,7 +704,7 @@ class CadViewer:
         self.widget.state_updates = states
 
     def update_camera_location(self):
-        """Sync position, quaternion and zoom of camer to Python"""
+        """Sync position, quaternion and zoom of camera to Python"""
         self.execute("updateCamera", [])
 
     def close(self):
