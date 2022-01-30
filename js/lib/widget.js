@@ -372,7 +372,7 @@ export class CadViewerView extends DOMWidgetView {
       quaternion = [...quaternion1];
       zoom = zoom1;
       this.viewer.setCameraPosition(position);
-      this.viewer.setCameraQuaternion(quaternion)
+      this.viewer.setCameraQuaternion(quaternion);
       this.viewer.setCameraZoom(zoom1);
     }
 
