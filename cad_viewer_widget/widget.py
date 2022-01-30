@@ -3,6 +3,7 @@
 import json
 from textwrap import dedent
 import ipywidgets as widgets
+from ipywidgets.embed import embed_minimal_html, dependency_state
 import numpy as np
 
 from traitlets import Unicode, Dict, Tuple, Integer, Float, Any, Bool, observe
@@ -1287,6 +1288,18 @@ class CadViewer:
         if self.control != "orbit":
             raise NameError("rotateLeft only works for orbit control")
         self.execute("viewer.controls.rotateLeft", (angle,))
+
+    #
+    # Exports
+    #
+
+    def export_html(self, filename="cadquery.html", title="CadQuery"):
+        pinning = self.pinning
+        self.pinning = False
+
+        embed_minimal_html(filename, title=title, views=[self.widget], state=dependency_state(self.widget))
+
+        self.pinning = pinning
 
     #
     # Custom message handling
