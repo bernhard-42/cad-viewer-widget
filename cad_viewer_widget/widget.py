@@ -1105,6 +1105,18 @@ class CadViewer:
 
         return self.widget.control
 
+    @property
+    def pinning(self):
+        """
+        Get or set the CadViewerWidget traitlet `pinning`
+        see [CadViewerWidget.pinning](./widget.html#cad_viewer_widget.widget.CadViewerWidget.pinning)
+        """
+        return self.widget.pinning
+
+    @pinning.setter
+    def pinning(self, flag):
+        self.widget.pinning = flag
+
     #
     # Animation handling
     #

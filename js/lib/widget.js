@@ -123,6 +123,7 @@ export class CadViewerView extends DOMWidgetView {
       this.model.on("change:transparent", this.handle_change, this);
       this.model.on("change:black_edges", this.handle_change, this);
       this.model.on("change:tools", this.handle_change, this);
+      this.model.on("change:pinning", this.handle_change, this);
       this.model.on("change:default_edge_color", this.handle_change, this);
       this.model.on("change:default_opacity", this.handle_change, this);
       this.model.on("change:ambient_intensity", this.handle_change, this);
@@ -488,6 +489,10 @@ export class CadViewerView extends DOMWidgetView {
         break;
       case "tools":
         setKey("getTools", "setTools", key);
+        break;
+      case "pinning":
+        var flag = change.changed[key];
+        this.viewer.display.setPinning(flag);
         break;
       case "default_edge_color":
         setKey("getEdgeColor", "setEdgeColor", key);

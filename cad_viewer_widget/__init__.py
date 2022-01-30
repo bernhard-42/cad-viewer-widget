@@ -76,6 +76,7 @@ def open_viewer(
     tree_width=250,
     height=600,
     theme="light",
+    pinning=True,
 ):
     if title is None:
         viewer = CadViewer(
@@ -85,7 +86,7 @@ def open_viewer(
             tree_width=tree_width,
             height=height,
             theme=theme,
-            pinning=True,
+            pinning=pinning,
         )
         display(viewer.widget)
 
@@ -128,8 +129,9 @@ def show(
     tree_width=250,
     height=600,
     theme="light",
+    pinning=None,
     #
-    # render oprions
+    # render options
     normal_len=0,
     default_edge_color="#707070",
     default_opacity=0.5,
@@ -193,9 +195,19 @@ def show(
 
     if title is None:
         if get_default() is None:
-            viewer = open_viewer(title=None, anchor=None, **display_args(kwargs))
+            viewer = open_viewer(
+                title=None,
+                anchor=None,
+                pinning=True if pinning is None else pinning,
+                **display_args(kwargs)
+            )
         else:
-            viewer = open_viewer(title=get_default(), anchor=None, **display_args(kwargs))
+            viewer = open_viewer(
+                title=get_default(),
+                anchor=None,
+                pinning=False if pinning is None else pinning,
+                **display_args(kwargs)
+            )
     else:
         viewer = get_sidecar(title)
         if viewer is None:
