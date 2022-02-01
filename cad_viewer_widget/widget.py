@@ -133,7 +133,7 @@ class CadViewerWidget(widgets.Output):  # pylint: disable-msg=too-many-instance-
     theme = Unicode(allow_none=True).tag(sync=True)
     "unicode string: UI theme, can be 'dark' or 'light' (default)"
 
-    pinning = Bool(allow_none=True).tag(sync=True)
+    pinning = Bool(allow_none=True, default_value=None).tag(sync=True)
     "bool: Whether to show the pin a png button or not"
 
     #
@@ -149,22 +149,22 @@ class CadViewerWidget(widgets.Output):  # pylint: disable-msg=too-many-instance-
     tracks = Unicode(allow_none=True).tag(sync=True)
     "unicode: Serialized list of animation track arrays, see [AnimationTrack.to_array](/widget.html#cad_viewer_widget.widget.AnimationTrack.to_array)"
 
-    timeit = Bool(allow_none=True).tag(sync=True)
+    timeit = Bool(allow_none=True, default_value=None).tag(sync=True)
     "bool: Whether to output timing info to the browser console (True) or not (False)"
 
-    tools = Bool(allow_none=True).tag(sync=True)
+    tools = Bool(allow_none=True, default_value=None).tag(sync=True)
     "bool: Whether to show CAD tools (True) or not (False)"
 
-    ortho = Bool(allow_none=True).tag(sync=True)
+    ortho = Bool(allow_none=True, default_value=None).tag(sync=True)
     "bool: Whether to use orthographic view (True) or perspective view (False)"
 
     control = Unicode().tag(sync=True)
     "unicode: Whether to use trackball controls ('trackball') or orbit controls ('orbit')"
 
-    axes = Bool(allow_none=True).tag(sync=True)
+    axes = Bool(allow_none=True, default_value=None).tag(sync=True)
     "bool: Whether to show coordinate axes (True) or not (False)"
 
-    axes0 = Bool(allow_none=True).tag(sync=True)
+    axes0 = Bool(allow_none=True, default_value=None).tag(sync=True)
     "bool: Whether to center coordinate axes at the origin [0,0,0] (True) or at the CAD object center (False)"
 
     grid = Tuple(Bool(), Bool(), Bool(), allow_none=True).tag(sync=True)
@@ -173,10 +173,10 @@ class CadViewerWidget(widgets.Output):  # pylint: disable-msg=too-many-instance-
     ticks = Integer(allow_none=True).tag(sync=True)
     "integer: Hint for the number of ticks for the grids (will be adjusted for nice intervals)"
 
-    transparent = Bool(allow_none=True).tag(sync=True)
+    transparent = Bool(allow_none=True, default_value=None).tag(sync=True)
     "bool: Whether to show the CAD objects transparently (True) or not (False)"
 
-    black_edges = Bool(allow_none=True).tag(sync=True)
+    black_edges = Bool(allow_none=True, default_value=None).tag(sync=True)
     "bool: Whether to shows the edges in black (True) or not(False)"
 
     normal_len = Float(allow_none=True).tag(sync=True)
@@ -201,31 +201,31 @@ class CadViewerWidget(widgets.Output):  # pylint: disable-msg=too-many-instance-
     tab = Unicode(allow_none=True).tag(sync=True)
     "unicode: Whether to show the navigation tree ('tree') or the clipping UI ('clip')"
 
-    clip_intersection = Bool(allow_none=True).tag(sync=True)
+    clip_intersection = Bool(allow_none=True, default_value=None).tag(sync=True)
     "bool: Whether to use intersection clipping (True) or not (False)"
 
-    clip_planes = Bool(allow_none=True).tag(sync=True)
+    clip_planes = Bool(allow_none=True, default_value=None).tag(sync=True)
     "bool: Whether to show colored clipping planes (True) or not (False)"
 
-    clip_normal_0 = Tuple(Float(), Float(), Float(), allow_none=True).tag(sync=True)
+    clip_normal_0 = Tuple(Float(), Float(), Float(), allow_none=True, default_value=None).tag(sync=True)
     "tuple: Normal of clipping plane 1 as a 3-dim tuple of float (x,y,z)"
 
-    clip_normal_1 = Tuple(Float(), Float(), Float(), allow_none=True).tag(sync=True)
+    clip_normal_1 = Tuple(Float(), Float(), Float(), allow_none=True, default_value=None).tag(sync=True)
     "tuple: Normal of clipping plane 2 as a 3-dim tuple of float (x,y,z)"
 
-    clip_normal_2 = Tuple(Float(), Float(), Float(), allow_none=True).tag(sync=True)
+    clip_normal_2 = Tuple(Float(), Float(), Float(), allow_none=True, default_value=None).tag(sync=True)
     "tuple: Normal of clipping plane 3 as a 3-dim tuple of float (x,y,z)"
 
-    clip_slider_0 = Float(allow_none=True).tag(sync=True)
+    clip_slider_0 = Float(allow_none=True, default_value=None).tag(sync=True)
     "float: Slider value of clipping plane 1"
 
-    clip_slider_1 = Float(allow_none=True).tag(sync=True)
+    clip_slider_1 = Float(allow_none=True, default_value=None).tag(sync=True)
     "float: Slider value of clipping plane 2"
 
-    clip_slider_2 = Float(allow_none=True).tag(sync=True)
+    clip_slider_2 = Float(allow_none=True, default_value=None).tag(sync=True)
     "float: Slider value of clipping plane 3"
 
-    reset_camera = Bool(allow_none=True).tag(sync=True)
+    reset_camera = Bool(allow_none=True, default_value=None).tag(sync=True)
     "bool: Whether to reset camera (True) or not (False)"
 
     position = Tuple(Float(), Float(), Float(), allow_none=True).tag(sync=True)
@@ -271,20 +271,20 @@ class CadViewerWidget(widgets.Output):  # pylint: disable-msg=too-many-instance-
     target = Tuple(Float(), Float(), Float(), allow_none=True, read_only=True).tag(sync=True)
     "tuple: Camera target as a 3-dim tuple of float (x,y,z)"
 
-    result = Unicode(allow_none=True, read_only=True).tag(sync=True)
+    result = Unicode(allow_none=True).tag(sync=True)
     "unicode string: JSON serialized result from Javascript"
 
     #
     # Internal traitlets
     #
 
-    disposed = Bool(default=False, allow_none=True).tag(sync=True)
+    disposed = Bool(default=False, allow_none=True, default_value=None).tag(sync=True)
     "unicode string: Whether the Javascript viewer is disposed"
 
-    initialize = Bool(allow_none=True).tag(sync=True)
+    initialize = Bool(allow_none=True, default_value=None).tag(sync=True)
     "bool: internally used to control initialization of view. Do not use!"
 
-    js_debug = Bool(allow_none=True).tag(sync=True)
+    js_debug = Bool(allow_none=True, default_value=None).tag(sync=True)
     "bool: Whether to show infos in the browser console (True) or not (False)"
 
     image_id = Unicode(allow_none=True).tag(sync=True)
