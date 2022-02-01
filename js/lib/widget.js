@@ -261,7 +261,7 @@ export class CadViewerView extends DOMWidgetView {
       container,
       options,
       this.handleNotification.bind(this),
-      this.pinAsPng.bind(this),
+      this.exportPng.bind(this),
       true
     );
 
@@ -316,7 +316,7 @@ export class CadViewerView extends DOMWidgetView {
     var quaternion1 = null;
     var zoom1 = null;
     var target = null;
-    
+
     if (!resetCamera) {
       // get both, old reset location and current location of camera
       position0 = this.model.get("position0");
@@ -578,20 +578,42 @@ export class CadViewerView extends DOMWidgetView {
     }
   }
 
-  pinAsPng(image) {
-    this.model.set(
-      "result",
-      JSON.stringify({
-        display_id: this.model.get("image_id"),
-        src: image.src,
-        width: image.width,
-        height: image.height
-      })
-    );
-    this.model.save_changes();
-    // and remove itself
-    this.dispose();
-    App.removeCellViewer(this.container_id);
+  exportPng(image) {
+    if (this.png_filename == null) {
+      this.model.set(
+        "result",
+        JSON.stringify({
+          display_id: this.model.get("image_id"),
+          src: image.src,
+          width: image.width,
+          height: image.height
+        })
+      );
+      this.model.save_changes();
+
+      this.dispose();
+      App.removeCellViewer(this.container_id);
+    } else {
+      this.model.set(
+        "result",
+        JSON.stringify({
+          filename: this.png_filename,
+          src: image.src
+        })
+      );
+      this.model.save_changes();
+      this.png_filename = null;
+    }
+  }
+
+  saveAsPng(filename) {
+    this.png_filename = filename;
+    this.viewer.pinAsPng();
+  }
+
+  pinAsPng() {
+    this.png_filename = null;
+    this.viewer.pinAsPng();
   }
 
   onCustomMessage(msg, buffers) {

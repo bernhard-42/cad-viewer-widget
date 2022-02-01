@@ -1,5 +1,6 @@
 """This module is the Python part of the CAD Viewer widget"""
 
+import base64
 import json
 from textwrap import dedent
 import ipywidgets as widgets
@@ -292,9 +293,17 @@ class CadViewerWidget(widgets.Output):  # pylint: disable-msg=too-many-instance-
 
     @observe("result")
     def func(self, change):
-        data = json.loads(change["new"])
-        html = f"""<img src="{data['src']}" width="{data['width']}px" height="{data['height']}px"/>"""
-        update_display(HTML(html), display_id=data["display_id"])
+        if change["new"] is not None:
+            data = json.loads(change["new"])
+
+            if data.get("display_id") is not None:
+                html = f"""<img src="{data['src']}" width="{data['width']}px" height="{data['height']}px"/>"""
+                update_display(HTML(html), display_id=data["display_id"])
+            else:
+                with open(data["filename"], "wb") as fd:
+                    fd.write(base64.b64decode(data["src"].split(",")[1]))
+
+            self.result = None
 
 
 class CadViewer:
@@ -1230,7 +1239,14 @@ class CadViewer:
         Pin CAD View as PNG
         """
 
-        self.execute("viewer.pinAsPng", None)
+        self.execute("pinAsPng", None)
+
+    def export_png(self, filename):
+        """
+        Save CAD View as PNG
+        """
+
+        self.execute("saveAsPng", filename)
 
     #
     # Tab handling
