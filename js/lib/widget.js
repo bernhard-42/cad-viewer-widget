@@ -151,6 +151,9 @@ export class CadViewerView extends DOMWidgetView {
 
       this.shell = App.getShell();
 
+      // in case of embedding we need to state values later, since rendering resets them
+      this.backupClipping();
+
       this.init = false;
       this.disposed = false;
 
@@ -304,6 +307,53 @@ export class CadViewerView extends DOMWidgetView {
     return states2;
   }
 
+  backupClipping() {
+    this.clipSettings = {
+      tab: this.model.get("tab"),
+      clip_planes: this.model.get("clip_planes"),
+      clip_intersection: this.model.get("clip_intersection"),
+      clip_normal_0: this.model.get("clip_normal_0"),
+      clip_normal_1: this.model.get("clip_normal_1"),
+      clip_normal_2: this.model.get("clip_normal_2"),
+      clip_slider_0: this.model.get("clip_slider_0"),
+      clip_slider_1: this.model.get("clip_slider_1"),
+      clip_slider_2: this.model.get("clip_slider_2")
+    };
+  }
+
+  setClipping() {
+    if (this.clipSettings.tab != null) {
+      this.viewer.display.selectTabByName(this.clipSettings.tab);
+    }
+    if (this.clipSettings.clip_intersection != null) {
+      this.viewer.setClipIntersection(
+        this.clipSettings.clip_intersection,
+        false
+      );
+    }
+    if (this.clipSettings.clip_planes != null) {
+      this.viewer.setClipPlaneHelpers(this.clipSettings.clip_planes, false);
+    }
+    if (this.clipSettings.clip_normal_0 != null) {
+      this.viewer.setClipNormal(0, this.clipSettings.clip_normal_0, false);
+    }
+    if (this.clipSettings.clip_normal_1 != null) {
+      this.viewer.setClipNormal(1, this.clipSettings.clip_normal_1, false);
+    }
+    if (this.clipSettings.clip_normal_2 != null) {
+      this.viewer.setClipNormal(2, this.clipSettings.clip_normal_2, false);
+    }
+    if (this.clipSettings.clip_slider_0 != null) {
+      this.viewer.setClipSlider(0, this.clipSettings.clip_slider_0, false);
+    }
+    if (this.clipSettings.clip_slider_1 != null) {
+      this.viewer.setClipSlider(1, this.clipSettings.clip_slider_1, false);
+    }
+    if (this.clipSettings.clip_slider_2 != null) {
+      this.viewer.setClipSlider(2, this.clipSettings.clip_slider_2, false);
+    }
+  }
+
   addShapes() {
     const timer = new Timer("addShapes", this.model.get("timeit"));
     this._debug = this.model.get("js_debug");
@@ -381,6 +431,8 @@ export class CadViewerView extends DOMWidgetView {
     this.model.set("quaternion", quaternion);
 
     this.model.save_changes();
+
+    this.setClipping();
 
     // add animation tracks if exist
     const tracks = this.model.get("tracks");
