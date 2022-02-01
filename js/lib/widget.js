@@ -411,12 +411,7 @@ export class CadViewerView extends DOMWidgetView {
       this.model.set("position0", position);
       this.model.set("quaternion0", quaternion);
     } else {
-      this.viewer.setResetLocation(
-        target,
-        position0,
-        quaternion0,
-        zoom0
-      );
+      this.viewer.setResetLocation(target, position0, quaternion0, zoom0);
 
       position = [...position1];
       quaternion = [...quaternion1];
@@ -445,16 +440,15 @@ export class CadViewerView extends DOMWidgetView {
 
     return true;
   }
-  
+
   updateCamera() {
-      var zoom = this.viewer.getCameraZoom();
-      var position = this.viewer.getCameraPosition();
-      var quaternion = this.viewer.getCameraQuaternion();
+    var zoom = this.viewer.getCameraZoom();
+    var position = this.viewer.getCameraPosition();
+    var quaternion = this.viewer.getCameraQuaternion();
 
-      this.model.set("zoom", zoom);
-      this.model.set("position", position);
-      this.model.set("quaternion", quaternion);
-
+    this.model.set("zoom", zoom);
+    this.model.set("position", position);
+    this.model.set("quaternion", quaternion);
   }
 
   addTracks(tracks) {
