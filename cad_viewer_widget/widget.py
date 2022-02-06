@@ -360,9 +360,10 @@ class CadViewer:
         self.msg_id = 0
         self.parser = get_parser()
 
-        self.widget.position0 = None
-        self.widget.quaternion0 = None
-        self.widget.zoom0 = None
+        # self.widget.position0 = None
+        # self.widget.quaternion0 = None
+        # self.widget.zoom0 = None
+        self.empty = True
 
         self.tracks = []
 
@@ -653,6 +654,11 @@ class CadViewer:
             if self.widget.control != "":
                 print("Camera control changed, so camera was resetted")
 
+        # Ensure that reset_camera is set to True for new viewers
+        if self.empty:
+            reset_camera = True
+            self.empty = False
+
         if reset_camera:
             if position is None:
                 bb = combined_bb(shapes)
@@ -698,6 +704,12 @@ class CadViewer:
             self.widget.position = position
             self.widget.quaternion = quaternion
             self.widget.zoom = zoom
+            # If reset_camera, position0, quaternion0 and zoom0 need to be set
+            if reset_camera:
+                self.widget.position0 = (*position,)
+                if control == "trackball":
+                    self.widget.quaternion0 = (*quaternion,)
+                self.widget.zoom0 = zoom
             self.widget.zoom_speed = zoom_speed
             self.widget.pan_speed = pan_speed
             self.widget.rotate_speed = rotate_speed
