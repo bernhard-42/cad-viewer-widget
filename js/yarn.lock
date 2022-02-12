@@ -5041,10 +5041,10 @@ text-table@^0.2.0:
   resolved "https://registry.yarnpkg.com/text-table/-/text-table-0.2.0.tgz#7f5ee823ae805207c00af2df4a84ec3fcfa570b4"
   integrity sha1-f17oI66AUgfACvLfSoTsP8+lcLQ=
 
-three-cad-viewer@1.2.8:
-  version "1.2.8"
-  resolved "https://registry.yarnpkg.com/three-cad-viewer/-/three-cad-viewer-1.2.8.tgz#1ee4dd5103c924e176391a853f1ade88907db6fd"
-  integrity sha512-aCXfGTdYWdmIubUn1/PjvG2LiOHMptAhj7h3GVzY8eLbDb15T13R0DxGQ4qWlFqddvUkF7w7i832rHTyTk368w==
+three-cad-viewer@1.3.1:
+  version "1.3.1"
+  resolved "https://registry.yarnpkg.com/three-cad-viewer/-/three-cad-viewer-1.3.1.tgz#88edf751e5d7e9e874298460c636af1b11ba9efd"
+  integrity sha512-jExFi9HauPOl/AQafpZLlVg3wvhm9T+XspFUESNzJpaR+MtP4MtivCki4xoVZmu6x3CcP5tX9VIuF0fOWRHUfg==
   dependencies:
     three "^0.137.5"
 
