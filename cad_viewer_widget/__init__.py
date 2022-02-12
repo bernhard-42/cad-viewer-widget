@@ -12,8 +12,8 @@ from .sidecar import (
     set_sidecar,
     close_sidecars,
     close_sidecar,
-    get_default,
-    set_default as _set_default,
+    get_default as get_default_sidecar,
+    set_default as _set_default_sidecar,
 )
 
 from .utils import display_args, viewer_args
@@ -196,20 +196,17 @@ def show(
         grid = [False, False, False]
 
     if title is None:
-        if get_default() is None:
+        if get_default_sidecar() is None:
             viewer = open_viewer(
-                title=None,
-                anchor=None,
-                pinning=True if pinning is None else pinning,
-                **display_args(kwargs)
+                title=None, anchor=None, pinning=True if pinning is None else pinning, **display_args(kwargs)
             )
         else:
-            viewer = open_viewer(
-                title=get_default(),
-                anchor=None,
-                pinning=False if pinning is None else pinning,
-                **display_args(kwargs)
-            )
+            title = get_default_sidecar()
+            viewer = get_sidecar(title)
+            if viewer is None:
+                viewer = open_viewer(
+                    title=title, anchor=None, pinning=False if pinning is None else pinning, **display_args(kwargs)
+                )
     else:
         viewer = get_sidecar(title)
         if viewer is None:
@@ -219,7 +216,7 @@ def show(
     return viewer
 
 
-def set_default(title, anchor="right"):
-    _set_default(title)
+def set_default_sidecar(title, anchor="right"):
+    _set_default_sidecar(title)
     if get_sidecar(title) is None:
         open_viewer(title, anchor=anchor)
