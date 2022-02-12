@@ -303,8 +303,11 @@ class CadViewerWidget(widgets.Output):  # pylint: disable-msg=too-many-instance-
                 html = f"""<img src="{data['src']}" width="{data['width']}px" height="{data['height']}px"/>"""
                 update_display(HTML(html), display_id=data["display_id"])
             else:
-                with open(data["filename"], "wb") as fd:
-                    fd.write(base64.b64decode(data["src"].split(",")[1]))
+                if self.test_func is not None and callable(self.test_func):
+                    self.test_func(base64.b64decode(data["src"].split(",")[1]))  # pylint: disable=not-callable
+                else:
+                    with open(data["filename"], "wb") as fd:
+                        fd.write(base64.b64decode(data["src"].split(",")[1]))
 
             self.result = None
 
@@ -360,6 +363,7 @@ class CadViewer:
             title=title,
             anchor=anchor,
         )
+        self.widget.test_func = None
         self.msg_id = 0
         self.parser = get_parser()
 
