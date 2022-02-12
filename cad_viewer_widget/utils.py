@@ -108,6 +108,7 @@ def viewer_args(config):
             "clipNormal",
             "position",
             "quaternion",
+            "target",
             "zoom",
             "reset_camera",
             "zoom_speed",

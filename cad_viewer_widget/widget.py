@@ -235,6 +235,9 @@ class CadViewerWidget(widgets.Output):  # pylint: disable-msg=too-many-instance-
     quaternion = Tuple(Float(), Float(), Float(), Float(), allow_none=True).tag(sync=True)
     "tuple: Rotation of the camera as 4-dim quaternion (x,y,z,w)"
 
+    target = Tuple(Float(), Float(), Float(), allow_none=True).tag(sync=True)
+    "tuple: Camera target to look at as 3-dim tuple (x,y,z)"
+
     zoom = Float(allow_none=True).tag(sync=True)
     "float: Zoom value of the camera"
 
@@ -246,6 +249,9 @@ class CadViewerWidget(widgets.Output):  # pylint: disable-msg=too-many-instance-
 
     zoom0 = Float(allow_none=True).tag(sync=True)
     "float: Initial zoom value of the camera"
+
+    target0 = Tuple(Float(), Float(), Float(), allow_none=True).tag(sync=True)
+    "tuple: Initial camera target to look at as 3-dim tuple (x,y,z)"
 
     zoom_speed = Float(allow_none=True).tag(sync=True)
     "float: Speed of zooming with the mouse"
@@ -268,9 +274,6 @@ class CadViewerWidget(widgets.Output):  # pylint: disable-msg=too-many-instance-
 
     lastPick = Dict(key_trait=Unicode(), value_trait=Any(), allow_none=True, read_only=True).tag(sync=True)
     "dict: Describes the last picked element of the CAD view"
-
-    target = Tuple(Float(), Float(), Float(), allow_none=True, read_only=True).tag(sync=True)
-    "tuple: Camera target as a 3-dim tuple of float (x,y,z)"
 
     result = Unicode(allow_none=True).tag(sync=True)
     "unicode string: JSON serialized result from Javascript"
@@ -360,9 +363,6 @@ class CadViewer:
         self.msg_id = 0
         self.parser = get_parser()
 
-        # self.widget.position0 = None
-        # self.widget.quaternion0 = None
-        # self.widget.zoom0 = None
         self.empty = True
 
         self.tracks = []
@@ -403,6 +403,7 @@ class CadViewer:
         black_edges=False,
         position=None,
         quaternion=None,
+        target=None,
         zoom=1.0,
         reset_camera=True,
         zoom_speed=1.0,
@@ -410,7 +411,6 @@ class CadViewer:
         rotate_speed=1.0,
         timeit=False,
         js_debug=False,
-        # bb_factor=1.0,
     ):
         """
         Adding shapes to the CAD view
@@ -455,6 +455,8 @@ class CadViewer:
             Position of the camera as a 3-dim tuple of float (x,y,z)
         quaternion : 4-dim list of float, default None
             Rotation of the camera as 4-dim quaternion (x,y,z,w)
+        target :  3-dim list of float, default None
+            Camera target to look at, default is the center of the object's bounding box
         zoom : float, default None
             Zoom value of the camera
         reset_camera : bool, default True
@@ -648,23 +650,22 @@ class CadViewer:
             grid = [False, False, False]
 
         # If one changes the control type, override reset_camera with "True"
-        if self.widget.control != control:
+        if self.empty or self.widget.control != control:
             reset_camera = True
+            self.empty = False
+
             # Don't show warning on first call
             if self.widget.control != "":
                 print("Camera control changed, so camera was resetted")
 
-        # Ensure that reset_camera is set to True for new viewers
-        if self.empty:
-            reset_camera = True
-            self.empty = False
-
         if reset_camera:
+            bb = combined_bb(shapes)
+
             if position is None:
-                bb = combined_bb(shapes)
                 position = (
                     normalize(np.array((1, 1, 1))) * 5.5 * bb.max_dist_from_center() + np.array(bb.center)
                 ).tolist()
+
             if quaternion is None and control == "trackball":
                 quaternion = (
                     0.1759198966061612,
@@ -672,11 +673,17 @@ class CadViewer:
                     0.8204732385702833,
                     0.33985114297998736,
                 )
+
+            if target is None:
+                target = bb.center
+
             if zoom is None:
                 zoom = 1.0
         else:
-            position = (*self.widget.position,)
-            quaternion = (*self.widget.quaternion,)
+            copy = lambda v: None if v is None else (*v,)
+            position = copy(self.widget.position)
+            quaternion = copy(self.widget.quaternion)
+            target = copy(self.widget.target)
             zoom = self.widget.zoom
 
         self.widget.initialize = True
@@ -703,12 +710,14 @@ class CadViewer:
             self.widget.reset_camera = reset_camera
             self.widget.position = position
             self.widget.quaternion = quaternion
+            self.widget.target = target
             self.widget.zoom = zoom
             # If reset_camera, position0, quaternion0 and zoom0 need to be set
             if reset_camera:
                 self.widget.position0 = (*position,)
                 if control == "trackball":
                     self.widget.quaternion0 = (*quaternion,)
+                self.widget.target0 = (*target,)
                 self.widget.zoom0 = zoom
             self.widget.zoom_speed = zoom_speed
             self.widget.pan_speed = pan_speed
@@ -718,7 +727,7 @@ class CadViewer:
             self.add_tracks(tracks)
 
         self.widget.initialize = False
-        self.update_camera_location()
+        # self.update_camera_location()
 
     def update_states(self, states):
         """Set navigation tree states for a CAD view"""
@@ -1071,7 +1080,6 @@ class CadViewer:
         see [CadViewerWidget.zoom](./widget.html#cad_viewer_widget.widget.CadViewerWidget.zoom)
         """
 
-        self.update_camera_location()
         return self.widget.zoom
 
     @zoom.setter
@@ -1085,7 +1093,6 @@ class CadViewer:
         see [CadViewerWidget.position](./widget.html#cad_viewer_widget.widget.CadViewerWidget.position)
         """
 
-        self.update_camera_location()
         return self.widget.position
 
     @position.setter
@@ -1099,15 +1106,32 @@ class CadViewer:
         see [CadViewerWidget.quaternion](./widget.html#cad_viewer_widget.widget.CadViewerWidget.quaternion)
         """
 
-        self.update_camera_location()
         if self.widget.control == "orbit":
+            print("quaternion controlled internally for control=='orbit'")
             return None
         else:
             return self.widget.quaternion
 
     @quaternion.setter
     def quaternion(self, value):
-        self.widget.quaternion = value
+        if self.widget.control == "orbit":
+            print("quaternion controlled internally for control=='orbit'")
+        else:
+            self.widget.quaternion = value
+
+    @property
+    def target(self):
+        """
+        Get or set the CadViewerWidget traitlet `target`
+        see [CadViewerWidget.position](./widget.html#cad_viewer_widget.widget.CadViewerWidget.target)
+        """
+
+        # self.update_camera_location()
+        return self.widget.target
+
+    @target.setter
+    def target(self, value):
+        self.widget.target = value
 
     @property
     def last_pick(self):
@@ -1282,6 +1306,19 @@ class CadViewer:
     # Rotations
     #
 
+    def set_camera(self, direction):
+        """
+        Set camera to one of the predefined locations
+
+        Parameters
+        ----------
+        direction : string
+            one of ["iso", "top", "bottom", "left", "right", "front", "rear"]
+        """
+
+        self.execute("viewer.camera.presetCamera", [direction])
+        self.execute("viewer.update", [])
+
     def rotate_x(self, angle):
         """
         Rotate CAD obj around x-axis - trackball controls only
@@ -1452,11 +1489,12 @@ class CadViewer:
                 reset_camera:       {self.widget.reset_camera}
                 position:           {self.widget.position}
                 quaternion:         {self.widget.quaternion}
+                target:             {self.widget.target}
                 zoom:               {self.widget.zoom}
                 position0:          {self.widget.position0}
                 quaternion0:        {self.widget.quaternion0}
+                target0:            {self.widget.target0}
                 zoom0:              {self.widget.zoom0}
-                target:             {self.widget.target}
                 zoom_speed:         {self.widget.zoom_speed}
                 pan_speed:          {self.widget.pan_speed}
                 rotate_speed:       {self.widget.rotate_speed}
