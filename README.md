@@ -1,10 +1,12 @@
-cad-viewer-widget
-===============================
+# cad-viewer-widget
 
 A Jupyter widget to view cad objects
 
-Installation
-------------
+Click on the "launch binder" icon to start _cad-viewer-widget_ on binder:
+
+[![Binder: Latest development version](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/bernhard-42/cad-viewer-widget)
+
+## Installation
 
 To install use pip:
 

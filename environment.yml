@@ -1,0 +1,11 @@
+channels:
+  - defaults
+  - cadquery
+  - conda-forge
+dependencies:
+  - python=3.8
+  - pip=21.0
+  - pythonocc-core=7.5.1
+  - occt=7.5.1
+  - pip:
+      - cad-viewer-widget==1.0.0
