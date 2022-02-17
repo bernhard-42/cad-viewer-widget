@@ -2,9 +2,24 @@
 
 A Jupyter widget to view cad objects
 
-Click on the "launch binder" icon to start _cad-viewer-widget_ on binder:
+[Jupyter-CadQuery](https://github.com/bernhard-42/jupyter-cadquery) has been split into 3 layers.
+This repo being the middle layer:
+
+1. **[three-cad-viewer](https://github.com/bernhard-42/three-cad-viewer)**
+   This is the complete CAD viewer written in Javascript with _[threejs](https://github.com/mrdoob/three.js/)_ being the only dependency. There is are a bunch of [live examples](https://bernhard-42.github.io/three-cad-viewer/example.html) and an [API documentation](https://bernhard-42.github.io/three-cad-viewer/Viewer.html). This layer could also serve as the viewer for a CadQuery integration into VS Code (anybody willing to give it a try?)
+
+2. **cad-view-widget** (this repository)
+   A thin layer on top of _cad-viewer-widget_ that wraps the CAD viewer into an [ipywidget](https://github.com/jupyter-widgets/ipywidgets). The API documentation can be found [here](https://bernhard-42.github.io/cad-viewer-widget/cad_viewer_widget/index.html)
+
+3. **[Jupyter-CadQuery](https://github.com/bernhard-42/jupyter-cadquery)** A [CadQuery](https://github.com/CadQuery/cadquery) viewer, collecting and tessellating CadQuery objects, using cad-view-widget to visualize the objects
+   Click on the "launch binder" icon to start _cad-viewer-widget_ on binder:
 
 [![Binder: Latest development version](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/bernhard-42/cad-viewer-widget/master?urlpath=lab&filepath=notebooks)
+
+## Examples
+
+- [Tests and demos](notebooks/Tests-and-demos.ipyng): Demonstrating the features using the sample tesssellations in [./examples](./examples)
+- [Classic OCC Bottle](notebooks/Classic-OCC-Bottle): A real CAD example based on [python-occ](https://github.com/tpaviot/pythonocc-core)
 
 ## Installation
 
