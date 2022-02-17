@@ -1,9 +1,9 @@
 # cad-viewer-widget
 
-A Jupyter widget to view cad objects
+A Jupyter widget to view CAD objects
 
-[Jupyter-CadQuery](https://github.com/bernhard-42/jupyter-cadquery) has been split into 3 layers.
-This repo being the middle layer:
+`cad-viewer-widgets` has its origin in [Jupyter-CadQuery](https://github.com/bernhard-42/jupyter-cadquery), which now
+has been split into 3 layers. This repo being the middle layer:
 
 1. **[three-cad-viewer](https://github.com/bernhard-42/three-cad-viewer)**
    This is the complete CAD viewer written in Javascript with _[threejs](https://github.com/mrdoob/three.js/)_ being the only dependency.
