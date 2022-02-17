@@ -4,7 +4,8 @@ channels:
   - conda-forge
 dependencies:
   - python=3.8
-  - pip=21.0
+  - pip=22.0
+  - numpy=1.22
   - pythonocc-core=7.5.1
   - occt=7.5.1
   - pip:
