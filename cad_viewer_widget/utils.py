@@ -1,9 +1,40 @@
 """Utility functions"""
 
-import zlib
-from base64 import b64encode
 import numpy as np
 from pyparsing import Literal, Word, alphanums, nums, delimitedList, ZeroOrMore
+
+
+def to_json(value, widget):
+    def walk(obj):
+        if isinstance(obj, (tuple, list)):
+            return obj
+
+        rv = {}
+        
+        for k,v in obj.items():
+            if isinstance(v, np.ndarray):
+                if str(v.dtype) in ('int32', 'int64', 'uint64'):
+                    v = v.astype("uint32", order='C')  # force uint triangles
+                elif not v.flags['C_CONTIGUOUS']:
+                    v = np.ascontiguousarray(v)
+                v = v.ravel()
+                rv[k] = {
+                    'shape': v.shape,
+                    'dtype': str(v.dtype),
+                    'buffer': memoryview(v)
+                }
+            elif isinstance(v, dict):
+                rv[k] = walk(v)
+            elif isinstance(v, (tuple, list)):
+                rv[k] = [walk(el) for el in v]
+            else:
+                rv[k] = v
+        return rv
+
+    if value is None:
+        return None
+    
+    return walk(value)
 
 
 def numpyify(obj):
@@ -23,33 +54,6 @@ def numpyify(obj):
         else:
             result[k] = v
     return result
-
-
-def serializer(obj):
-    """
-    Serialize objects and arrays with converting numpy 64 bit floats/int into 32 bit equivalent values for threejs
-
-    Parameters
-    ----------
-    obj: dict
-        Nested dict with numpy arrays
-    """
-
-    def compress(obj, dtype):
-        cobj = zlib.compress(obj.reshape(-1).astype(dtype).tobytes(order="C"))
-        return b64encode(cobj).decode()
-
-    if type(obj).__module__ == np.__name__:
-        if isinstance(obj, np.ndarray):
-            if obj.dtype in (np.float32, np.float64):
-                return ("_f32", obj.shape, compress(obj, "float32"))
-            elif obj.dtype in (np.int32, np.int64):
-                return ("_i32", obj.shape, compress(obj, "int32"))
-            else:
-                raise Exception("unknown numpy type")
-        else:
-            return obj.item()
-    raise TypeError("Unknown type:", type(obj))
 
 
 def get_parser():

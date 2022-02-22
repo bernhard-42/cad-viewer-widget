@@ -377,6 +377,14 @@ export class CadViewerView extends DOMWidgetView {
   }
 
   addShapes() {
+    if (this.model.get("initialize") == null) {
+      return;
+    }
+
+    this.shapes = this.model.get("shapes");
+    decode(this.shapes);
+    this.states = this.clone_states();
+
     const timer = new Timer("addShapes", this.model.get("timeit"));
     this._debug = this.model.get("js_debug");
 
@@ -385,9 +393,6 @@ export class CadViewerView extends DOMWidgetView {
     var quaternion = null;
     var target = null;
     var zoom = null;
-
-    this.shapes = decode(this.model.get("shapes"));
-    this.states = this.clone_states();
 
     this.tracks = [];
 
@@ -468,7 +473,7 @@ export class CadViewerView extends DOMWidgetView {
   }
 
   addTracks(tracks) {
-    this.tracks = decode(tracks);
+    this.tracks = tracks;
     if (Array.isArray(this.tracks) && this.tracks.length > 0) {
       for (var track of this.tracks) {
         this.viewer.addAnimationTrack(...track);

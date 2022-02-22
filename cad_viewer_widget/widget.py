@@ -3,15 +3,17 @@
 import base64
 import json
 from textwrap import dedent
-import ipywidgets as widgets
-from ipywidgets.embed import embed_minimal_html, dependency_state
+
 import numpy as np
 
-from traitlets import Unicode, Dict, Tuple, Integer, Float, Any, Bool, observe
+import ipywidgets as widgets
+from ipywidgets.embed import embed_minimal_html, dependency_state
+
+from traitlets import Unicode, Dict, List, Tuple, Integer, Float, Any, Bool, observe
 from IPython.display import HTML, update_display
 from pyparsing import ParseException
 
-from .utils import serializer, get_parser
+from .utils import get_parser, to_json
 from .boundingbox import combined_bb, normalize
 
 
@@ -141,13 +143,13 @@ class CadViewerWidget(widgets.Output):  # pylint: disable-msg=too-many-instance-
     # Viewer traits
     #
 
-    shapes = Unicode(allow_none=True).tag(sync=True)
+    shapes = Dict(allow_none=True).tag(sync=True, to_json=to_json)
     "unicode: Serialized nested tessellated shapes"
 
     states = Dict(Tuple(Integer(), Integer()), allow_none=True).tag(sync=True)
     "dict: State of the nested cad objects, key = object path, value = 2-dim tuple of 0/1 (hidden/visible) for object and edges"
 
-    tracks = Unicode(allow_none=True).tag(sync=True)
+    tracks = List(allow_none=True).tag(sync=True)
     "unicode: Serialized list of animation track arrays, see [AnimationTrack.to_array](/widget.html#cad_viewer_widget.widget.AnimationTrack.to_array)"
 
     timeit = Bool(allow_none=True, default_value=None).tag(sync=True)
@@ -693,7 +695,7 @@ class CadViewer:
         self.widget.initialize = True
 
         with self.widget.hold_trait_notifications():
-            self.widget.shapes = json.dumps(shapes, default=serializer)
+            self.widget.shapes = shapes
             self.widget.states = states
 
             self.widget.default_edge_color = default_edge_color
@@ -1248,7 +1250,7 @@ class CadViewer:
             Animation speed, will be forwarded via `animation_speed` traitlet
         """
 
-        self.widget.tracks = json.dumps([track.to_array() for track in self.tracks])
+        self.widget.tracks = [track.to_array() for track in self.tracks]
         self.widget.animation_speed = speed
         self.execute("animate")
         # self.play()
@@ -1459,7 +1461,7 @@ class CadViewer:
                 pinning:            {self.widget.pinning}
 
                             SHAPES
-                shapes:             {self.widget.shapes if shapes else (self.widget.shapes[:200] + " ...")}
+                shapes:             {self.widget.shapes if shapes else "... (set shapes=True)"}
                 states:             {self.widget.states}
                 tracks:             {self.widget.tracks}
                             
