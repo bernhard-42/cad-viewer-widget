@@ -5,35 +5,29 @@ from pyparsing import Literal, Word, alphanums, nums, delimitedList, ZeroOrMore
 
 
 def to_json(value, widget):
+   
     def walk(obj):
-        if isinstance(obj, (tuple, list)):
+        if isinstance(obj, np.ndarray):
+            if str(obj.dtype) in ('int32', 'int64', 'uint64'):
+                obj = obj.astype("uint32", order='C') # force uint triangles
+            elif not obj.flags['C_CONTIGUOUS']:
+                obj = np.ascontiguousarray(obj)
+            obj = obj.ravel()
+            return {
+                'shape': obj.shape,
+                'dtype': str(obj.dtype),
+                'buffer': memoryview(obj)
+            }
+        elif isinstance(obj, (tuple, list)):
+            return [walk(el) for el in obj]
+        elif isinstance(obj, dict):
+            rv = {}
+            for k,v in obj.items():
+                rv[k] = walk(v)
+            return rv
+        else:
             return obj
 
-        rv = {}
-        
-        for k,v in obj.items():
-            if isinstance(v, np.ndarray):
-                if str(v.dtype) in ('int32', 'int64', 'uint64'):
-                    v = v.astype("uint32", order='C')  # force uint triangles
-                elif not v.flags['C_CONTIGUOUS']:
-                    v = np.ascontiguousarray(v)
-                v = v.ravel()
-                rv[k] = {
-                    'shape': v.shape,
-                    'dtype': str(v.dtype),
-                    'buffer': memoryview(v)
-                }
-            elif isinstance(v, dict):
-                rv[k] = walk(v)
-            elif isinstance(v, (tuple, list)):
-                rv[k] = [walk(el) for el in v]
-            else:
-                rv[k] = v
-        return rv
-
-    if value is None:
-        return None
-    
     return walk(value)
 
 
