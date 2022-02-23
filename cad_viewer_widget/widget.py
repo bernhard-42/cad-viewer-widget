@@ -1179,7 +1179,7 @@ class CadViewer:
         """
 
         self.tracks = []
-        self.widget.tracks = ""
+        self.widget.tracks = []
 
     def _check_track(self, track):
         paths = self.widget.states.keys()
