@@ -267,6 +267,11 @@ see <a href="./widget.html#cad_viewer_widget.widget.CadViewerWidget.quaternion">
 <div class="desc"><p>Get or set the CadViewerWidget traitlet <code>rotate_speed</code>
 see <a href="./widget.html#cad_viewer_widget.widget.CadViewerWidget.rotate_speed">CadViewerWidget.rotate_speed</a></p></div>
 </dd>
+<dt id="cad_viewer_widget.widget.CadViewer.target"><code class="name">var <span class="ident">target</span></code></dt>
+<dd>
+<div class="desc"><p>Get or set the CadViewerWidget traitlet <code>target</code>
+see <a href="./widget.html#cad_viewer_widget.widget.CadViewerWidget.target">CadViewerWidget.position</a></p></div>
+</dd>
 <dt id="cad_viewer_widget.widget.CadViewer.tools"><code class="name">var <span class="ident">tools</span></code></dt>
 <dd>
 <div class="desc"><p>Get or set the CadViewerWidget traitlet <code>tools</code>
@@ -291,7 +296,7 @@ see <a href="./widget.html#cad_viewer_widget.widget.CadViewerWidget.zoom_speed">
 <h3>Methods</h3>
 <dl>
 <dt id="cad_viewer_widget.widget.CadViewer.add_shapes"><code class="name flex">
-<span>def <span class="ident">add_shapes</span></span>(<span>self, shapes, states, tracks=None, normal_len=0, default_edge_color='#707070', default_opacity=0.5, ambient_intensity=0.5, direct_intensity=0.3, tools=True, control='trackball', ortho=True, axes=False, axes0=False, grid=None, ticks=10, transparent=False, black_edges=False, position=None, quaternion=None, zoom=1.0, reset_camera=True, zoom_speed=1.0, pan_speed=1.0, rotate_speed=1.0, timeit=False, js_debug=False)</span>
+<span>def <span class="ident">add_shapes</span></span>(<span>self, shapes, states, tracks=None, normal_len=0, default_edge_color='#707070', default_opacity=0.5, ambient_intensity=0.5, direct_intensity=0.3, tools=True, control='trackball', ortho=True, axes=False, axes0=False, grid=None, ticks=10, transparent=False, black_edges=False, position=None, quaternion=None, target=None, zoom=1.0, reset_camera=True, zoom_speed=1.0, pan_speed=1.0, rotate_speed=1.0, timeit=False, js_debug=False)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Adding shapes to the CAD view</p>
@@ -335,6 +340,8 @@ see <a href="./widget.html#cad_viewer_widget.widget.CadViewerWidget.zoom_speed">
 <dd>Position of the camera as a 3-dim tuple of float (x,y,z)</dd>
 <dt><strong><code>quaternion</code></strong> :&ensp;<code>4-dim list</code> of <code>float</code>, default <code>None</code></dt>
 <dd>Rotation of the camera as 4-dim quaternion (x,y,z,w)</dd>
+<dt><strong><code>target</code></strong> :&ensp;<code>3-dim list</code> of <code>float</code>, default <code>None</code></dt>
+<dd>Camera target to look at, default is the center of the object's bounding box</dd>
 <dt><strong><code>zoom</code></strong> :&ensp;<code>float</code>, default <code>None</code></dt>
 <dd>Zoom value of the camera</dd>
 <dt><strong><code>reset_camera</code></strong> :&ensp;<code>bool</code>, default <code>True</code></dt>
@@ -682,6 +689,17 @@ object notation relative to the 'CadViewer' object and <code>method</code> is th
 <dd>
 <div class="desc"><p>Select Navigation tree tab</p></div>
 </dd>
+<dt id="cad_viewer_widget.widget.CadViewer.set_camera"><code class="name flex">
+<span>def <span class="ident">set_camera</span></span>(<span>self, direction)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Set camera to one of the predefined locations</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>direction</code></strong> :&ensp;<code>string</code></dt>
+<dd>one of ["iso", "top", "bottom", "left", "right", "front", "rear"]</dd>
+</dl></div>
+</dd>
 <dt id="cad_viewer_widget.widget.CadViewer.stop"><code class="name flex">
 <span>def <span class="ident">stop</span></span>(<span>self)</span>
 </code></dt>
@@ -886,7 +904,11 @@ object notation relative to the 'CadViewer' object and <code>method</code> is th
 </dd>
 <dt id="cad_viewer_widget.widget.CadViewerWidget.target"><code class="name">var <span class="ident">target</span></code></dt>
 <dd>
-<div class="desc"><p>tuple: Camera target as a 3-dim tuple of float (x,y,z)</p></div>
+<div class="desc"><p>tuple: Camera target to look at as 3-dim tuple (x,y,z)</p></div>
+</dd>
+<dt id="cad_viewer_widget.widget.CadViewerWidget.target0"><code class="name">var <span class="ident">target0</span></code></dt>
+<dd>
+<div class="desc"><p>tuple: Initial camera target to look at as 3-dim tuple (x,y,z)</p></div>
 </dd>
 <dt id="cad_viewer_widget.widget.CadViewerWidget.theme"><code class="name">var <span class="ident">theme</span></code></dt>
 <dd>
@@ -1016,7 +1038,9 @@ object notation relative to the 'CadViewer' object and <code>method</code> is th
 <li><code><a title="cad_viewer_widget.widget.CadViewer.rotate_z" href="#cad_viewer_widget.widget.CadViewer.rotate_z">rotate_z</a></code></li>
 <li><code><a title="cad_viewer_widget.widget.CadViewer.select_clipping" href="#cad_viewer_widget.widget.CadViewer.select_clipping">select_clipping</a></code></li>
 <li><code><a title="cad_viewer_widget.widget.CadViewer.select_tree" href="#cad_viewer_widget.widget.CadViewer.select_tree">select_tree</a></code></li>
+<li><code><a title="cad_viewer_widget.widget.CadViewer.set_camera" href="#cad_viewer_widget.widget.CadViewer.set_camera">set_camera</a></code></li>
 <li><code><a title="cad_viewer_widget.widget.CadViewer.stop" href="#cad_viewer_widget.widget.CadViewer.stop">stop</a></code></li>
+<li><code><a title="cad_viewer_widget.widget.CadViewer.target" href="#cad_viewer_widget.widget.CadViewer.target">target</a></code></li>
 <li><code><a title="cad_viewer_widget.widget.CadViewer.tools" href="#cad_viewer_widget.widget.CadViewer.tools">tools</a></code></li>
 <li><code><a title="cad_viewer_widget.widget.CadViewer.transparent" href="#cad_viewer_widget.widget.CadViewer.transparent">transparent</a></code></li>
 <li><code><a title="cad_viewer_widget.widget.CadViewer.update_camera_location" href="#cad_viewer_widget.widget.CadViewer.update_camera_location">update_camera_location</a></code></li>
@@ -1071,6 +1095,7 @@ object notation relative to the 'CadViewer' object and <code>method</code> is th
 <li><code><a title="cad_viewer_widget.widget.CadViewerWidget.states" href="#cad_viewer_widget.widget.CadViewerWidget.states">states</a></code></li>
 <li><code><a title="cad_viewer_widget.widget.CadViewerWidget.tab" href="#cad_viewer_widget.widget.CadViewerWidget.tab">tab</a></code></li>
 <li><code><a title="cad_viewer_widget.widget.CadViewerWidget.target" href="#cad_viewer_widget.widget.CadViewerWidget.target">target</a></code></li>
+<li><code><a title="cad_viewer_widget.widget.CadViewerWidget.target0" href="#cad_viewer_widget.widget.CadViewerWidget.target0">target0</a></code></li>
 <li><code><a title="cad_viewer_widget.widget.CadViewerWidget.theme" href="#cad_viewer_widget.widget.CadViewerWidget.theme">theme</a></code></li>
 <li><code><a title="cad_viewer_widget.widget.CadViewerWidget.ticks" href="#cad_viewer_widget.widget.CadViewerWidget.ticks">ticks</a></code></li>
 <li><code><a title="cad_viewer_widget.widget.CadViewerWidget.timeit" href="#cad_viewer_widget.widget.CadViewerWidget.timeit">timeit</a></code></li>
