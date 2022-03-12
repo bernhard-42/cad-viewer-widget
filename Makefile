@@ -1,4 +1,4 @@
-.PHONY: clean_notebooks bump dist release install upload docs
+.PHONY: clean_notebooks bump dist release create-release install upload docs
 
 PYCACHE := $(shell find . -name '__pycache__')
 EGGS := $(wildcard *.egg-info)
@@ -57,6 +57,11 @@ release:
 	git status
 	git diff-index --quiet HEAD || git commit -m "Latest release: $(CURRENT_VERSION)"
 	git tag -a v$(CURRENT_VERSION) -m "Latest release: $(CURRENT_VERSION)"
+
+create-release:
+	@github-release release -u bernhard-42 -r cad-viewer-widget -t v$(CURRENT_VERSION) -n cad-viewer-widget-$(CURRENT_VERSION)
+	@sleep 2
+	@github-release upload  -u bernhard-42 -r cad-viewer-widget -t v$(CURRENT_VERSION) -n cad_viewer_widget-$(CURRENT_VERSION).tar.gz -f dist/cad_viewer_widget-$(CURRENT_VERSION).tar.gz
 
 install: dist
 	@echo "=> Installing cad-viewer-widget"
