@@ -52,7 +52,10 @@ setup_args = dict(
     description="A Jupyter widget to view cad objects",
     long_description=LONG_DESCRIPTION,
     include_package_data=True,
-    install_requires=["ipywidgets>=7.6.0"],
+    install_requires=[
+        "ipywidgets==7.7",
+        "numpy"
+    ],
     extras_require={"dev": ["twine", "bumpversion", "pydoc3"]},
     packages=find_packages(),
     zip_safe=False,
