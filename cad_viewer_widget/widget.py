@@ -751,7 +751,10 @@ class CadViewer:
 
     def update_states(self, states):
         """Set navigation tree states for a CAD view"""
-
+        all_paths = list(self.widget.states.keys())
+        for path, state in states.items():
+            if not path in all_paths:
+                raise ValueError(f"Path {path} is not a valid state")
         self.widget.state_updates = states
 
     def update_camera_location(self):
