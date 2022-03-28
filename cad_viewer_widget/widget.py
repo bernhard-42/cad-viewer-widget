@@ -158,6 +158,9 @@ class CadViewerWidget(widgets.Output):  # pylint: disable-msg=too-many-instance-
     tools = Bool(allow_none=True, default_value=None).tag(sync=True)
     "bool: Whether to show CAD tools (True) or not (False)"
 
+    glass = Bool(allow_none=True, default_value=None).tag(sync=True)
+    "bool: Whether to use the glass mode (CAD navigation as transparent overlay) or not"
+
     ortho = Bool(allow_none=True, default_value=None).tag(sync=True)
     "bool: Whether to use orthographic view (True) or perspective view (False)"
 
@@ -333,6 +336,8 @@ class CadViewer:
         UI theme, can be 'dark' or 'light' (default)
     tools : bool, default: True
         Whether to show CAD tools (True) or not (False)
+    glass : bool, default: True
+        Whether to use glass mode (True) or not (False)
     pinning: bool, default: False
         Whether to allow replacing the CAD View by a canvas screenshot
 
@@ -349,13 +354,14 @@ class CadViewer:
         cad_width=800,
         height=600,
         tree_width=240,
-        theme="light",
+        theme="browser",
+        glass=False,
         pinning=False,
         title=None,
         anchor=None,
     ):
-        if cad_width < 640:
-            raise ValueError("Ensure cad_width >= 640")
+        if cad_width < 700:
+            raise ValueError("Ensure cad_width >= 700")
         if tree_width < 240:
             raise ValueError("Ensure tree_width >= 240")
 
@@ -364,6 +370,7 @@ class CadViewer:
             height=height,
             tree_width=tree_width,
             theme=theme,
+            glass=glass,
             pinning=pinning,
             title=title,
             anchor=anchor,
@@ -1044,6 +1051,19 @@ class CadViewer:
         self.widget.tools = value
 
     @property
+    def glass(self):
+        """
+        Get or set the CadViewerWidget traitlet `glass`
+        see [CadViewerWidget.tools](./widget.html#cad_viewer_widget.widget.CadViewerWidget.glass)
+        """
+
+        return self.widget.glass
+
+    @glass.setter
+    def glass(self, value):
+        self.widget.glass = value
+
+    @property
     def pan_speed(self):
         """
         Get or set the CadViewerWidget traitlet `pan_speed`
@@ -1482,6 +1502,7 @@ class CadViewer:
                             VIEWER
                 timeit:             {self.widget.timeit}
                 tools:              {self.widget.tools}
+                glass:              {self.widget.glass}
                 ortho:              {self.widget.ortho}
                 control:            {self.widget.control}
                 axes:               {self.widget.axes}

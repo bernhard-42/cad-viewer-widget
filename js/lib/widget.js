@@ -194,6 +194,7 @@ export class CadViewerView extends DOMWidgetView {
       height: this.model.get("height"),
       treeWidth: this.model.get("tree_width"),
       theme: this.model.get("theme"),
+      glass: this.model.get("glass"),
       pinning: this.model.get("pinning")
     };
   }
@@ -568,11 +569,15 @@ export class CadViewerView extends DOMWidgetView {
         }
         break;
       case "tools":
-        setKey("getTools", "setTools", key);
+        setKey("getTools", "showTools", key);
+        break;
+      case "glass":
+        flag = change.changed[key];
+        this.viewer.display.glassMode(flag);
         break;
       case "pinning":
-        var flag = change.changed[key];
-        this.viewer.display.setPinning(flag);
+        flag = change.changed[key];
+        this.viewer.display.showPinning(flag);
         break;
       case "default_edge_color":
         setKey("getEdgeColor", "setEdgeColor", key);

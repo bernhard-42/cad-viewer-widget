@@ -75,7 +75,8 @@ def open_viewer(
     cad_width=800,
     tree_width=250,
     height=600,
-    theme="light",
+    theme="browser",
+    glass=False,
     pinning=True,
 ):
     if title is None:
@@ -86,6 +87,7 @@ def open_viewer(
             tree_width=tree_width,
             height=height,
             theme=theme,
+            glass=glass,
             pinning=pinning,
         )
         display(viewer.widget)
@@ -94,27 +96,35 @@ def open_viewer(
         html = "<div></div>"
         display(HTML(html), display_id=image_id)
         viewer.widget.image_id = image_id
-
+        error = None
     else:
 
         out = Sidecar(title=title, anchor=anchor)
         with out:
-            viewer = CadViewer(
-                title=title,
-                anchor=anchor,
-                cad_width=cad_width,
-                tree_width=tree_width,
-                height=height,
-                theme=theme,
-                pinning=False,
-            )
-            display(viewer.widget)
+            try:
+                viewer = CadViewer(
+                    title=title,
+                    anchor=anchor,
+                    cad_width=cad_width,
+                    tree_width=tree_width,
+                    height=height,
+                    theme=theme,
+                    glass=glass,
+                    pinning=False,
+                )
+                display(viewer.widget)
+                error = None
+            except Exception as ex:
+                error = ex
+        
+        if error is None:
+            out.resize_sidebar(cad_width + (0 if glass else tree_width) + 12)
 
-        out.resize_sidebar(cad_width + tree_width + 12)
-
-        set_sidecar(title, viewer)
-
-    return viewer
+            set_sidecar(title, viewer)
+    if error is None:
+        return viewer
+    else:
+        raise RuntimeError(error)
 
 
 def show(
@@ -128,7 +138,8 @@ def show(
     cad_width=800,
     tree_width=250,
     height=600,
-    theme="light",
+    theme="browser",
+    glass=False,
     pinning=None,
     #
     # render options
@@ -173,6 +184,7 @@ def show(
         "ambient_intensity": ambient_intensity,
         "direct_intensity": direct_intensity,
         "tools": tools,
+        "glass": glass,
         "control": control,
         "ortho": ortho,
         "axes": axes,

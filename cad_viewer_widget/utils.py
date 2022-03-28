@@ -76,6 +76,7 @@ def display_args(config):
             "height",
             "tree_width",
             "theme",
+            "glass",
             "pinning",
         ]
     }
