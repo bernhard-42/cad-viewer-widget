@@ -182,6 +182,9 @@ class CadViewerWidget(widgets.Output):  # pylint: disable-msg=too-many-instance-
     black_edges = Bool(allow_none=True, default_value=None).tag(sync=True)
     "bool: Whether to shows the edges in black (True) or not(False)"
 
+    collapse = Integer(allow_none=True, default_value=None).tag(sync=True)
+    "int: Collapse CAD tree (1: collapse nodes with single leaf, 2: collapse all nodes)"
+
     normal_len = Float(allow_none=True).tag(sync=True)
     "float: If > 0, the vertex normals will be rendered with the length given be this parameter"
 
@@ -407,6 +410,7 @@ class CadViewer:
         ticks=10,
         transparent=False,
         black_edges=False,
+        collapse=0,
         position=None,
         quaternion=None,
         target=None,
@@ -447,6 +451,8 @@ class CadViewer:
             Whether to show the CAD objects transparently (True) or not (False)
         black_edges : bool, default False
             Whether to shows the edges in black (True) or not(False)
+        collapse : int, default 0
+            Collapse CAD tree (1: collapse nodes with single leaf, 2: collapse all nodes)
         normal_Len : int, default 0
             If > 0, the vertex normals will be rendered with the length given be this parameter
         default_edge_color : string, default "#707070"
@@ -713,6 +719,7 @@ class CadViewer:
             self.widget.ortho = ortho
             self.widget.transparent = transparent
             self.widget.black_edges = black_edges
+            self.widget.collapse = collapse
             self.widget.reset_camera = reset_camera
             self.widget.position = position
             self.widget.quaternion = quaternion
@@ -1483,6 +1490,7 @@ class CadViewer:
                 ticks:              {self.widget.ticks}
                 transparent:        {self.widget.transparent}
                 black_edges:        {self.widget.black_edges}
+                collapse:           {self.widget.collapse}
                 tab:                {self.widget.tab}
                 clip_intersection:  {self.widget.clip_intersection}
                 clip_planes:        {self.widget.clip_planes}

@@ -101,6 +101,7 @@ def viewer_args(config):
             "ortho",
             "transparent",
             "black_edges",
+            "collapse",
             "clipIntersection",
             "clipPlaneHelpers",
             "clipNormal",

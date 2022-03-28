@@ -47,6 +47,7 @@ export class CadViewerModel extends DOMWidgetModel {
       ticks: null,
       transparent: null,
       black_edges: null,
+      collapse: null,
       normal_len: null,
 
       default_edge_color: null,
@@ -133,6 +134,7 @@ export class CadViewerView extends DOMWidgetView {
       this.model.on("change:ortho", this.handle_change, this);
       this.model.on("change:transparent", this.handle_change, this);
       this.model.on("change:black_edges", this.handle_change, this);
+      this.model.on("change:collapse", this.handle_change, this);
       this.model.on("change:tools", this.handle_change, this);
       this.model.on("change:pinning", this.handle_change, this);
       this.model.on("change:default_edge_color", this.handle_change, this);
@@ -217,6 +219,7 @@ export class CadViewerView extends DOMWidgetView {
       ticks: this.model.get("ticks"),
       transparent: this.model.get("transparent"),
       blackEdges: this.model.get("black_edges"),
+      collapse: this.model.get("collapse"),
       timeit: this.model.get("timeit"),
       zoomSpeed: this.model.get("zoom_speed"),
       panSpeed: this.model.get("pan_speed"),
@@ -397,7 +400,6 @@ export class CadViewerView extends DOMWidgetView {
     this.tracks = [];
 
     var viewerOptions = this.getViewerOptions();
-
     timer.split("viewer");
     this.viewer.render(
       ...this.viewer.renderTessellatedShapes(
@@ -556,6 +558,14 @@ export class CadViewerView extends DOMWidgetView {
         break;
       case "black_edges":
         setKey("getBlackEdges", "setBlackEdges", key);
+        break;
+      case "collapse":
+        var val = change.changed[key];
+        if ([1, 2].includes(val)) {
+          this.viewer.collapseNodes(val);
+        } else {
+          this.viewer.expandNodes();
+        }
         break;
       case "tools":
         setKey("getTools", "setTools", key);
