@@ -38,6 +38,7 @@ export class CadViewerModel extends DOMWidgetModel {
       tracks: null,
       timeit: null,
       tools: null,
+      glass: null,
 
       ortho: null,
       control: null,
@@ -111,6 +112,7 @@ export class CadViewerView extends DOMWidgetView {
     this.lastTarget = null;
     this.lastZoom = null;
     this.empty = true;
+    this.activeTab = "";
   }
 
   debug(...args) {
@@ -136,6 +138,7 @@ export class CadViewerView extends DOMWidgetView {
       this.model.on("change:black_edges", this.handle_change, this);
       this.model.on("change:collapse", this.handle_change, this);
       this.model.on("change:tools", this.handle_change, this);
+      this.model.on("change:glass", this.handle_change, this);
       this.model.on("change:pinning", this.handle_change, this);
       this.model.on("change:default_edge_color", this.handle_change, this);
       this.model.on("change:default_opacity", this.handle_change, this);
@@ -282,8 +285,8 @@ export class CadViewerView extends DOMWidgetView {
       true
     );
 
-    this.viewer.display.setAnimationControl(false);
-    this.viewer.display.setTools(options.tools);
+    this.viewer.display.showAnimationControl(false);
+    this.viewer.display.showTools(options.tools);
   }
 
   handleNotification(change) {
@@ -528,6 +531,7 @@ export class CadViewerView extends DOMWidgetView {
 
     var tracks = "";
     var value = null;
+    var flag = null;
 
     switch (key) {
       case "zoom":
@@ -563,9 +567,9 @@ export class CadViewerView extends DOMWidgetView {
       case "collapse":
         var val = change.changed[key];
         if ([1, 2].includes(val)) {
-          this.viewer.collapseNodes(val);
+          this.viewer.display.collapseNodes(val);
         } else {
-          this.viewer.expandNodes();
+          this.viewer.display.expandNodes();
         }
         break;
       case "tools":
@@ -613,10 +617,13 @@ export class CadViewerView extends DOMWidgetView {
         break;
       case "tab":
         value = change.changed[key];
-        if (value === "tree" || value == "clip") {
-          this.viewer.display.selectTabByName(value);
-        } else {
-          console.error(`cad-viewer-widget: unkonwn tab name ${value}`);
+        if (this.activeTab !== value) {
+          this.activeTab = value;
+          if (value === "tree" || value == "clip") {
+            this.viewer.display.selectTabByName(value);
+          } else {
+            console.error(`cad-viewer-widget: unkonwn tab name ${value}`);
+          }
         }
         break;
       case "clip_intersection":
