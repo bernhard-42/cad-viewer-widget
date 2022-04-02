@@ -566,10 +566,12 @@ export class CadViewerView extends DOMWidgetView {
         break;
       case "collapse":
         var val = change.changed[key];
-        if ([1, 2].includes(val)) {
-          this.viewer.display.collapseNodes(val);
+        if (val == 1) {
+          this.viewer.display.collapseNodes("1");
+        } else if (val == 2) {
+          this.viewer.display.collapseNodes("C");
         } else {
-          this.viewer.display.expandNodes();
+          this.viewer.display.collapseNodes("E");
         }
         break;
       case "tools":
