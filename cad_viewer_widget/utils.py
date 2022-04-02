@@ -1,9 +1,22 @@
 """Utility functions"""
 
+import warnings
 import numpy as np
 from pyparsing import Literal, Word, alphanums, nums, delimitedList, ZeroOrMore
 
+def warn(message, warning=RuntimeWarning, when="always"):
+    def warning_on_one_line(
+        message, category, filename, lineno, file=None, line=None
+    ):  # pylint: disable=unused-argument
+        return "%s: %s" % (category.__name__, message)
 
+    warn_format = warnings.formatwarning
+    warnings.formatwarning = warning_on_one_line
+    warnings.simplefilter(when, warning)
+    warnings.warn(message + "\n", warning)
+    warnings.formatwarning = warn_format
+    warnings.simplefilter("ignore", warning)
+    
 def to_json(value, widget):
    
     def walk(obj):
