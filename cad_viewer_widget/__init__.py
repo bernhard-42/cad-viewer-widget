@@ -16,7 +16,7 @@ from .sidecar import (
     set_default as _set_default_sidecar,
 )
 
-from .utils import display_args, viewer_args
+from .utils import display_args, viewer_args, warn
 
 
 def _jupyter_labextension_paths():
@@ -77,6 +77,7 @@ def open_viewer(
     height=600,
     theme="browser",
     glass=False,
+    tools=True,
     pinning=True,
 ):
     if title is None:
@@ -88,6 +89,7 @@ def open_viewer(
             height=height,
             theme=theme,
             glass=glass,
+            tools=tools,
             pinning=pinning,
         )
         display(viewer.widget)
@@ -110,13 +112,14 @@ def open_viewer(
                     height=height,
                     theme=theme,
                     glass=glass,
+                    tools=tools,
                     pinning=False,
                 )
                 display(viewer.widget)
                 error = None
             except Exception as ex:
                 error = ex
-        
+
         if error is None:
             out.resize_sidebar(cad_width + (0 if glass else tree_width) + 12)
 
@@ -134,77 +137,158 @@ def show(
     #
     # Viewer options
     title=None,
-    anchor="right",
-    cad_width=800,
-    tree_width=250,
-    height=600,
-    theme="browser",
-    glass=False,
+    anchor=None,
+    cad_width=None,
+    tree_width=None,
+    height=None,
+    theme=None,
+    glass=None,
+    tools=None,
     pinning=None,
     #
     # render options
-    normal_len=0,
-    default_edge_color="#707070",
-    default_opacity=0.5,
-    ambient_intensity=0.5,
-    direct_intensity=0.3,
+    normal_len=None,
+    default_edge_color=None,
+    default_opacity=None,
+    ambient_intensity=None,
+    direct_intensity=None,
     #
     # add_shapes options
-    tools=True,
-    control="trackball",
-    ortho=True,
-    axes=False,
-    axes0=False,
+    control=None,
+    ortho=None,
+    axes=None,
+    axes0=None,
     grid=None,
-    ticks=10,
-    transparent=False,
-    black_edges=False,
-    collapse=0,
-    reset_camera=True,
+    ticks=None,
+    transparent=None,
+    black_edges=None,
+    collapse=None,
+    reset_camera=None,
     position=None,
     quaternion=None,
     target=None,
     zoom=None,
-    zoom_speed=0.5,
-    pan_speed=0.5,
-    rotate_speed=1.0,
-    timeit=False,
-    js_debug=False,
+    zoom_speed=None,
+    pan_speed=None,
+    rotate_speed=None,
+    timeit=None,
+    js_debug=None,
 ):
-    kwargs = {
-        "title": title,
-        "anchor": anchor,
-        "cad_width": cad_width,
-        "tree_width": tree_width,
-        "height": height,
-        "theme": theme,
-        "normal_len": normal_len,
-        "default_edge_color": default_edge_color,
-        "default_opacity": default_opacity,
-        "ambient_intensity": ambient_intensity,
-        "direct_intensity": direct_intensity,
-        "tools": tools,
-        "glass": glass,
-        "control": control,
-        "ortho": ortho,
-        "axes": axes,
-        "axes0": axes0,
-        "grid": grid,
-        "ticks": ticks,
-        "transparent": transparent,
-        "black_edges": black_edges,
-        "collapse": collapse,
-        "reset_camera": reset_camera,
-        "position": position,
-        "quaternion": quaternion,
-        "target": target,
-        "zoom": zoom,
-        "zoom_speed": zoom_speed,
-        "pan_speed": pan_speed,
-        "rotate_speed": rotate_speed,
-        "timeit": timeit,
-        "js_debug": js_debug,
-    }
+    """
+    Show CAD objects in JupyterLab
+
+    - shapes:            Serialized nested tessellated shapes 
+    - states:            State of the nested cad objects, key = object path, value = 2-dim tuple of 0/1 (hidden/visible) for object and edges
+
+    Valid keywords:
+
+
+    DISPLAY OPTIONS
+    - title:              Name of the sidecar viewer (default=None)
+    - anchor:             How to open sidecar: "right", "split-right", "split-bottom", ... (default="right")
+    - cad_width:          Width of CAD view part of the view (default=800)
+    - tree_width:         Width of navigation tree part of the view (default=250)
+    - height:             Height of the CAD view (default=600)
+    - theme:              Theme "light" or "dark" (default="light")
+    - tools:              Show the viewer tools like the object tree (default=True)
+    - glass:              Use the glass mode, i.e. CAD navigation as transparent overlay (default=False)
+    - pinning:            Allow replacing the CAD View by a canvas screenshot (default=True in cells, else False)
+
+    TESSELLATION OPTIONS
+    - default_edge_color: Default edge color (default="#707070")
+    - default_opacity:    Default opacity (default=0.5)
+    - ambient_intensity   Default ambient (default=0.5) 
+    - direct_intensity:   Default direct (default=0.3)   
+    - normal_len:         Render vertex normals if > 0 (default=0)
+    - render_edges:       Render edges  (default=True)
+    - render_mates:       Render mates (for MAssemblies, default=False)
+    - mate_scale:         Scale of rendered mates (for MAssemblies, default=1)
+
+    VIEWER OPTIONS
+    - control:            Use trackball controls ('trackball') or orbit controls ('orbit') (default='trackball')
+    - ortho:              Use orthographic projections (default=True)
+    - axes:               Show axes (default=False)
+    - axes0:              Show axes at (0,0,0) (default=False)
+    - grid:               Show grid (default=[False, False, False])
+    - ticks:              Hint for the number of ticks in both directions (default=10)
+    - transparent:        Show objects transparent (default=False)
+    - black_edges:        Show edges in black (default=False)
+    - collapse:           Collapse CAD tree (1: collapse nodes with single leaf, 2: collapse all nodes, default=0)
+    - reset_camera:       Whether to reset camera (True) or not (False) (default=True)
+    - position:           Absolute camera position that will be scaled (default=None)
+    - quaternion:         Camera rotation as quaternion (x, y, z, w) (default=None)
+    - target:             Camera target to look at (default=None)
+    - zoom:               Zoom factor of view (default=2.5)
+    - reset_camera:       Reset camera position, rotation and zoom to default (default=True)
+    - zoom_speed:         Mouse zoom speed (default=1.0)
+    - pan_speed:          Mouse pan speed (default=1.0)
+    - rotate_speed:       Mouse rotate speed (default=1.0)
+    - timeit:             Show rendering times, levels = False, 0,1,2,3,4,5 (default=False)
+    - js_debug:           Enable debug output in browser console (default=False)
+    """
+
+    viewer = None
+    if title is not None:
+        viewer = get_sidecar(title)
+        if viewer is not None:
+            if anchor is not None and viewer.widget.anchor != anchor:
+                warn(f"Parameter 'anchor' cannot be changed after sidecar with title '{title}' has been openend")
+                anchor = viewer.widget.anchor
+            if cad_width is not None and viewer.widget.cad_width != cad_width:
+                warn(f"Parameter 'cad_width' cannot be changed after sidecar with title '{title}' has been openend")
+                cad_width = viewer.widget.cad_width
+            if tree_width is not None and viewer.widget.tree_width != tree_width:
+                warn(f"Parameter 'tree_width' cannot be changed after sidecar with title '{title}' has been openend")
+                tree_width = viewer.widget.tree_width
+            if height is not None and viewer.widget.height != height:
+                warn(f"Parameter 'height' cannot be changed after sidecar with title '{title}' has been openend")
+                height = viewer.widget.height
+            if theme is not None and viewer.widget.theme != theme:
+                warn(f"Parameter 'theme' cannot be changed after sidecar with title '{title}' has been openend")
+                theme = viewer.widget.theme
+            if pinning:
+                warn("Pinning not suported for sidecar views")
+            if glass is not None and viewer.glass != glass:
+                viewer.glass = glass
+            if tools is not None and viewer.tools != tools:
+                viewer.tools = tools
+            
+    def preset(key, val, default): 
+        if viewer is None or viewer.widget.shapes == {}:
+            return default if val is None else val
+        else:
+            return getattr(viewer.widget, key) if val is None else val
+    
+    kwargs = {}
+    if title is not None and viewer is None:
+        kwargs["anchor"] = preset("anchor", anchor, "right")
+    if title is None:
+        kwargs["glass"] = preset("glass", glass, False)
+        kwargs["tools"] = preset("tools", tools, True)
+    kwargs["cad_width"] = preset("cad_width", cad_width, 800)
+    kwargs["tree_width"] = preset("tree_width", tree_width, 250)
+    kwargs["height"] = preset("height", height, 600)
+    kwargs["theme"] = preset("theme", theme, "browser")
+    kwargs["normal_len"] = preset("normal_len", normal_len, 0,)
+    kwargs["default_edge_color"] = preset("default_edge_color", default_edge_color, "#707070")
+    kwargs["default_opacity"] = preset("default_opacity", default_opacity, 0.5)
+    kwargs["ambient_intensity"] = preset("ambient_intensity", ambient_intensity, 0.5)
+    kwargs["direct_intensity"] = preset("direct_intensity", direct_intensity, 0.3)
+    kwargs["control"] = preset("control", control, "trackball")
+    kwargs["ortho"] = preset("ortho", ortho, True)
+    kwargs["axes"] = preset("axes", axes, False)
+    kwargs["axes0"] = preset("axes0", axes0, False)
+    kwargs["grid"] = preset("grid", grid, [False, False, False])
+    kwargs["ticks"] = preset("ticks", ticks, 10)
+    kwargs["transparent"] = preset("transparent", transparent, False)
+    kwargs["black_edges"] = preset("black_edges", black_edges, False)
+    kwargs["collapse"] = preset("collapse", collapse, 0)
+    kwargs["reset_camera"] = preset("reset_camera", reset_camera, True)
+    kwargs["zoom_speed"] = preset("zoom_speed", zoom_speed, 0.5)
+    kwargs["pan_speed"] = preset("pan_speed", pan_speed, 0.5)
+    kwargs["rotate_speed"] = preset("rotate_speed", rotate_speed, 1.0)
+    kwargs["timeit"] = preset("timeit", timeit, False)
+    kwargs["js_debug"] = preset("js_debug", js_debug, False)
 
     if grid is None:
         grid = [False, False, False]
@@ -224,7 +308,7 @@ def show(
     else:
         viewer = get_sidecar(title)
         if viewer is None:
-            viewer = open_viewer(title=title, anchor=anchor, **display_args(kwargs))
+            viewer = open_viewer(title=title, pinning=pinning, anchor=anchor, **display_args(kwargs))
 
     viewer.add_shapes(shapes, states, tracks, **viewer_args(kwargs))
     return viewer

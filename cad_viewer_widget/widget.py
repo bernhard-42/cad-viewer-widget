@@ -356,12 +356,13 @@ class CadViewer:
         tree_width=240,
         theme="browser",
         glass=False,
+        tools=True,
         pinning=False,
         title=None,
         anchor=None,
     ):
-        if cad_width < 700:
-            raise ValueError("Ensure cad_width >= 700")
+        if cad_width < 400:
+            raise ValueError("Ensure cad_width >= 400")
         if tree_width < 240:
             raise ValueError("Ensure tree_width >= 240")
 
@@ -371,6 +372,7 @@ class CadViewer:
             tree_width=tree_width,
             theme=theme,
             glass=glass,
+            tools=tools,
             pinning=pinning,
             title=title,
             anchor=anchor,
@@ -408,7 +410,8 @@ class CadViewer:
         ambient_intensity=0.5,
         direct_intensity=0.3,
         # viewer options
-        tools=True,
+        tools=None,
+        glass=None,
         control="trackball",
         ortho=True,
         axes=False,
@@ -716,8 +719,6 @@ class CadViewer:
             self.widget.ambient_intensity = ambient_intensity
             self.widget.direct_intensity = direct_intensity
             self.widget.normal_len = normal_len
-
-            self.widget.tools = tools
             self.widget.control = control
             self.widget.axes = axes
             self.widget.axes0 = axes0
@@ -747,7 +748,12 @@ class CadViewer:
             self.add_tracks(tracks)
 
         self.widget.initialize = False
-        # self.update_camera_location()
+
+        if tools is not None:
+            self.widget.tools = tools
+            
+        if glass is not None:
+            self.widget.glass = glass
 
     def update_states(self, states):
         """Set navigation tree states for a CAD view"""

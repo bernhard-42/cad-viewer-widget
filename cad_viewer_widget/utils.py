@@ -89,6 +89,7 @@ def display_args(config):
             "height",
             "tree_width",
             "theme",
+            "tools",
             "glass",
             "pinning",
         ]
@@ -108,6 +109,7 @@ def viewer_args(config):
             "normal_len",
             "control",
             "tools",
+            "glass",
             "ticks",
             "axes",
             "axes0",
