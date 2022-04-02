@@ -54,7 +54,7 @@
 <h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
 <dt id="cad_viewer_widget.open_viewer"><code class="name flex">
-<span>def <span class="ident">open_viewer</span></span>(<span>title=None, anchor='right', cad_width=800, tree_width=250, height=600, theme='light', pinning=True)</span>
+<span>def <span class="ident">open_viewer</span></span>(<span>title=None, anchor='right', cad_width=800, tree_width=250, height=600, theme='browser', glass=False, tools=True, pinning=True)</span>
 </code></dt>
 <dd>
 <div class="desc"></div>
@@ -66,10 +66,94 @@
 <div class="desc"></div>
 </dd>
 <dt id="cad_viewer_widget.show"><code class="name flex">
-<span>def <span class="ident">show</span></span>(<span>shapes, states, tracks=None, title=None, anchor='right', cad_width=800, tree_width=250, height=600, theme='light', pinning=None, normal_len=0, default_edge_color='#707070', default_opacity=0.5, ambient_intensity=0.5, direct_intensity=0.3, tools=True, control='trackball', ortho=True, axes=False, axes0=False, grid=None, ticks=10, transparent=False, black_edges=False, reset_camera=True, position=None, quaternion=None, target=None, zoom=None, zoom_speed=0.5, pan_speed=0.5, rotate_speed=1.0, timeit=False, js_debug=False)</span>
+<span>def <span class="ident">show</span></span>(<span>shapes, states, tracks=None, title=None, anchor=None, cad_width=None, tree_width=None, height=None, theme=None, glass=None, tools=None, pinning=None, normal_len=None, default_edge_color=None, default_opacity=None, ambient_intensity=None, direct_intensity=None, control=None, ortho=None, axes=None, axes0=None, grid=None, ticks=None, transparent=None, black_edges=None, collapse=None, reset_camera=None, position=None, quaternion=None, target=None, zoom=None, zoom_speed=None, pan_speed=None, rotate_speed=None, timeit=None, js_debug=None)</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>Show CAD objects in JupyterLab</p>
+<ul>
+<li>shapes:
+Serialized nested tessellated shapes </li>
+<li>states:
+State of the nested cad objects, key = object path, value = 2-dim tuple of 0/1 (hidden/visible) for object and edges</li>
+</ul>
+<p>Valid keywords:</p>
+<p>DISPLAY OPTIONS
+- title:
+Name of the sidecar viewer (default=None)
+- anchor:
+How to open sidecar: "right", "split-right", "split-bottom", &hellip; (default="right")
+- cad_width:
+Width of CAD view part of the view (default=800)
+- tree_width:
+Width of navigation tree part of the view (default=250)
+- height:
+Height of the CAD view (default=600)
+- theme:
+Theme "light" or "dark" (default="light")
+- tools:
+Show the viewer tools like the object tree (default=True)
+- glass:
+Use the glass mode, i.e. CAD navigation as transparent overlay (default=False)
+- pinning:
+Allow replacing the CAD View by a canvas screenshot (default=True in cells, else False)</p>
+<p>TESSELLATION OPTIONS
+- default_edge_color: Default edge color (default="#707070")
+- default_opacity:
+Default opacity (default=0.5)
+- ambient_intensity
+Default ambient (default=0.5)
+- direct_intensity:
+Default direct (default=0.3) <br>
+- normal_len:
+Render vertex normals if &gt; 0 (default=0)
+- render_edges:
+Render edges
+(default=True)
+- render_mates:
+Render mates (for MAssemblies, default=False)
+- mate_scale:
+Scale of rendered mates (for MAssemblies, default=1)</p>
+<p>VIEWER OPTIONS
+- control:
+Use trackball controls ('trackball') or orbit controls ('orbit') (default='trackball')
+- ortho:
+Use orthographic projections (default=True)
+- axes:
+Show axes (default=False)
+- axes0:
+Show axes at (0,0,0) (default=False)
+- grid:
+Show grid (default=[False, False, False])
+- ticks:
+Hint for the number of ticks in both directions (default=10)
+- transparent:
+Show objects transparent (default=False)
+- black_edges:
+Show edges in black (default=False)
+- collapse:
+Collapse CAD tree (1: collapse nodes with single leaf, 2: collapse all nodes, default=0)
+- reset_camera:
+Whether to reset camera (True) or not (False) (default=True)
+- position:
+Absolute camera position that will be scaled (default=None)
+- quaternion:
+Camera rotation as quaternion (x, y, z, w) (default=None)
+- target:
+Camera target to look at (default=None)
+- zoom:
+Zoom factor of view (default=2.5)
+- reset_camera:
+Reset camera position, rotation and zoom to default (default=True)
+- zoom_speed:
+Mouse zoom speed (default=1.0)
+- pan_speed:
+Mouse pan speed (default=1.0)
+- rotate_speed:
+Mouse rotate speed (default=1.0)
+- timeit:
+Show rendering times, levels = False, 0,1,2,3,4,5 (default=False)
+- js_debug:
+Enable debug output in browser console (default=False)</p></div>
 </dd>
 </dl>
 </section>
