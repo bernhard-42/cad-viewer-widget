@@ -1483,6 +1483,9 @@ class CadViewer:
             args = [args]
         return wrapper()
 
+    def remove_ui_elements(self, elements):
+        self.execute("viewer.trimUI", [elements, False])
+        
     def dump_model(self, shapes=False):
         print(
             dedent(
