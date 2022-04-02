@@ -4,6 +4,7 @@ import warnings
 import numpy as np
 from pyparsing import Literal, Word, alphanums, nums, delimitedList, ZeroOrMore
 
+
 def warn(message, warning=RuntimeWarning, when="always"):
     def warning_on_one_line(
         message, category, filename, lineno, file=None, line=None
@@ -16,26 +17,22 @@ def warn(message, warning=RuntimeWarning, when="always"):
     warnings.warn(message + "\n", warning)
     warnings.formatwarning = warn_format
     warnings.simplefilter("ignore", warning)
-    
+
+
 def to_json(value, widget):
-   
     def walk(obj):
         if isinstance(obj, np.ndarray):
-            if str(obj.dtype) in ('int32', 'int64', 'uint64'):
-                obj = obj.astype("uint32", order='C') # force uint triangles
-            elif not obj.flags['C_CONTIGUOUS']:
+            if str(obj.dtype) in ("int32", "int64", "uint64"):
+                obj = obj.astype("uint32", order="C")  # force uint triangles
+            elif not obj.flags["C_CONTIGUOUS"]:
                 obj = np.ascontiguousarray(obj)
             obj = obj.ravel()
-            return {
-                'shape': obj.shape,
-                'dtype': str(obj.dtype),
-                'buffer': memoryview(obj)
-            }
+            return {"shape": obj.shape, "dtype": str(obj.dtype), "buffer": memoryview(obj)}
         elif isinstance(obj, (tuple, list)):
             return [walk(el) for el in obj]
         elif isinstance(obj, dict):
             rv = {}
-            for k,v in obj.items():
+            for k, v in obj.items():
                 rv[k] = walk(v)
             return rv
         else:
