@@ -198,6 +198,7 @@ export class CadViewerView extends DOMWidgetView {
       treeWidth: this.model.get("tree_width"),
       theme: this.model.get("theme"),
       glass: this.model.get("glass"),
+      tools: this.model.get("tools"),
       pinning: this.model.get("pinning")
     };
   }
@@ -216,6 +217,7 @@ export class CadViewerView extends DOMWidgetView {
     var options = {
       control: this.model.get("control"),
       tools: this.model.get("tools"),
+      glass: this.model.get("glass"),
       axes: this.model.get("axes"),
       axes0: this.model.get("axes0"),
       grid: this.model.get("grid").slice(), // clone the array to ensure changes get detected
