@@ -424,7 +424,7 @@ class CadViewer:
         position=None,
         quaternion=None,
         target=None,
-        zoom=1.0,
+        zoom=None,
         reset_camera=True,
         zoom_speed=1.0,
         pan_speed=1.0,
@@ -700,7 +700,9 @@ class CadViewer:
                 target = bb.center
 
             if zoom is None:
-                zoom = 1.0
+                zoom = 4 / 3
+                if self.widget.cad_width >= self.widget.height:
+                    zoom *= self.widget.height / self.widget.cad_width
         else:
             copy = lambda v: None if v is None else (*v,)
             position = copy(self.widget.position)
@@ -1485,7 +1487,7 @@ class CadViewer:
 
     def remove_ui_elements(self, elements):
         self.execute("viewer.trimUI", [elements, False])
-        
+
     def dump_model(self, shapes=False):
         print(
             dedent(
