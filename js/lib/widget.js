@@ -289,6 +289,10 @@ export class CadViewerView extends DOMWidgetView {
 
     this.viewer.display.showAnimationControl(false);
     this.viewer.display.showTools(options.tools);
+
+    if (options.glass != null && this.title != null) {
+      this.viewer.display.glassMode(options.glass);
+    }
   }
 
   handleNotification(change) {
