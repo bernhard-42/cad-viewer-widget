@@ -753,7 +753,7 @@ class CadViewer:
 
         if tools is not None:
             self.widget.tools = tools
-            
+
         if glass is not None:
             self.widget.glass = glass
 
@@ -1327,6 +1327,7 @@ class CadViewer:
         """
 
         self.execute("saveAsPng", filename)
+        self.execute("viewer.update", True)
 
     #
     # Tab handling
