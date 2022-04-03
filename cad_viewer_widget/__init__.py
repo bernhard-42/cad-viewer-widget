@@ -197,8 +197,8 @@ def show(
     TESSELLATION OPTIONS
     - default_edge_color: Default edge color (default="#707070")
     - default_opacity:    Default opacity (default=0.5)
-    - ambient_intensity   Default ambient (default=0.5) 
-    - direct_intensity:   Default direct (default=0.3)   
+    - ambient_intensity   Default ambient (default=0.5)
+    - direct_intensity:   Default direct (default=0.3)
     - normal_len:         Render vertex normals if > 0 (default=0)
     - render_edges:       Render edges  (default=True)
     - render_mates:       Render mates (for MAssemblies, default=False)
@@ -252,13 +252,13 @@ def show(
                 viewer.glass = glass
             if tools is not None and viewer.tools != tools:
                 viewer.tools = tools
-            
-    def preset(key, val, default): 
+
+    def preset(key, val, default):
         if viewer is None or viewer.widget.shapes == {}:
             return default if val is None else val
         else:
             return getattr(viewer.widget, key) if val is None else val
-    
+
     kwargs = {}
     if title is not None and viewer is None:
         kwargs["anchor"] = preset("anchor", anchor, "right")
@@ -269,7 +269,7 @@ def show(
     kwargs["tree_width"] = preset("tree_width", tree_width, 250)
     kwargs["height"] = preset("height", height, 600)
     kwargs["theme"] = preset("theme", theme, "browser")
-    kwargs["normal_len"] = preset("normal_len", normal_len, 0,)
+    kwargs["normal_len"] = preset("normal_len", normal_len, 0)
     kwargs["default_edge_color"] = preset("default_edge_color", default_edge_color, "#707070")
     kwargs["default_opacity"] = preset("default_opacity", default_opacity, 0.5)
     kwargs["ambient_intensity"] = preset("ambient_intensity", ambient_intensity, 0.5)
