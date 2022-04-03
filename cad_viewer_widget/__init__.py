@@ -177,7 +177,7 @@ def show(
     """
     Show CAD objects in JupyterLab
 
-    - shapes:            Serialized nested tessellated shapes 
+    - shapes:            Serialized nested tessellated shapes
     - states:            State of the nested cad objects, key = object path, value = 2-dim tuple of 0/1 (hidden/visible) for object and edges
 
     Valid keywords:
@@ -292,6 +292,14 @@ def show(
     kwargs["rotate_speed"] = preset("rotate_speed", rotate_speed, 1.0)
     kwargs["timeit"] = preset("timeit", timeit, False)
     kwargs["js_debug"] = preset("js_debug", js_debug, False)
+    if position is not None:
+        kwargs["position"] = preset("position", position, False)
+    if quaternion is not None:
+        kwargs["quaternion"] = preset("quaternion", quaternion, False)
+    if target is not None:
+        kwargs["target"] = preset("target", target, False)
+    if zoom is not None:
+        kwargs["zoom"] = preset("zoom", zoom, False)
 
     if grid is None:
         grid = [False, False, False]
