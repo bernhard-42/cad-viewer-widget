@@ -261,8 +261,8 @@ def show(
 
     kwargs = {}
     if title is not None and viewer is None:
-        kwargs["anchor"] = preset("anchor", anchor, "right")
-    if title is None:
+        anchor = "right"
+    if viewer is None:
         kwargs["glass"] = preset("glass", glass, False)
         kwargs["tools"] = preset("tools", tools, True)
     kwargs["cad_width"] = preset("cad_width", cad_width, 800)
