@@ -265,6 +265,9 @@ def show(
     if viewer is None:
         kwargs["glass"] = preset("glass", glass, False)
         kwargs["tools"] = preset("tools", tools, True)
+    else:
+        kwargs["glass"] = preset("glass", glass, viewer.widget.glass)
+        kwargs["tools"] = preset("tools", tools, viewer.widget.tools)
     kwargs["cad_width"] = preset("cad_width", cad_width, 800)
     kwargs["tree_width"] = preset("tree_width", tree_width, 250)
     kwargs["height"] = preset("height", height, 600)
