@@ -370,7 +370,12 @@ the <code>parts</code> list:</p>
 <pre><code>shapes = {
     &quot;name&quot;: &quot;Group&quot;,
     &quot;id&quot;: &quot;/Group&quot;,
-    &quot;loc&quot;: None,  # would be (&lt;position&gt;, &lt;quaternion&gt;), e.g. ([0,0,0), (0,0,0,1)])
+    &quot;loc&quot;: None,  # would be (&lt;position&gt;, &lt;quaternion&gt;), e.g. ([0,0,0), (0,0,0,1)]),
+    &quot;bb&quot;: {
+        &quot;xmin&quot;: -0.5, &quot;xmax&quot;: 0.5,
+        &quot;ymin&quot;: -0.5, &quot;ymax&quot;: 0.5,
+        &quot;zmin&quot;: -0.5, &quot;zmax&quot;: 0.5
+    }
     &quot;parts&quot;: [{
         &quot;name&quot;: &quot;Part_0&quot;,
         &quot;id&quot;: &quot;/Group/Part_0&quot;,
@@ -408,12 +413,7 @@ the <code>parts</code> list:</p>
             [[-0.5, 0.5, 0.5], [0.5, 0.5, 0.5]]
         ]},
         &quot;color&quot;: &quot;#e8b024&quot;,
-        &quot;renderback&quot;: false,
-        &quot;bb&quot;: {
-            &quot;xmin&quot;: -0.5, &quot;xmax&quot;: 0.5,
-            &quot;ymin&quot;: -0.5, &quot;ymax&quot;: 0.5,
-            &quot;zmin&quot;: -0.5, &quot;zmax&quot;: 0.5
-        }
+        &quot;renderback&quot;: false
     }]
 }
 states = {'/Group/Part_0': [1, 1]}
@@ -488,12 +488,7 @@ EdgeList
 "name": "<str>",
 "type": "shapes",
 "color": "#ffffff",
-"renderback": false,
-"bb": {
-"xmin": -0.5, "xmax": 0.5,
-"ymin": -0.5, "ymax": 0.5,
-"zmin": -0.5, "zmax": 0.5
-},
+"renderback": false
 "shape": {
 "vertices": <VectorList>,
 "triangles": <Index>,
@@ -507,12 +502,7 @@ EdgeList
 "type": "edges",
 "color": "#ffffff",
 "width": 3,
-"renderback": false,
-"bb": {
-"xmin": -0.5, "xmax": 0.5,
-"ymin": -0.5, "ymax": 0.5,
-"zmin": -0.5, "zmax": 0.5
-},
+"renderback": false
 "shape": <EdgeList>
 }</p>
 <p>Vertices := {
@@ -520,13 +510,7 @@ EdgeList
 "name": "<name>",
 "type": "vertices",
 "color": "#ffffff",
-"size": 6,
-"bb": {
-"xmin":
--5.0, "xmax": 5.0,
-"ymin": -10.0, "ymax": 10.0,
-"zmin": -15.0, "zmax": 15.0
-},
+"size": 6
 "shape": <VectorList>
 }</p></div>
 </dd>
