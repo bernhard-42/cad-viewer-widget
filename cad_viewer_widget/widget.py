@@ -13,8 +13,7 @@ from traitlets import Unicode, Dict, List, Tuple, Integer, Float, Any, Bool, obs
 from IPython.display import HTML, update_display
 from pyparsing import ParseException
 
-from .utils import get_parser, to_json
-from .boundingbox import combined_bb, normalize
+from .utils import get_parser, to_json, bsphere, normalize
 
 
 class AnimationTrack:
@@ -502,7 +501,12 @@ class CadViewer:
         shapes = {
             "name": "Group",
             "id": "/Group",
-            "loc": None,  # would be (<position>, <quaternion>), e.g. ([0,0,0), (0,0,0,1)])
+            "loc": None,  # would be (<position>, <quaternion>), e.g. ([0,0,0), (0,0,0,1)]),
+            "bb": {
+                "xmin": -0.5, "xmax": 0.5,
+                "ymin": -0.5, "ymax": 0.5,
+                "zmin": -0.5, "zmax": 0.5
+            }
             "parts": [{
                 "name": "Part_0",
                 "id": "/Group/Part_0",
@@ -540,12 +544,7 @@ class CadViewer:
                     [[-0.5, 0.5, 0.5], [0.5, 0.5, 0.5]]
                 ]},
                 "color": "#e8b024",
-                "renderback": false,
-                "bb": {
-                    "xmin": -0.5, "xmax": 0.5,
-                    "ymin": -0.5, "ymax": 0.5,
-                    "zmin": -0.5, "zmax": 0.5
-                }
+                "renderback": false
             }]
         }
         states = {'/Group/Part_0': [1, 1]}
@@ -618,12 +617,7 @@ class CadViewer:
             "name": "<str>",
             "type": "shapes",
             "color": "#ffffff",
-            "renderback": false,
-            "bb": {
-                "xmin": -0.5, "xmax": 0.5,
-                "ymin": -0.5, "ymax": 0.5,
-                "zmin": -0.5, "zmax": 0.5
-            },
+            "renderback": false
             "shape": {
                 "vertices": <VectorList>,
                 "triangles": <Index>,
@@ -638,12 +632,7 @@ class CadViewer:
             "type": "edges",
             "color": "#ffffff",
             "width": 3,
-            "renderback": false,
-            "bb": {
-                "xmin": -0.5, "xmax": 0.5,
-                "ymin": -0.5, "ymax": 0.5,
-                "zmin": -0.5, "zmax": 0.5
-            },
+            "renderback": false
             "shape": <EdgeList>
         }
 
@@ -652,12 +641,7 @@ class CadViewer:
             "name": "<name>",
             "type": "vertices",
             "color": "#ffffff",
-            "size": 6,
-            "bb": {
-                "xmin":  -5.0, "xmax": 5.0,
-                "ymin": -10.0, "ymax": 10.0,
-                "zmin": -15.0, "zmax": 15.0
-            },
+            "size": 6
             "shape": <VectorList>
         }
         """
@@ -681,12 +665,10 @@ class CadViewer:
                 print("Camera control changed, so camera was resetted")
 
         if reset_camera:
-            bb = combined_bb(shapes)
+            center, radius = bsphere(shapes["bb"])
 
             if position is None:
-                position = (
-                    normalize(np.array((1, 1, 1))) * 5.5 * bb.max_dist_from_center() + np.array(bb.center)
-                ).tolist()
+                position = (normalize(np.array((1, 1, 1))) * 5.5 * radius + center).tolist()
 
             if quaternion is None and control == "trackball":
                 quaternion = (
@@ -697,7 +679,7 @@ class CadViewer:
                 )
 
             if target is None:
-                target = bb.center
+                target = center.tolist()
 
             if zoom is None:
                 zoom = 4 / 3

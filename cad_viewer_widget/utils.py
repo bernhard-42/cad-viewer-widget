@@ -1,5 +1,6 @@
 """Utility functions"""
 
+import itertools
 import warnings
 import numpy as np
 from pyparsing import Literal, Word, alphanums, nums, delimitedList, ZeroOrMore
@@ -17,6 +18,42 @@ def warn(message, warning=RuntimeWarning, when="always"):
     warnings.warn(message + "\n", warning)
     warnings.formatwarning = warn_format
     warnings.simplefilter("ignore", warning)
+
+
+# Linear Algebra helpers
+
+
+def distance(v1, v2=None):
+    if v2 is None:
+        return np.linalg.norm(v1)
+    else:
+        return np.linalg.norm([x - y for x, y in zip(v1, v2)])
+
+
+def normalize(v):
+    return np.array(v) / distance(v)
+
+
+def bsphere(bbox):
+    center = (
+        (bbox["xmin"] + bbox["xmax"]) / 2.0,
+        (bbox["ymin"] + bbox["ymax"]) / 2.0,
+        (bbox["zmin"] + bbox["zmax"]) / 2.0,
+    )
+    radius = max(
+        [
+            distance(center, v)
+            for v in itertools.product(
+                (bbox["xmin"], bbox["xmax"]),
+                (bbox["ymin"], bbox["ymax"]),
+                (bbox["zmin"], bbox["zmax"]),
+            )
+        ]
+    )
+    return (np.array(center), radius)
+
+
+# Json conversion helpers
 
 
 def to_json(value, widget):
