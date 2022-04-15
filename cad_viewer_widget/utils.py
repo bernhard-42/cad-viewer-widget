@@ -5,6 +5,8 @@ import warnings
 import numpy as np
 from pyparsing import Literal, Word, alphanums, nums, delimitedList, ZeroOrMore
 
+# Warnings
+
 
 def warn(message, warning=RuntimeWarning, when="always"):
     def warning_on_one_line(
@@ -111,6 +113,9 @@ def get_parser():
     index = lbrack + delimitedList(integer) + rbrack
     obj = Word(alphanums + "_$") + ZeroOrMore(index)
     return obj + ZeroOrMore(dot + obj)
+
+
+# Arguments split helpers
 
 
 def display_args(config):
