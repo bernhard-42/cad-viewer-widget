@@ -139,6 +139,9 @@ export class CadViewerView extends DOMWidgetView {
       this.model.on("change:collapse", this.handle_change, this);
       this.model.on("change:tools", this.handle_change, this);
       this.model.on("change:glass", this.handle_change, this);
+      this.model.on("change:cad_width", this.handle_change, this);
+      this.model.on("change:tree_width", this.handle_change, this);
+      this.model.on("change:height", this.handle_change, this);
       this.model.on("change:pinning", this.handle_change, this);
       this.model.on("change:default_edge_color", this.handle_change, this);
       this.model.on("change:default_opacity", this.handle_change, this);
@@ -586,6 +589,18 @@ export class CadViewerView extends DOMWidgetView {
       case "glass":
         flag = change.changed[key];
         this.viewer.display.glassMode(flag);
+        break;
+      case "cad_width":
+        value = change.changed[key];
+        this.viewer.resizeCadView(value, this.model.get("tree_width"), this.model.get("height"), this.model.get("glass"));
+        break;
+      case "tree_width":
+        value = change.changed[key];
+        this.viewer.resizeCadView(this.model.get("cad_width"), value, this.model.get("height"), this.model.get("glass"));
+        break;
+      case "height":
+        value = change.changed[key];
+        this.viewer.resizeCadView(this.model.get("cad_width"), this.model.get("tree_width"), value, this.model.get("glass"));
         break;
       case "pinning":
         flag = change.changed[key];

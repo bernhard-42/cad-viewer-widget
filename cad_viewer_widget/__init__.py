@@ -234,15 +234,6 @@ def show(
             if anchor is not None and viewer.widget.anchor != anchor:
                 warn(f"Parameter 'anchor' cannot be changed after sidecar with title '{title}' has been openend")
                 anchor = viewer.widget.anchor
-            if cad_width is not None and viewer.widget.cad_width != cad_width:
-                warn(f"Parameter 'cad_width' cannot be changed after sidecar with title '{title}' has been openend")
-                cad_width = viewer.widget.cad_width
-            if tree_width is not None and viewer.widget.tree_width != tree_width:
-                warn(f"Parameter 'tree_width' cannot be changed after sidecar with title '{title}' has been openend")
-                tree_width = viewer.widget.tree_width
-            if height is not None and viewer.widget.height != height:
-                warn(f"Parameter 'height' cannot be changed after sidecar with title '{title}' has been openend")
-                height = viewer.widget.height
             if theme is not None and viewer.widget.theme != theme:
                 warn(f"Parameter 'theme' cannot be changed after sidecar with title '{title}' has been openend")
                 theme = viewer.widget.theme

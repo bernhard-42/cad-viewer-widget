@@ -335,7 +335,7 @@ class CadViewer:
         UI theme, can be 'dark' or 'light' (default)
     tools : bool, default: True
         Whether to show CAD tools (True) or not (False)
-    glass : bool, default: True
+    glass : bool, default: False
         Whether to use glass mode (True) or not (False)
     pinning: bool, default: False
         Whether to allow replacing the CAD View by a canvas screenshot
@@ -411,6 +411,9 @@ class CadViewer:
         # viewer options
         tools=None,
         glass=None,
+        cad_width=None,
+        tree_width=None,
+        height=None,
         control="trackball",
         ortho=True,
         axes=False,
@@ -446,6 +449,16 @@ class CadViewer:
             Name of the title view to display the shapes.
         ortho : bool, default True
             Whether to use orthographic view (True) or perspective view (False)
+        cad_width : int, default: None
+            Width of the canvas element
+        height : int, default: None
+            Height of the canvas element
+        tree_width : int, default: None
+            Width of the navigation tree element
+        tools : bool, default: None
+            Whether to show CAD tools (True) or not (False)
+        glass : bool, default: None
+            Whether to use glass mode (True) or not (False)
         control : string, default 'trackball'
             Whether to use trackball controls ('trackball') or orbit controls ('orbit')
         axes : bool, default False
@@ -704,6 +717,16 @@ class CadViewer:
             self.widget.direct_intensity = direct_intensity
             self.widget.normal_len = normal_len
             self.widget.control = control
+            if tools is not None:
+                self.widget.tools = tools
+            if glass is not None:
+                self.widget.glass = glass
+            if cad_width is not None:
+                self.widget.cad_width = cad_width
+            if tree_width is not None:
+                self.widget.tree_width = tree_width
+            if height is not None:
+                self.widget.height = height
             self.widget.axes = axes
             self.widget.axes0 = axes0
             self.widget.grid = grid
@@ -1055,6 +1078,45 @@ class CadViewer:
     @glass.setter
     def glass(self, value):
         self.widget.glass = value
+
+    @property
+    def cad_width(self):
+        """
+        Get or set the CadViewerWidget traitlet `cad_width`
+        see [CadViewerWidget.tools](./widget.html#cad_viewer_widget.widget.CadViewerWidget.cad_width)
+        """
+
+        return self.widget.cad_width
+
+    @cad_width.setter
+    def cad_width(self, value):
+        self.widget.cad_width = value
+
+    @property
+    def tree_width(self):
+        """
+        Get or set the CadViewerWidget traitlet `tree_width`
+        see [CadViewerWidget.tools](./widget.html#cad_viewer_widget.widget.CadViewerWidget.tree_width)
+        """
+
+        return self.widget.tree_width
+
+    @tree_width.setter
+    def tree_width(self, value):
+        self.widget.tree_width = value
+
+    @property
+    def height(self):
+        """
+        Get or set the CadViewerWidget traitlet `height`
+        see [CadViewerWidget.tools](./widget.html#cad_viewer_widget.widget.CadViewerWidget.height)
+        """
+
+        return self.widget.height
+
+    @height.setter
+    def height(self, value):
+        self.widget.height = value
 
     @property
     def pan_speed(self):
