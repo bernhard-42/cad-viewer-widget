@@ -607,15 +607,30 @@ export class CadViewerView extends DOMWidgetView {
         break;
       case "cad_width":
         value = change.changed[key];
-        this.viewer.resizeCadView(value, this.model.get("tree_width"), this.model.get("height"), this.model.get("glass"));
+        this.viewer.resizeCadView(
+          value,
+          this.model.get("tree_width"),
+          this.model.get("height"),
+          this.model.get("glass")
+        );
         break;
       case "tree_width":
         value = change.changed[key];
-        this.viewer.resizeCadView(this.model.get("cad_width"), value, this.model.get("height"), this.model.get("glass"));
+        this.viewer.resizeCadView(
+          this.model.get("cad_width"),
+          value,
+          this.model.get("height"),
+          this.model.get("glass")
+        );
         break;
       case "height":
         value = change.changed[key];
-        this.viewer.resizeCadView(this.model.get("cad_width"), this.model.get("tree_width"), value, this.model.get("glass"));
+        this.viewer.resizeCadView(
+          this.model.get("cad_width"),
+          this.model.get("tree_width"),
+          value,
+          this.model.get("glass")
+        );
         break;
       case "pinning":
         flag = change.changed[key];
