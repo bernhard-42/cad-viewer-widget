@@ -696,8 +696,11 @@ class CadViewer:
 
             if zoom is None:
                 zoom = 4 / 3
-                if self.widget.cad_width >= self.widget.height:
-                    zoom *= self.widget.height / self.widget.cad_width
+                w = self.widget.cad_width if cad_width is None else cad_width
+                h = self.widget.height if height is None else height
+                if w >= h:
+                    zoom *= h / w
+
         else:
             copy = lambda v: None if v is None else (*v,)
             position = copy(self.widget.position)
