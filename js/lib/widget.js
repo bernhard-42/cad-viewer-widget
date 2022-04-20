@@ -25,9 +25,9 @@ export class CadViewerModel extends DOMWidgetModel {
 
       title: null,
       anchor: null,
-      cadWidth: null,
+      cad_width: null,
       height: null,
-      treeWidth: null,
+      tree_width: null,
       theme: null,
       pinning: null,
 
