@@ -150,6 +150,7 @@ def viewer_args(config):
             "direct_intensity",
             "normal_len",
             "control",
+            "up",
             "tools",
             "glass",
             "ticks",

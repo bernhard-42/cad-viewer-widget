@@ -155,6 +155,7 @@ def show(
     #
     # add_shapes options
     control=None,
+    up=None,
     ortho=None,
     axes=None,
     axes0=None,
@@ -206,6 +207,7 @@ def show(
 
     VIEWER OPTIONS
     - control:            Use trackball controls ('trackball') or orbit controls ('orbit') (default='trackball')
+    - up:                 Camera up direction is Z or Y (default='Z')
     - ortho:              Use orthographic projections (default=True)
     - axes:               Show axes (default=False)
     - axes0:              Show axes at (0,0,0) (default=False)
@@ -269,6 +271,7 @@ def show(
     kwargs["ambient_intensity"] = preset("ambient_intensity", ambient_intensity, 0.5)
     kwargs["direct_intensity"] = preset("direct_intensity", direct_intensity, 0.3)
     kwargs["control"] = preset("control", control, "trackball")
+    kwargs["up"] = preset("up", up, "Z")
     kwargs["ortho"] = preset("ortho", ortho, True)
     kwargs["axes"] = preset("axes", axes, False)
     kwargs["axes0"] = preset("axes0", axes0, False)

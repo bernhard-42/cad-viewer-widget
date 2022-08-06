@@ -166,6 +166,9 @@ class CadViewerWidget(widgets.Output):  # pylint: disable-msg=too-many-instance-
     control = Unicode().tag(sync=True)
     "unicode: Whether to use trackball controls ('trackball') or orbit controls ('orbit')"
 
+    up = Unicode().tag(sync=True)
+    "unicode: Whether camera up direction is Z ('Z') or Y ('Y')"
+
     axes = Bool(allow_none=True, default_value=None).tag(sync=True)
     "bool: Whether to show coordinate axes (True) or not (False)"
 
@@ -415,6 +418,7 @@ class CadViewer:
         tree_width=None,
         height=None,
         control="trackball",
+        up="Z",
         ortho=True,
         axes=False,
         axes0=False,
@@ -461,6 +465,8 @@ class CadViewer:
             Whether to use glass mode (True) or not (False)
         control : string, default 'trackball'
             Whether to use trackball controls ('trackball') or orbit controls ('orbit')
+        up : string, default 'Z'
+            Whether camera up direction is Z ('Z') or Y ('Y')
         axes : bool, default False
             Whether to show coordinate axes (True) or not (False)
         axes0 : bool, default False
@@ -665,6 +671,9 @@ class CadViewer:
         if control == "trackball" and position is not None and quaternion is None:
             raise ValueError("For Trackball camera control, position paramater also needs quaternion parameter")
 
+        if up != "Z" and up != "Y":
+            raise ValueError("Camera up value can only be Y or Z")
+
         if grid is None:
             grid = [False, False, False]
 
@@ -684,12 +693,10 @@ class CadViewer:
                 position = (normalize(np.array((1, 1, 1))) * 5.5 * radius + center).tolist()
 
             if quaternion is None and control == "trackball":
-                quaternion = (
-                    0.1759198966061612,
-                    0.42470820027786693,
-                    0.8204732385702833,
-                    0.33985114297998736,
-                )
+                if up == "Y":
+                    quaternion = (-0.27984814233312133, 0.3647051996310009, 0.11591689595929514, 0.8804762392171493)
+                else:  # Z as default
+                    quaternion = (0.1759198966061612, 0.42470820027786693, 0.8204732385702833, 0.33985114297998736)
 
             if target is None:
                 target = center.tolist()
@@ -720,6 +727,7 @@ class CadViewer:
             self.widget.direct_intensity = direct_intensity
             self.widget.normal_len = normal_len
             self.widget.control = control
+            self.widget.up = up
             if tools is not None:
                 self.widget.tools = tools
             if glass is not None:
@@ -1243,6 +1251,15 @@ class CadViewer:
         return self.widget.control
 
     @property
+    def up(self):
+        """
+        Get or set the CadViewerWidget traitlet `up`
+        see [CadViewerWidget.up](./widget.html#cad_viewer_widget.widget.CadViewerWidget.up)
+        """
+
+        return self.widget.up
+
+    @property
     def pinning(self):
         """
         Get or set the CadViewerWidget traitlet `pinning`
@@ -1567,6 +1584,7 @@ class CadViewer:
                 glass:              {self.widget.glass}
                 ortho:              {self.widget.ortho}
                 control:            {self.widget.control}
+                up:                 {self.widget.up}
                 axes:               {self.widget.axes}
                 axes0:              {self.widget.axes0}
                 grid:               {self.widget.grid}

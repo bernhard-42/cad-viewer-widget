@@ -42,6 +42,7 @@ export class CadViewerModel extends DOMWidgetModel {
 
       ortho: null,
       control: null,
+      up: null,
       axes: null,
       axes0: null,
       grid: null,
@@ -219,6 +220,7 @@ export class CadViewerView extends DOMWidgetView {
   getViewerOptions() {
     var options = {
       control: this.model.get("control"),
+      up: this.model.get("up"),
       tools: this.model.get("tools"),
       glass: this.model.get("glass"),
       axes: this.model.get("axes"),
