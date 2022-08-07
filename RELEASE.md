@@ -47,3 +47,10 @@ To release a new version of cad_viewer_widget on PyPI:
    ```shell
    make upload_js
    ```
+
+8.
+
+   ```shell
+   # Set github token
+   make create-release   
+   ```
