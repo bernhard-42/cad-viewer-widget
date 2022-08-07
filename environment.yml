@@ -9,4 +9,4 @@ dependencies:
   - pythonocc-core=7.5.1
   - occt=7.5.1
   - pip:
-      - cad-viewer-widget==1.3.2
+      - cad-viewer-widget==1.3.4
