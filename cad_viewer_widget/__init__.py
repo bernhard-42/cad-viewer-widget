@@ -250,7 +250,10 @@ def show(
         if viewer is None or viewer.widget.shapes == {}:
             return default if val is None else val
         else:
-            return getattr(viewer.widget, key) if val is None else val
+            if key in ("position", "quaternion", "target", "zoom", "position0", "quaternion0", "target0", "zoom0"):
+                return getattr(viewer.widget, key) if val is None else val
+            else:
+                return default if val is None else val
 
     kwargs = {}
     if title is not None and viewer is None:
