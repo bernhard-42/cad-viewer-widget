@@ -58,7 +58,7 @@
 <div class="desc"></div>
 </dd>
 <dt id="cad_viewer_widget.show"><code class="name flex">
-<span>def <span class="ident">show</span></span>(<span>shapes, states, tracks=None, title=None, anchor=None, cad_width=None, tree_width=None, height=None, theme=None, glass=None, tools=None, pinning=None, normal_len=None, default_edge_color=None, default_opacity=None, ambient_intensity=None, direct_intensity=None, control=None, ortho=None, axes=None, axes0=None, grid=None, ticks=None, transparent=None, black_edges=None, collapse=None, reset_camera=None, position=None, quaternion=None, target=None, zoom=None, zoom_speed=None, pan_speed=None, rotate_speed=None, timeit=None, js_debug=None)</span>
+<span>def <span class="ident">show</span></span>(<span>shapes, states, tracks=None, title=None, anchor=None, cad_width=None, tree_width=None, height=None, theme=None, glass=None, tools=None, pinning=None, normal_len=None, default_edge_color=None, default_opacity=None, ambient_intensity=None, direct_intensity=None, control=None, up=None, ortho=None, axes=None, axes0=None, grid=None, ticks=None, transparent=None, black_edges=None, collapse=None, reset_camera=None, position=None, quaternion=None, target=None, zoom=None, zoom_speed=None, pan_speed=None, rotate_speed=None, timeit=None, js_debug=None)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Show CAD objects in JupyterLab</p>
@@ -108,6 +108,8 @@ Scale of rendered mates (for MAssemblies, default=1)</p>
 <p>VIEWER OPTIONS
 - control:
 Use trackball controls ('trackball') or orbit controls ('orbit') (default='trackball')
+- up:
+Camera up direction is Z or Y (default='Z')
 - ortho:
 Use orthographic projections (default=True)
 - axes:

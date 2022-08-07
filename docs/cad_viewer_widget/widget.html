@@ -304,6 +304,11 @@ see <a href="./widget.html#cad_viewer_widget.widget.CadViewerWidget.transparent"
 <div class="desc"><p>Get or set the CadViewerWidget traitlet <code>tree_width</code>
 see <a href="./widget.html#cad_viewer_widget.widget.CadViewerWidget.tree_width">CadViewerWidget.tools</a></p></div>
 </dd>
+<dt id="cad_viewer_widget.widget.CadViewer.up"><code class="name">var <span class="ident">up</span></code></dt>
+<dd>
+<div class="desc"><p>Get or set the CadViewerWidget traitlet <code>up</code>
+see <a href="./widget.html#cad_viewer_widget.widget.CadViewerWidget.up">CadViewerWidget.up</a></p></div>
+</dd>
 <dt id="cad_viewer_widget.widget.CadViewer.zoom"><code class="name">var <span class="ident">zoom</span></code></dt>
 <dd>
 <div class="desc"><p>Get or set the CadViewerWidget traitlet <code>zoom</code>
@@ -318,7 +323,7 @@ see <a href="./widget.html#cad_viewer_widget.widget.CadViewerWidget.zoom_speed">
 <h3>Methods</h3>
 <dl>
 <dt id="cad_viewer_widget.widget.CadViewer.add_shapes"><code class="name flex">
-<span>def <span class="ident">add_shapes</span></span>(<span>self, shapes, states, tracks=None, normal_len=0, default_edge_color='#707070', default_opacity=0.5, ambient_intensity=0.5, direct_intensity=0.3, tools=None, glass=None, cad_width=None, tree_width=None, height=None, control='trackball', ortho=True, axes=False, axes0=False, grid=None, ticks=10, transparent=False, black_edges=False, collapse=0, position=None, quaternion=None, target=None, zoom=None, reset_camera=True, zoom_speed=1.0, pan_speed=1.0, rotate_speed=1.0, timeit=False, js_debug=False)</span>
+<span>def <span class="ident">add_shapes</span></span>(<span>self, shapes, states, tracks=None, normal_len=0, default_edge_color='#707070', default_opacity=0.5, ambient_intensity=0.5, direct_intensity=0.3, tools=None, glass=None, cad_width=None, tree_width=None, height=None, control='trackball', up='Z', ortho=True, axes=False, axes0=False, grid=None, ticks=10, transparent=False, black_edges=False, collapse=0, position=None, quaternion=None, target=None, zoom=None, reset_camera=True, zoom_speed=1.0, pan_speed=1.0, rotate_speed=1.0, timeit=False, js_debug=False)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Adding shapes to the CAD view</p>
@@ -346,6 +351,8 @@ see <a href="./widget.html#cad_viewer_widget.widget.CadViewerWidget.zoom_speed">
 <dd>Whether to use glass mode (True) or not (False)</dd>
 <dt><strong><code>control</code></strong> :&ensp;<code>string</code>, default <code>'trackball'</code></dt>
 <dd>Whether to use trackball controls ('trackball') or orbit controls ('orbit')</dd>
+<dt><strong><code>up</code></strong> :&ensp;<code>string</code>, default <code>'Z'</code></dt>
+<dd>Whether camera up direction is Z ('Z') or Y ('Y')</dd>
 <dt><strong><code>axes</code></strong> :&ensp;<code>bool</code>, default <code>False</code></dt>
 <dd>Whether to show coordinate axes (True) or not (False)</dd>
 <dt><strong><code>axes0</code></strong> :&ensp;<code>bool</code>, default <code>False</code></dt>
@@ -974,6 +981,10 @@ object notation relative to the 'CadViewer' object and <code>method</code> is th
 <dd>
 <div class="desc"><p>int: Width of the navigation tree element</p></div>
 </dd>
+<dt id="cad_viewer_widget.widget.CadViewerWidget.up"><code class="name">var <span class="ident">up</span></code></dt>
+<dd>
+<div class="desc"><p>unicode: Whether camera up direction is Z ('Z') or Y ('Y')</p></div>
+</dd>
 <dt id="cad_viewer_widget.widget.CadViewerWidget.zoom"><code class="name">var <span class="ident">zoom</span></code></dt>
 <dd>
 <div class="desc"><p>float: Zoom value of the camera</p></div>
@@ -1080,6 +1091,7 @@ object notation relative to the 'CadViewer' object and <code>method</code> is th
 <li><code><a title="cad_viewer_widget.widget.CadViewer.tools" href="#cad_viewer_widget.widget.CadViewer.tools">tools</a></code></li>
 <li><code><a title="cad_viewer_widget.widget.CadViewer.transparent" href="#cad_viewer_widget.widget.CadViewer.transparent">transparent</a></code></li>
 <li><code><a title="cad_viewer_widget.widget.CadViewer.tree_width" href="#cad_viewer_widget.widget.CadViewer.tree_width">tree_width</a></code></li>
+<li><code><a title="cad_viewer_widget.widget.CadViewer.up" href="#cad_viewer_widget.widget.CadViewer.up">up</a></code></li>
 <li><code><a title="cad_viewer_widget.widget.CadViewer.update_camera_location" href="#cad_viewer_widget.widget.CadViewer.update_camera_location">update_camera_location</a></code></li>
 <li><code><a title="cad_viewer_widget.widget.CadViewer.update_states" href="#cad_viewer_widget.widget.CadViewer.update_states">update_states</a></code></li>
 <li><code><a title="cad_viewer_widget.widget.CadViewer.zoom" href="#cad_viewer_widget.widget.CadViewer.zoom">zoom</a></code></li>
@@ -1143,6 +1155,7 @@ object notation relative to the 'CadViewer' object and <code>method</code> is th
 <li><code><a title="cad_viewer_widget.widget.CadViewerWidget.tracks" href="#cad_viewer_widget.widget.CadViewerWidget.tracks">tracks</a></code></li>
 <li><code><a title="cad_viewer_widget.widget.CadViewerWidget.transparent" href="#cad_viewer_widget.widget.CadViewerWidget.transparent">transparent</a></code></li>
 <li><code><a title="cad_viewer_widget.widget.CadViewerWidget.tree_width" href="#cad_viewer_widget.widget.CadViewerWidget.tree_width">tree_width</a></code></li>
+<li><code><a title="cad_viewer_widget.widget.CadViewerWidget.up" href="#cad_viewer_widget.widget.CadViewerWidget.up">up</a></code></li>
 <li><code><a title="cad_viewer_widget.widget.CadViewerWidget.zoom" href="#cad_viewer_widget.widget.CadViewerWidget.zoom">zoom</a></code></li>
 <li><code><a title="cad_viewer_widget.widget.CadViewerWidget.zoom0" href="#cad_viewer_widget.widget.CadViewerWidget.zoom0">zoom0</a></code></li>
 <li><code><a title="cad_viewer_widget.widget.CadViewerWidget.zoom_speed" href="#cad_viewer_widget.widget.CadViewerWidget.zoom_speed">zoom_speed</a></code></li>
