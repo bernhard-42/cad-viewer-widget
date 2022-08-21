@@ -53,7 +53,8 @@ setup_args = dict(
     long_description=LONG_DESCRIPTION,
     include_package_data=True,
     install_requires=[
-        "ipywidgets==7.7",
+        "ipywidgets~=7.7",
+        "jupyterlab<3.5",
         "numpy"
     ],
     extras_require={"dev": ["twine", "bumpversion", "pydoc3"]},
