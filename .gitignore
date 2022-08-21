@@ -4,6 +4,9 @@ dist/
 build/
 *.py[cod]
 node_modules/
+.vscode/configurationCache.log
+.vscode/dryrun.log
+.vscode/targets.log
 
 # Compiled javascript
 cad_viewer_widget/nbextension/
