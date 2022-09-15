@@ -466,7 +466,7 @@ class CadViewer:
         control : string, default 'trackball'
             Whether to use trackball controls ('trackball') or orbit controls ('orbit')
         up : string, default 'Z'
-            Whether camera up direction is Z ('Z') or Y ('Y')
+            Whether camera up direction is Z ('Z') or Y ('Y') or the lagacy Z orientation ('L')
         axes : bool, default False
             Whether to show coordinate axes (True) or not (False)
         axes0 : bool, default False
@@ -690,12 +690,15 @@ class CadViewer:
             center, radius = bsphere(shapes["bb"])
 
             if position is None:
-                position = (normalize(np.array((1, 1, 1))) * 5.5 * radius + center).tolist()
+                dir = -1 if up == "Z" else 1
+                position = (normalize(np.array((1, dir, 1))) * 5.5 * radius + center).tolist()
 
             if quaternion is None and control == "trackball":
                 if up == "Y":
                     quaternion = (-0.27984814233312133, 0.3647051996310009, 0.11591689595929514, 0.8804762392171493)
-                else:  # Z as default
+                elif up == "Z":
+                    quaternion = (0.424708200277867, 0.1759198966061612, 0.3398511429799874, 0.8204732385702832)
+                else:  # legacy
                     quaternion = (0.1759198966061612, 0.42470820027786693, 0.8204732385702833, 0.33985114297998736)
 
             if target is None:
