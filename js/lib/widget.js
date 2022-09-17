@@ -416,7 +416,7 @@ export class CadViewerView extends DOMWidgetView {
 
     var viewerOptions = this.getViewerOptions();
     timer.split("viewer");
-    
+
     // set the latest view dimension before rendering
     this.viewer.cadWidth = this.model.get("cad_width");
     this.viewer.treeWidth = this.model.get("tree_width");
@@ -432,7 +432,7 @@ export class CadViewerView extends DOMWidgetView {
       this.states,
       viewerOptions
     );
-    
+
     // and resize the view accordingly afterwards
     this.viewer.resizeCadView(
       this.model.get("cad_width"),

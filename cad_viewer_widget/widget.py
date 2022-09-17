@@ -110,8 +110,8 @@ class CadViewerWidget(widgets.Output):  # pylint: disable-msg=too-many-instance-
     _model_name = Unicode("CadViewerModel").tag(sync=True)
     _view_module = Unicode("cad-viewer-widget").tag(sync=True)
     _model_module = Unicode("cad-viewer-widget").tag(sync=True)
-    _view_module_version = Unicode("1.3.5").tag(sync=True)
-    _model_module_version = Unicode("1.3.5").tag(sync=True)
+    _view_module_version = Unicode("1.4.0").tag(sync=True)
+    _model_module_version = Unicode("1.4.0").tag(sync=True)
 
     #
     # Display traits
@@ -167,7 +167,7 @@ class CadViewerWidget(widgets.Output):  # pylint: disable-msg=too-many-instance-
     "unicode: Whether to use trackball controls ('trackball') or orbit controls ('orbit')"
 
     up = Unicode().tag(sync=True)
-    "unicode: Whether camera up direction is Z ('Z') or Y ('Y')"
+    "unicode: Whether camera up direction is Z ('Z') or Y ('Y') or the legacy Z orientation ('L')"
 
     axes = Bool(allow_none=True, default_value=None).tag(sync=True)
     "bool: Whether to show coordinate axes (True) or not (False)"
@@ -671,8 +671,8 @@ class CadViewer:
         if control == "trackball" and position is not None and quaternion is None:
             raise ValueError("For Trackball camera control, position paramater also needs quaternion parameter")
 
-        if up != "Z" and up != "Y":
-            raise ValueError("Camera up value can only be Y or Z")
+        if not up in ["Z", "Y", "L"]:
+            raise ValueError("Camera up value can only be Y or Z or L")
 
         if grid is None:
             grid = [False, False, False]
