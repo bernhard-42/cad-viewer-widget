@@ -54,7 +54,9 @@ setup_args = dict(
     include_package_data=True,
     install_requires=[
         "ipywidgets~=7.7",
-        "jupyterlab<3.5",
+        "jupyterlab<3.6",
+        "traitlets~=5.8",
+        "pyparsing",
         "numpy"
     ],
     extras_require={"dev": ["twine", "bumpversion", "pydoc3"]},
