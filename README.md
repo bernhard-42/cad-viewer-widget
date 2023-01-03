@@ -46,3 +46,11 @@ Then you need to rebuild the JS when you make a code change:
     $ yarn run build
 
 You then need to refresh the JupyterLab page when your javascript changes.
+
+## Changes
+
+**2023-01-03**
+- Added pyparsing as dependency
+- Pinned traitlets to ~5.8
+- Upgraded bottle example to occt 7.6.2
+
