@@ -2,6 +2,8 @@ import { output } from "@jupyter-widgets/jupyterlab-manager";
 import App from "./app.js";
 import { _module, _version } from "./version.js";
 
+import "../style/index.css"
+
 export class CadViewerSidecarModel extends output.OutputModel {
   constructor(...arg) {
     super(...arg);
@@ -26,8 +28,7 @@ export class CadViewerSidecarModel extends output.OutputModel {
 
   initialize(attributes, options) {
     super.initialize(attributes, options);
-
-    this.widget_manager.display_model(undefined, this, {});
+    this.widget_manager.create_view(this, {})
   }
 }
 
