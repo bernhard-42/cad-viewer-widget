@@ -3,7 +3,7 @@ from ._version import __version__
 
 from IPython.display import display, HTML
 
-from .widget import AnimationTrack, CadViewer
+from .widget import AnimationTrack, CadViewer, Camera, Collapse
 from .sidecar import Sidecar
 
 from .sidecar import (
@@ -100,7 +100,6 @@ def open_viewer(
         viewer.widget.image_id = image_id
         error = None
     else:
-
         out = Sidecar(title=title, anchor=anchor)
         with out:
             try:
@@ -148,10 +147,12 @@ def show(
     #
     # render options
     normal_len=None,
-    default_edge_color=None,
+    default_edgecolor=None,
     default_opacity=None,
     ambient_intensity=None,
     direct_intensity=None,
+    metalness=None,
+    roughness=None,
     #
     # add_shapes options
     control=None,
@@ -160,6 +161,7 @@ def show(
     axes=None,
     axes0=None,
     grid=None,
+    explode=None,
     ticks=None,
     transparent=None,
     black_edges=None,
@@ -173,7 +175,7 @@ def show(
     pan_speed=None,
     rotate_speed=None,
     timeit=None,
-    js_debug=None,
+    debug=None,
 ):
     """
     Show CAD objects in JupyterLab
@@ -196,10 +198,12 @@ def show(
     - pinning:            Allow replacing the CAD View by a canvas screenshot (default=True in cells, else False)
 
     TESSELLATION OPTIONS
-    - default_edge_color: Default edge color (default="#707070")
+    - default_edgecolor: Default edge color (default="#707070")
     - default_opacity:    Default opacity (default=0.5)
-    - ambient_intensity   Default ambient (default=0.5)
-    - direct_intensity:   Default direct (default=0.3)
+    - ambient_intensity   Default ambient (default=1.0)
+    - direct_intensity:   Default direct (default=1.1)
+    - metalness : float:  The degree of material metalness (default 0.3)
+    - roughness : float:  The degree of material roughness (default 0.65)
     - normal_len:         Render vertex normals if > 0 (default=0)
     - render_edges:       Render edges  (default=True)
     - render_mates:       Render mates (for MAssemblies, default=False)
@@ -213,6 +217,7 @@ def show(
     - axes0:              Show axes at (0,0,0) (default=False)
     - grid:               Show grid (default=[False, False, False])
     - ticks:              Hint for the number of ticks in both directions (default=10)
+    - explode:            Whether explode widget is visibe or not (default=False)
     - transparent:        Show objects transparent (default=False)
     - black_edges:        Show edges in black (default=False)
     - collapse:           Collapse CAD tree (1: collapse nodes with single leaf, 2: collapse all nodes, default=0)
@@ -226,7 +231,7 @@ def show(
     - pan_speed:          Mouse pan speed (default=1.0)
     - rotate_speed:       Mouse rotate speed (default=1.0)
     - timeit:             Show rendering times, levels = False, 0,1,2,3,4,5 (default=False)
-    - js_debug:           Enable debug output in browser console (default=False)
+    - debug:           Enable debug output in browser console (default=False)
     """
 
     viewer = None
@@ -269,10 +274,12 @@ def show(
     kwargs["height"] = preset("height", height, 600)
     kwargs["theme"] = preset("theme", theme, "browser")
     kwargs["normal_len"] = preset("normal_len", normal_len, 0)
-    kwargs["default_edge_color"] = preset("default_edge_color", default_edge_color, "#707070")
+    kwargs["default_edgecolor"] = preset("default_edgecolor", default_edgecolor, "#707070")
     kwargs["default_opacity"] = preset("default_opacity", default_opacity, 0.5)
-    kwargs["ambient_intensity"] = preset("ambient_intensity", ambient_intensity, 0.5)
-    kwargs["direct_intensity"] = preset("direct_intensity", direct_intensity, 0.3)
+    kwargs["ambient_intensity"] = preset("ambient_intensity", ambient_intensity, 1.0)
+    kwargs["direct_intensity"] = preset("direct_intensity", direct_intensity, 1.1)
+    kwargs["metalness"] = preset("metalness", metalness, 0.3)
+    kwargs["roughness"] = preset("roughness", roughness, 0.65)
     kwargs["control"] = preset("control", control, "trackball")
     kwargs["up"] = preset("up", up, "Z")
     kwargs["ortho"] = preset("ortho", ortho, True)
@@ -280,15 +287,16 @@ def show(
     kwargs["axes0"] = preset("axes0", axes0, False)
     kwargs["grid"] = preset("grid", grid, [False, False, False])
     kwargs["ticks"] = preset("ticks", ticks, 10)
+    kwargs["explode"] = preset("explode", explode, False)
     kwargs["transparent"] = preset("transparent", transparent, False)
     kwargs["black_edges"] = preset("black_edges", black_edges, False)
     kwargs["collapse"] = preset("collapse", collapse, 0)
-    kwargs["reset_camera"] = preset("reset_camera", reset_camera, True)
+    kwargs["reset_camera"] = preset("reset_camera", reset_camera, Camera.RESET)
     kwargs["zoom_speed"] = preset("zoom_speed", zoom_speed, 0.5)
     kwargs["pan_speed"] = preset("pan_speed", pan_speed, 0.5)
     kwargs["rotate_speed"] = preset("rotate_speed", rotate_speed, 1.0)
     kwargs["timeit"] = preset("timeit", timeit, False)
-    kwargs["js_debug"] = preset("js_debug", js_debug, False)
+    kwargs["debug"] = preset("debug", debug, False)
     if position is not None:
         kwargs["position"] = preset("position", position, False)
     if quaternion is not None:

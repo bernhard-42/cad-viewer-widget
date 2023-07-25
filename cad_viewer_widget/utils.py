@@ -144,7 +144,7 @@ def viewer_args(config):
             "cad_width",
             "height",
             "tree_width",
-            "default_edge_color",
+            "default_edgecolor",
             "default_opacity",
             "ambient_intensity",
             "direct_intensity",
@@ -173,6 +173,6 @@ def viewer_args(config):
             "pan_speed",
             "rotate_speed",
             "timeit",
-            "js_debug",
+            "debug",
         ]
     }

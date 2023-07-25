@@ -7,6 +7,6 @@ dependencies:
   - pip=22.0
   - numpy=1.22
   - pythonocc-core=7.6.2
-  - occt=7.6.2
+  - occt=7.7.1
   - pip:
       - cad-viewer-widget==1.5.0

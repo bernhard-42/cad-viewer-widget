@@ -1,6 +1,7 @@
 """This module is the Python part of the CAD Viewer widget"""
 
 import base64
+from enum import Enum
 import json
 from textwrap import dedent
 
@@ -9,11 +10,27 @@ import numpy as np
 import ipywidgets as widgets
 from ipywidgets.embed import embed_minimal_html, dependency_state
 
-from traitlets import Unicode, Dict, List, Tuple, Integer, Float, Any, Bool, observe
+from traitlets import Unicode, Dict, List, Tuple, Integer, Float, Any, Bool, Enum, observe
 from IPython.display import HTML, update_display
 from pyparsing import ParseException
 
 from .utils import get_parser, to_json, bsphere, normalize
+
+
+class Camera(Enum):
+    RESET = "reset"
+    CENTER = "center"
+    KEEP = "keep"
+
+
+class Collapse(Enum):
+    NONE = 0
+    LEAVES = 1
+    ALL = 2
+    ROOT = 3
+
+
+LAST_RADIUS = None
 
 
 class AnimationTrack:
@@ -178,6 +195,9 @@ class CadViewerWidget(widgets.Output):  # pylint: disable-msg=too-many-instance-
     grid = Tuple(Bool(), Bool(), Bool(), allow_none=True).tag(sync=True)
     "tuple: Whether to show the grids for `xy`, `xz`, `yz`."
 
+    explode = Bool(allow_none=True, default_value=None).tag(sync=True)
+    "bool: Whether to use showthe explode menu or not (False)"
+
     ticks = Integer(allow_none=True).tag(sync=True)
     "integer: Hint for the number of ticks for the grids (will be adjusted for nice intervals)"
 
@@ -187,13 +207,15 @@ class CadViewerWidget(widgets.Output):  # pylint: disable-msg=too-many-instance-
     black_edges = Bool(allow_none=True, default_value=None).tag(sync=True)
     "bool: Whether to shows the edges in black (True) or not(False)"
 
-    collapse = Integer(allow_none=True, default_value=None).tag(sync=True)
-    "int: Collapse CAD tree (1: collapse nodes with single leaf, 2: collapse all nodes)"
+    collapse = Enum(
+        [Collapse.NONE, Collapse.LEAVES, Collapse.ALL, Collapse.ROOT], allow_none=True, default_value=None
+    ).tag(sync=True)
+    "Enum Collapse: Collapse CAD tree (1: collapse nodes with single leaf, 2: collapse all nodes)"
 
     normal_len = Float(allow_none=True).tag(sync=True)
     "float: If > 0, the vertex normals will be rendered with the length given be this parameter"
 
-    default_edge_color = Unicode(allow_none=True).tag(sync=True)
+    default_edgecolor = Unicode(allow_none=True).tag(sync=True)
     "unicode: The default edge color in web format, e.g. '#ffaa88'"
 
     default_opacity = Float(allow_none=True).tag(sync=True)
@@ -203,7 +225,13 @@ class CadViewerWidget(widgets.Output):  # pylint: disable-msg=too-many-instance-
     "float: The intensity of the ambient light"
 
     direct_intensity = Float(allow_none=True).tag(sync=True)
-    "float: The intensity of the 8 direct lights"
+    "float: The intensity of the direct light"
+
+    metalness = Float(allow_none=True).tag(sync=True)
+    "float: The degree of metalness"
+
+    roughness = Float(allow_none=True).tag(sync=True)
+    "float: The degree of roughness"
 
     #
     # Generic UI traits
@@ -236,8 +264,8 @@ class CadViewerWidget(widgets.Output):  # pylint: disable-msg=too-many-instance-
     clip_slider_2 = Float(allow_none=True, default_value=None).tag(sync=True)
     "float: Slider value of clipping plane 3"
 
-    reset_camera = Bool(allow_none=True, default_value=None).tag(sync=True)
-    "bool: Whether to reset camera (True) or not (False)"
+    reset_camera = Enum([Camera.RESET, Camera.CENTER, Camera.KEEP], allow_none=True, default_value=None).tag(sync=True)
+    "Enum Camera: Whether to reset camera (Camera.RESET) or not (Camera.KEEP or Camera.CENTER keep orientation but center the camera)"
 
     position = Tuple(Float(), Float(), Float(), allow_none=True).tag(sync=True)
     "tuple: Position of the camera as a 3-dim tuple of float (x,y,z)"
@@ -298,7 +326,7 @@ class CadViewerWidget(widgets.Output):  # pylint: disable-msg=too-many-instance-
     initialize = Bool(allow_none=True, default_value=None).tag(sync=True)
     "bool: internally used to control initialization of view. Do not use!"
 
-    js_debug = Bool(allow_none=True, default_value=None).tag(sync=True)
+    debug = Bool(allow_none=True, default_value=None).tag(sync=True)
     "bool: Whether to show infos in the browser console (True) or not (False)"
 
     image_id = Unicode(allow_none=True).tag(sync=True)
@@ -407,10 +435,12 @@ class CadViewer:
         tracks=None,
         # render options
         normal_len=0,
-        default_edge_color="#707070",
+        default_edgecolor="#707070",
         default_opacity=0.5,
-        ambient_intensity=0.5,
-        direct_intensity=0.3,
+        ambient_intensity=1.0,
+        direct_intensity=1.1,
+        metalness=0.3,
+        roughness=0.65,
         # viewer options
         tools=None,
         glass=None,
@@ -423,20 +453,21 @@ class CadViewer:
         axes=False,
         axes0=False,
         grid=None,
+        explode=False,
         ticks=10,
         transparent=False,
         black_edges=False,
-        collapse=0,
+        collapse=Collapse.LEAVES,
         position=None,
         quaternion=None,
         target=None,
         zoom=None,
-        reset_camera=True,
+        reset_camera=Camera.RESET,
         zoom_speed=1.0,
         pan_speed=1.0,
         rotate_speed=1.0,
         timeit=False,
-        js_debug=False,
+        debug=False,
     ):
         """
         Adding shapes to the CAD view
@@ -473,6 +504,8 @@ class CadViewer:
             Whether to center coordinate axes at the origin [0,0,0] (True) or at the CAD object center (False)
         grid : 3-dim list of bool, default None
             Whether to show the grids for `xy`, `xz`, `yz` (`None` means `(False, False, False)`)
+        explode : bool, default: None
+            Whether to show the explode widget (True) or not (False)
         ticks : int, default 10
             Hint for the number of ticks for the grids (will be adjusted for nice intervals)
         transparent : bool, default False
@@ -483,14 +516,18 @@ class CadViewer:
             Collapse CAD tree (1: collapse nodes with single leaf, 2: collapse all nodes)
         normal_Len : int, default 0
             If > 0, the vertex normals will be rendered with the length given be this parameter
-        default_edge_color : string, default "#707070"
-            The default edge color in web format, e.g. '#ffaa88'
+        default_edgecolor : string, default "#707070"
+            The default edge color in web format, e.g. '#707070'
         default_opacity : float, default 0.5
             The default opacity level for transparency between 0.0 an 1.0
-        ambient_intensity : float, default 0.9
+        ambient_intensity : float, default 1.0
             The intensity of the ambient light
-        direct_intensity : float, default 0.12
-            The intensity of the 8 direct lights
+        direct_intensity : float, default 1.1
+            The intensity of the direct light
+        metalness : float, default 0.3
+            The degree of material metalness
+        roughness : float, default 0.65
+            The degree of material roughness
         position : 3-dim list of float, default None
             Position of the camera as a 3-dim tuple of float (x,y,z)
         quaternion : 4-dim list of float, default None
@@ -665,6 +702,8 @@ class CadViewer:
         }
         """
 
+        global LAST_RADIUS
+
         if control == "orbit" and quaternion is not None:
             raise ValueError("Camera quaternion cannot be used with Orbit camera control")
 
@@ -677,21 +716,32 @@ class CadViewer:
         if grid is None:
             grid = [False, False, False]
 
-        # If one changes the control type, override reset_camera with "True"
+        # If one changes the control type, override reset_camera with "Camera.RESET"
         if self.empty or self.widget.control != control:
-            reset_camera = True
+            reset_camera = Camera.RESET
             self.empty = False
 
             # Don't show warning on first call
             if self.widget.control != "":
                 print("Camera control changed, so camera was resetted")
 
-        if reset_camera:
-            center, radius = bsphere(shapes["bb"])
+        center, radius = bsphere(shapes["bb"])
+        camera_distance = 5.5 * radius
 
+        if (
+            (reset_camera == "keep")
+            and (LAST_RADIUS is not None)
+            and ((radius < LAST_RADIUS / 2) or (radius > LAST_RADIUS * 2))
+        ):
+            reset_camera = Camera.CENTER
+            print("Bounding box 2 times smaller/larger than before, changed reset_camera to Camera.CENTER")
+
+        LAST_RADIUS = radius
+
+        if reset_camera == Camera.RESET:
             if position is None:
                 dir = -1 if up == "Z" else 1
-                position = (normalize(np.array((1, dir, 1))) * 5.5 * radius + center).tolist()
+                position = (normalize(np.array((1, dir, 1))) * camera_distance + center).tolist()
 
             if quaternion is None and control == "trackball":
                 if up == "Y":
@@ -705,17 +755,23 @@ class CadViewer:
                 target = center.tolist()
 
             if zoom is None:
-                zoom = 4 / 3
-                w = self.widget.cad_width if cad_width is None else cad_width
-                h = self.widget.height if height is None else height
-                if w >= h:
-                    zoom *= h / w
+                zoom = 1
 
         else:
             copy = lambda v: None if v is None else (*v,)
             position = copy(self.widget.position)
+
+            p = np.array(self.widget.position) - np.array(self.widget.target)
+            p = normalize(p)
+
+            offset = copy(self.widget.target) if reset_camera == Camera.KEEP else center
+            position = (p * camera_distance + offset).tolist()
+
             quaternion = copy(self.widget.quaternion)
-            target = copy(self.widget.target)
+            if reset_camera == Camera.KEEP:
+                target = copy(self.widget.target)
+            else:
+                target = center.tolist()
             zoom = self.widget.zoom
 
         self.widget.initialize = True
@@ -724,10 +780,12 @@ class CadViewer:
             self.widget.shapes = shapes
             self.widget.states = states
 
-            self.widget.default_edge_color = default_edge_color
+            self.widget.default_edgecolor = default_edgecolor
             self.widget.default_opacity = default_opacity
             self.widget.ambient_intensity = ambient_intensity
             self.widget.direct_intensity = direct_intensity
+            self.widget.metalness = metalness
+            self.widget.roughness = roughness
             self.widget.normal_len = normal_len
             self.widget.control = control
             self.widget.up = up
@@ -744,6 +802,7 @@ class CadViewer:
             self.widget.axes = axes
             self.widget.axes0 = axes0
             self.widget.grid = grid
+            self.explode = explode
             self.widget.ticks = ticks
             self.widget.ortho = ortho
             self.widget.transparent = transparent
@@ -765,7 +824,7 @@ class CadViewer:
             self.widget.pan_speed = pan_speed
             self.widget.rotate_speed = rotate_speed
             self.widget.timeit = timeit
-            self.widget.js_debug = js_debug
+            self.widget.debug = debug
             self.add_tracks(tracks)
 
         self.widget.initialize = False
@@ -833,6 +892,32 @@ class CadViewer:
         self.widget.direct_intensity = value
 
     @property
+    def metalness(self):
+        """
+        Get or set the CadViewerWidget traitlet `metalness`
+        see [CadViewerWidget.direct_intensity](./widget.html#cad_viewer_widget.widget.CadViewerWidget.metalness)
+        """
+
+        return self.widget.metalness
+
+    @metalness.setter
+    def metalness(self, value):
+        self.widget.metalness = value
+
+    @property
+    def roughness(self):
+        """
+        Get or set the CadViewerWidget traitlet `roughness`
+        see [CadViewerWidget.direct_intensity](./widget.html#cad_viewer_widget.widget.CadViewerWidget.roughness)
+        """
+
+        return self.widget.direct_intensity
+
+    @roughness.setter
+    def roughness(self, value):
+        self.widget.roughness = value
+
+    @property
     def axes(self):
         """
         Get or set the CadViewerWidget traitlet `axes`
@@ -870,6 +955,19 @@ class CadViewer:
     @grid.setter
     def grid(self, value):
         self.widget.grid = value
+
+    @property
+    def explode(self):
+        """
+        Get or set the CadViewerWidget traitlet `explode`
+        see [CadViewerWidget.explode](./widget.html#cad_viewer_widget.widget.CadViewerWidget.explode)
+        """
+
+        return self.widget.explode
+
+    @explode.setter
+    def explode(self, value):
+        self.widget.explode = value
 
     @property
     def ortho(self):
@@ -919,20 +1017,20 @@ class CadViewer:
         return self.widget.black_edges
 
     @property
-    def default_edge_color(self):
+    def default_edgecolor(self):
         """
-        Get or set the CadViewerWidget traitlet `default_edge_color`
-        see [CadViewerWidget.default_edge_color](./widget.html#cad_viewer_widget.widget.CadViewerWidget.default_edge_color)
+        Get or set the CadViewerWidget traitlet `default_edgecolor`
+        see [CadViewerWidget.default_edgecolor](./widget.html#cad_viewer_widget.widget.CadViewerWidget.default_edgecolor)
         """
 
-        return self.widget.default_edge_color
+        return self.widget.default_edgecolor
 
-    @default_edge_color.setter
-    def default_edge_color(self, value):
+    @default_edgecolor.setter
+    def default_edgecolor(self, value):
         if value.startswith("#"):
-            self.widget.default_edge_color = value
+            self.widget.default_edgecolor = value
         else:
-            self.widget.default_edge_color = f"#{value}"
+            self.widget.default_edgecolor = f"#{value}"
 
     @property
     def default_opacity(self):
@@ -1055,17 +1153,17 @@ class CadViewer:
         self.widget.clip_planes = value
 
     @property
-    def js_debug(self):
+    def debug(self):
         """
-        Get or set the CadViewerWidget traitlet `js_debug`
-        see [CadViewerWidget.js_debug](./widget.html#cad_viewer_widget.widget.CadViewerWidget.js_debug)
+        Get or set the CadViewerWidget traitlet `debug`
+        see [CadViewerWidget.debug](./widget.html#cad_viewer_widget.widget.CadViewerWidget.debug)
         """
 
-        return self.widget.js_debug
+        return self.widget.debug
 
-    @js_debug.setter
-    def js_debug(self, value):
-        self.widget.js_debug = value
+    @debug.setter
+    def debug(self, value):
+        self.widget.debug = value
 
     @property
     def tools(self):
@@ -1576,10 +1674,12 @@ class CadViewer:
                             
                             RENDERER
                 normal_len:         {self.widget.normal_len}
-                default_edge_color: {self.widget.default_edge_color}
+                default_edgecolor:  {self.widget.default_edgecolor}
                 default_opacity:    {self.widget.default_opacity}
                 ambient_intensity:  {self.widget.ambient_intensity}
                 direct_intensity:   {self.widget.direct_intensity}
+                metalness:          {self.widget.metalness}
+                roughness:          {self.widget.roughness}
                             
                             VIEWER
                 timeit:             {self.widget.timeit}
@@ -1591,6 +1691,7 @@ class CadViewer:
                 axes:               {self.widget.axes}
                 axes0:              {self.widget.axes0}
                 grid:               {self.widget.grid}
+                explode:               {self.widget.explode}
                 ticks:              {self.widget.ticks}
                 transparent:        {self.widget.transparent}
                 black_edges:        {self.widget.black_edges}
@@ -1624,7 +1725,7 @@ class CadViewer:
                 result:             {self.widget.result}
                 disposed:           {self.widget.disposed}
                 initialize:         {self.widget.initialize}
-                js_debug:           {self.widget.js_debug}
+                debug:           {self.widget.debug}
                 image_id:           {self.widget.image_id}
                 """
             )

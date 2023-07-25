@@ -46,16 +46,19 @@ export class CadViewerModel extends DOMWidgetModel {
       axes: null,
       axes0: null,
       grid: null,
+      explode: null,
       ticks: null,
       transparent: null,
       black_edges: null,
       collapse: null,
       normal_len: null,
 
-      default_edge_color: null,
+      default_edgecolor: null,
       default_opacity: null,
       ambient_intensity: null,
       direct_intensity: null,
+      metalness: null,
+      roughness: null,
 
       // Generic UI traits
 
@@ -94,7 +97,7 @@ export class CadViewerModel extends DOMWidgetModel {
       image_id: null,
 
       result: "",
-      js_debug: false,
+      debug: false,
       disposed: false,
       rendered: false
     };
@@ -135,6 +138,7 @@ export class CadViewerView extends DOMWidgetView {
       this.model.on("change:grid", this.handle_change, this);
       this.model.on("change:axes0", this.handle_change, this);
       this.model.on("change:ortho", this.handle_change, this);
+      this.model.on("change:explode", this.handle_change, this);
       this.model.on("change:transparent", this.handle_change, this);
       this.model.on("change:black_edges", this.handle_change, this);
       this.model.on("change:collapse", this.handle_change, this);
@@ -144,10 +148,12 @@ export class CadViewerView extends DOMWidgetView {
       this.model.on("change:tree_width", this.handle_change, this);
       this.model.on("change:height", this.handle_change, this);
       this.model.on("change:pinning", this.handle_change, this);
-      this.model.on("change:default_edge_color", this.handle_change, this);
+      this.model.on("change:default_edgecolor", this.handle_change, this);
       this.model.on("change:default_opacity", this.handle_change, this);
       this.model.on("change:ambient_intensity", this.handle_change, this);
       this.model.on("change:direct_intensity", this.handle_change, this);
+      this.model.on("change:metalness", this.handle_change, this);
+      this.model.on("change:roughness", this.handle_change, this);
       this.model.on("change:zoom_speed", this.handle_change, this);
       this.model.on("change:pan_speed", this.handle_change, this);
       this.model.on("change:rotate_speed", this.handle_change, this);
@@ -162,7 +168,7 @@ export class CadViewerView extends DOMWidgetView {
       this.model.on("change:clip_slider_1", this.handle_change, this);
       this.model.on("change:clip_slider_2", this.handle_change, this);
       this.model.on("change:initialize", this.clearOrAddShapes, this);
-      this.model.on("change:js_debug", this.handle_change, this);
+      this.model.on("change:debug", this.handle_change, this);
       this.model.on("change:disposed", this.handle_change, this);
 
       this.listenTo(this.model, "msg:custom", this.onCustomMessage.bind(this));
@@ -208,13 +214,17 @@ export class CadViewerView extends DOMWidgetView {
   }
 
   getRenderOptions() {
-    return {
+    var options = {
       normalLen: this.model.get("normal_len"),
-      edgeColor: this.model.get("default_edge_color"),
+      edgeColor: this.model.get("default_edgecolor"),
       defaultOpacity: this.model.get("default_opacity"),
       ambientIntensity: this.model.get("ambient_intensity"),
-      directIntensity: this.model.get("direct_intensity")
+      directIntensity: this.model.get("direct_intensity"),
+      metalness: this.model.get("metalness"),
+      roughness: this.model.get("roughness")
     };
+    console.log("getRenderOptions", options)    
+    return options;
   }
 
   getViewerOptions() {
@@ -238,9 +248,10 @@ export class CadViewerView extends DOMWidgetView {
       position: this.model.get("position"),
       quaternion: this.model.get("quaternion"),
       target: this.model.get("target"),
-      zoom: this.model.get("zoom")
+      zoom: this.model.get("zoom"),
+      explode: this.model.get("explode"),
     };
-
+    console.log("getViewerOptions", options)
     return options;
   }
 
@@ -404,7 +415,7 @@ export class CadViewerView extends DOMWidgetView {
     this.states = this.clone_states();
 
     const timer = new Timer("addShapes", this.model.get("timeit"));
-    this._debug = this.model.get("js_debug");
+    this._debug = this.model.get("debug");
 
     const resetCamera = this.model.get("reset_camera");
     var position = null;
@@ -590,14 +601,19 @@ export class CadViewerView extends DOMWidgetView {
       case "black_edges":
         setKey("getBlackEdges", "setBlackEdges", key);
         break;
+      case "explode":
+        this.viewer.display.setExplode(key)
+        break;
       case "collapse":
         var val = change.changed[key];
         if (val == 1) {
           this.viewer.display.collapseNodes("1");
         } else if (val == 2) {
           this.viewer.display.collapseNodes("C");
-        } else {
+        } else if (val == 0) {
           this.viewer.display.collapseNodes("E");
+        } else if (val == 3) {
+          this.viewer.display.collapseNodes("R");
         }
         break;
       case "tools":
@@ -638,7 +654,7 @@ export class CadViewerView extends DOMWidgetView {
         flag = change.changed[key];
         this.viewer.display.showPinning(flag);
         break;
-      case "default_edge_color":
+      case "default_edgecolor":
         setKey("getEdgeColor", "setEdgeColor", key);
         break;
       case "default_opacity":
@@ -649,6 +665,12 @@ export class CadViewerView extends DOMWidgetView {
         break;
       case "direct_intensity":
         setKey("getDirectLight", "setDirectLight", key);
+        break;
+      case "metalness":
+        setKey("getMetalness", "setMetalness", key);
+        break;
+      case "roughness":
+        setKey("getRoughness", "setRoughness", key);
         break;
       case "zoom_speed":
         setKey("getZoomSpeed", "setZoomSpeed", key);
@@ -674,7 +696,7 @@ export class CadViewerView extends DOMWidgetView {
         value = change.changed[key];
         if (this.activeTab !== value) {
           this.activeTab = value;
-          if (value === "tree" || value == "clip") {
+          if (value === "tree" || value == "clip" || value == "material") {
             this.viewer.display.selectTabByName(value);
           } else {
             console.error(`cad-viewer-widget: unkonwn tab name ${value}`);
@@ -705,7 +727,7 @@ export class CadViewerView extends DOMWidgetView {
       case "clip_slider_2":
         setKey("getClipSlider", "setClipSlider", key, 2);
         break;
-      case "js_debug":
+      case "debug":
         this._debug = change.changed[key];
         break;
       case "disposed":
