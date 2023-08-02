@@ -223,7 +223,7 @@ export class CadViewerView extends DOMWidgetView {
       metalness: this.model.get("metalness"),
       roughness: this.model.get("roughness")
     };
-    console.log("getRenderOptions", options)    
+    console.log("getRenderOptions", options)
     return options;
   }
 
@@ -436,7 +436,7 @@ export class CadViewerView extends DOMWidgetView {
 
     this.viewer.render(
       ...this.viewer.renderTessellatedShapes(
-        this.shapes,
+        this.shapes.shapes,
         this.states,
         this.getRenderOptions()
       ),
