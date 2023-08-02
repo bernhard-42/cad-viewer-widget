@@ -206,10 +206,10 @@ see <a href="./widget.html#cad_viewer_widget.widget.CadViewerWidget.clip_slider_
 <div class="desc"><p>Get or set the CadViewerWidget traitlet <code>control</code>
 see <a href="./widget.html#cad_viewer_widget.widget.CadViewerWidget.control">CadViewerWidget.control</a></p></div>
 </dd>
-<dt id="cad_viewer_widget.widget.CadViewer.default_edge_color"><code class="name">var <span class="ident">default_edge_color</span></code></dt>
+<dt id="cad_viewer_widget.widget.CadViewer.default_edgecolor"><code class="name">var <span class="ident">default_edgecolor</span></code></dt>
 <dd>
-<div class="desc"><p>Get or set the CadViewerWidget traitlet <code>default_edge_color</code>
-see <a href="./widget.html#cad_viewer_widget.widget.CadViewerWidget.default_edge_color">CadViewerWidget.default_edge_color</a></p></div>
+<div class="desc"><p>Get or set the CadViewerWidget traitlet <code>default_edgecolor</code>
+see <a href="./widget.html#cad_viewer_widget.widget.CadViewerWidget.default_edgecolor">CadViewerWidget.default_edgecolor</a></p></div>
 </dd>
 <dt id="cad_viewer_widget.widget.CadViewer.default_opacity"><code class="name">var <span class="ident">default_opacity</span></code></dt>
 <dd>
@@ -323,7 +323,7 @@ see <a href="./widget.html#cad_viewer_widget.widget.CadViewerWidget.zoom_speed">
 <h3>Methods</h3>
 <dl>
 <dt id="cad_viewer_widget.widget.CadViewer.add_shapes"><code class="name flex">
-<span>def <span class="ident">add_shapes</span></span>(<span>self, shapes, states, tracks=None, normal_len=0, default_edge_color='#707070', default_opacity=0.5, ambient_intensity=0.5, direct_intensity=0.3, tools=None, glass=None, cad_width=None, tree_width=None, height=None, control='trackball', up='Z', ortho=True, axes=False, axes0=False, grid=None, ticks=10, transparent=False, black_edges=False, collapse=0, position=None, quaternion=None, target=None, zoom=None, reset_camera=True, zoom_speed=1.0, pan_speed=1.0, rotate_speed=1.0, timeit=False, js_debug=False)</span>
+<span>def <span class="ident">add_shapes</span></span>(<span>self, shapes, states, tracks=None, normal_len=0, default_edgecolor='#707070', default_opacity=0.5, ambient_intensity=0.5, direct_intensity=0.3, tools=None, glass=None, cad_width=None, tree_width=None, height=None, control='trackball', up='Z', ortho=True, axes=False, axes0=False, grid=None, ticks=10, transparent=False, black_edges=False, collapse=0, position=None, quaternion=None, target=None, zoom=None, reset_camera=True, zoom_speed=1.0, pan_speed=1.0, rotate_speed=1.0, timeit=False, js_debug=False)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Adding shapes to the CAD view</p>
@@ -369,7 +369,7 @@ see <a href="./widget.html#cad_viewer_widget.widget.CadViewerWidget.zoom_speed">
 <dd>Collapse CAD tree (1: collapse nodes with single leaf, 2: collapse all nodes)</dd>
 <dt><strong><code>normal_Len</code></strong> :&ensp;<code>int</code>, default <code>0</code></dt>
 <dd>If &gt; 0, the vertex normals will be rendered with the length given be this parameter</dd>
-<dt><strong><code>default_edge_color</code></strong> :&ensp;<code>string</code>, default <code>"#707070"</code></dt>
+<dt><strong><code>default_edgecolor</code></strong> :&ensp;<code>string</code>, default <code>"#707070"</code></dt>
 <dd>The default edge color in web format, e.g. '#ffaa88'</dd>
 <dt><strong><code>default_opacity</code></strong> :&ensp;<code>float</code>, default <code>0.5</code></dt>
 <dd>The default opacity level for transparency between 0.0 an 1.0</dd>
@@ -837,7 +837,7 @@ object notation relative to the 'CadViewer' object and <code>method</code> is th
 <dd>
 <div class="desc"><p>unicode: Whether to use trackball controls ('trackball') or orbit controls ('orbit')</p></div>
 </dd>
-<dt id="cad_viewer_widget.widget.CadViewerWidget.default_edge_color"><code class="name">var <span class="ident">default_edge_color</span></code></dt>
+<dt id="cad_viewer_widget.widget.CadViewerWidget.default_edgecolor"><code class="name">var <span class="ident">default_edgecolor</span></code></dt>
 <dd>
 <div class="desc"><p>unicode: The default edge color in web format, e.g. '#ffaa88'</p></div>
 </dd>
@@ -1053,7 +1053,7 @@ object notation relative to the 'CadViewer' object and <code>method</code> is th
 <li><code><a title="cad_viewer_widget.widget.CadViewer.clip_value_2" href="#cad_viewer_widget.widget.CadViewer.clip_value_2">clip_value_2</a></code></li>
 <li><code><a title="cad_viewer_widget.widget.CadViewer.close" href="#cad_viewer_widget.widget.CadViewer.close">close</a></code></li>
 <li><code><a title="cad_viewer_widget.widget.CadViewer.control" href="#cad_viewer_widget.widget.CadViewer.control">control</a></code></li>
-<li><code><a title="cad_viewer_widget.widget.CadViewer.default_edge_color" href="#cad_viewer_widget.widget.CadViewer.default_edge_color">default_edge_color</a></code></li>
+<li><code><a title="cad_viewer_widget.widget.CadViewer.default_edgecolor" href="#cad_viewer_widget.widget.CadViewer.default_edgecolor">default_edgecolor</a></code></li>
 <li><code><a title="cad_viewer_widget.widget.CadViewer.default_opacity" href="#cad_viewer_widget.widget.CadViewer.default_opacity">default_opacity</a></code></li>
 <li><code><a title="cad_viewer_widget.widget.CadViewer.direct_intensity" href="#cad_viewer_widget.widget.CadViewer.direct_intensity">direct_intensity</a></code></li>
 <li><code><a title="cad_viewer_widget.widget.CadViewer.dispose" href="#cad_viewer_widget.widget.CadViewer.dispose">dispose</a></code></li>
@@ -1118,7 +1118,7 @@ object notation relative to the 'CadViewer' object and <code>method</code> is th
 <li><code><a title="cad_viewer_widget.widget.CadViewerWidget.clip_slider_2" href="#cad_viewer_widget.widget.CadViewerWidget.clip_slider_2">clip_slider_2</a></code></li>
 <li><code><a title="cad_viewer_widget.widget.CadViewerWidget.collapse" href="#cad_viewer_widget.widget.CadViewerWidget.collapse">collapse</a></code></li>
 <li><code><a title="cad_viewer_widget.widget.CadViewerWidget.control" href="#cad_viewer_widget.widget.CadViewerWidget.control">control</a></code></li>
-<li><code><a title="cad_viewer_widget.widget.CadViewerWidget.default_edge_color" href="#cad_viewer_widget.widget.CadViewerWidget.default_edge_color">default_edge_color</a></code></li>
+<li><code><a title="cad_viewer_widget.widget.CadViewerWidget.default_edgecolor" href="#cad_viewer_widget.widget.CadViewerWidget.default_edgecolor">default_edgecolor</a></code></li>
 <li><code><a title="cad_viewer_widget.widget.CadViewerWidget.default_opacity" href="#cad_viewer_widget.widget.CadViewerWidget.default_opacity">default_opacity</a></code></li>
 <li><code><a title="cad_viewer_widget.widget.CadViewerWidget.direct_intensity" href="#cad_viewer_widget.widget.CadViewerWidget.direct_intensity">direct_intensity</a></code></li>
 <li><code><a title="cad_viewer_widget.widget.CadViewerWidget.disposed" href="#cad_viewer_widget.widget.CadViewerWidget.disposed">disposed</a></code></li>
