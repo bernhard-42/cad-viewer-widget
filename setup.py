@@ -53,7 +53,7 @@ setup_args = dict(
     long_description=LONG_DESCRIPTION,
     include_package_data=True,
     install_requires=[
-        "ipywidgets~=7.7",
+        "ipywidgets~=8.0",
         "jupyterlab<3.7",
         "traitlets~=5.9",
         "pyparsing",
