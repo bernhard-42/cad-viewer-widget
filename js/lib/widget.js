@@ -249,7 +249,6 @@ export class CadViewerView extends DOMWidgetView {
       quaternion: this.model.get("quaternion"),
       target: this.model.get("target"),
       zoom: this.model.get("zoom"),
-      explode: this.model.get("explode"),
     };
     console.log("getViewerOptions", options)
     return options;
@@ -498,6 +497,12 @@ export class CadViewerView extends DOMWidgetView {
       this.animate();
     }
 
+    if (this.model.get("explode") != null) {
+      let flag = this.model.get("explode");
+      this.viewer.display.setExplode({ target: { checked: flag } });
+      this.viewer.display.setExplodeCheck(flag);
+    }
+
     timer.stop();
 
     return true;
@@ -602,7 +607,11 @@ export class CadViewerView extends DOMWidgetView {
         setKey("getBlackEdges", "setBlackEdges", key);
         break;
       case "explode":
-        this.viewer.display.setExplode(key)
+        if (this.model.get("explode") != null) {
+          let flag = change.changed[key];
+          this.viewer.display.setExplode({ target: { checked: flag } });
+          this.viewer.display.setExplodeCheck(flag);
+        }
         break;
       case "collapse":
         var val = change.changed[key];

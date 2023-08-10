@@ -160,6 +160,7 @@ def viewer_args(config):
             "ortho",
             "transparent",
             "black_edges",
+            "explode",
             "collapse",
             "clipIntersection",
             "clipPlaneHelpers",
