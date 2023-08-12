@@ -36,11 +36,11 @@
   "dependencies": {
     "@jupyter-widgets/base": "^6.0.5",
     "@jupyter-widgets/jupyterlab-manager": "^5.0.8",
-    "@jupyterlab/apputils": "^3.3.1",
+    "@jupyterlab/apputils": "^4.1.4",
     "three-cad-viewer": "1.8.6"
   },
   "devDependencies": {
-    "@jupyterlab/builder": "^3.3.1",
+    "@jupyterlab/builder": "^4.0.4",
     "css-loader": "^6.8.1",
     "eslint": "^8.45.0",
     "eslint-config-prettier": "^8.8.0",

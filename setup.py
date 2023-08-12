@@ -19,7 +19,7 @@ here = os.path.dirname(os.path.abspath(__file__))
 # log.info('setup.py entered')
 # log.info('$PATH=%s' % os.environ['PATH'])
 
-name = "cad_viewer_widget"
+NAME = "cad_viewer_widget"
 LONG_DESCRIPTION = "A Jupyter widget to view cad objects"
 
 js_dir = pjoin(here, "js")
@@ -44,21 +44,16 @@ cmdclass["jsdeps"] = combine_commands(
 
 # Get cad_viewer_widget version
 sys.path.insert(0, "./cad_viewer_widget")
-from _version import __version__
+# pylint:disable=import-error,wrong-import-position
+from _version import __version__  # type: ignore[reportMissingImports]
 
 setup_args = dict(
-    name=name,
+    name=NAME,
     version=__version__,
     description="A Jupyter widget to view cad objects",
     long_description=LONG_DESCRIPTION,
     include_package_data=True,
-    install_requires=[
-        "ipywidgets~=8.0",
-        "jupyterlab<3.7",
-        "traitlets~=5.9",
-        "pyparsing",
-        "numpy"
-    ],
+    install_requires=["ipywidgets~=8.0", "jupyterlab~=4.0", "pyparsing", "numpy"],
     extras_require={"dev": ["twine", "bumpversion", "pydoc3"]},
     packages=find_packages(),
     zip_safe=False,
