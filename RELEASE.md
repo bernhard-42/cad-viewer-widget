@@ -1,3 +1,5 @@
+## Release process
+
 To release a new version of cad_viewer_widget on PyPI:
 
 1. Either clean working folder
