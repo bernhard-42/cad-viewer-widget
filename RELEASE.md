@@ -54,3 +54,19 @@ To release a new version of cad_viewer_widget on PyPI:
    # Set github token
    make create-release   
    ```
+
+## Developer setup:
+
+- Preparation
+
+   ```bash
+   pip install -e . --config-settings editable_mode=strict
+   jupyter labextension develop . --overwrite
+   ```
+
+- Update
+
+   ```bash
+   cd js
+   yarn run build
+   ```
