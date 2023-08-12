@@ -127,8 +127,8 @@ class CadViewerWidget(widgets.Output):  # pylint: disable-msg=too-many-instance-
     _model_name = Unicode("CadViewerModel").tag(sync=True)
     _view_module = Unicode("cad-viewer-widget").tag(sync=True)
     _model_module = Unicode("cad-viewer-widget").tag(sync=True)
-    _view_module_version = Unicode("1.5.0").tag(sync=True)
-    _model_module_version = Unicode("1.5.0").tag(sync=True)
+    _view_module_version = Unicode("2.0.0").tag(sync=True)
+    _model_module_version = Unicode("2.0.0").tag(sync=True)
 
     #
     # Display traits
