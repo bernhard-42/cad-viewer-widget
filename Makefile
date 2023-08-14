@@ -47,7 +47,8 @@ endif
 dist:
 	@rm -f dist/*
 	@rm -f js/dist/*
-	python setup.py sdist bdist_wheel
+	@rm -f cad_viewer_widget/labextension
+	hatch build
 
 docs:
 	@pdoc3 --force --config show_source_code=False --html --output-dir docs cad_viewer_widget
