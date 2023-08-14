@@ -32,9 +32,8 @@ For a development installation (requires [Node.js](https://nodejs.org) and [Yarn
 
     $ git clone https://github.com/bernhard-42/cad-viewer-widget.git
     $ cd cad-viewer-widget
-    $ pip install -e .
-    $ jupyter nbextension install --py --symlink --overwrite --sys-prefix cad_viewer_widget
-    $ jupyter nbextension enable --py --sys-prefix cad_viewer_widget
+    $ pip install -e . 
+    $ jupyter labextension develop . --overwrite 
 
 When actively developing your extension for JupyterLab, run the command:
 
@@ -47,7 +46,21 @@ Then you need to rebuild the JS when you make a code change:
 
 You then need to refresh the JupyterLab page when your javascript changes.
 
+
+## Build step
+
+```python
+hatch build
+```
+
 ## Changes
+
+**2023-08-14**
+- Adapt to [ocp-tessellate](http://github.com/bernhard-42/ocp-tessellate.git)
+- Support version 1.8.6 of [three-cad-viewer](http://github.com/bernhard-42/three-cad-viewer.git)
+- Supports `jupyterlab>=4`, `ipywidgets>=8` and `notebook>7`
+- Dropped support for `notebook < 7.0`
+- Build process now uses pyproject.toml and hatch
 
 **2023-01-03**
 - Added pyparsing as dependency
