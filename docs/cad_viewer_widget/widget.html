@@ -206,6 +206,11 @@ see <a href="./widget.html#cad_viewer_widget.widget.CadViewerWidget.clip_slider_
 <div class="desc"><p>Get or set the CadViewerWidget traitlet <code>control</code>
 see <a href="./widget.html#cad_viewer_widget.widget.CadViewerWidget.control">CadViewerWidget.control</a></p></div>
 </dd>
+<dt id="cad_viewer_widget.widget.CadViewer.debug"><code class="name">var <span class="ident">debug</span></code></dt>
+<dd>
+<div class="desc"><p>Get or set the CadViewerWidget traitlet <code>debug</code>
+see <a href="./widget.html#cad_viewer_widget.widget.CadViewerWidget.debug">CadViewerWidget.debug</a></p></div>
+</dd>
 <dt id="cad_viewer_widget.widget.CadViewer.default_edgecolor"><code class="name">var <span class="ident">default_edgecolor</span></code></dt>
 <dd>
 <div class="desc"><p>Get or set the CadViewerWidget traitlet <code>default_edgecolor</code>
@@ -225,6 +230,11 @@ see <a href="./widget.html#cad_viewer_widget.widget.CadViewerWidget.direct_inten
 <dd>
 <div class="desc"><p>Whether the Javascript viewer is disposed</p></div>
 </dd>
+<dt id="cad_viewer_widget.widget.CadViewer.explode"><code class="name">var <span class="ident">explode</span></code></dt>
+<dd>
+<div class="desc"><p>Get or set the CadViewerWidget traitlet <code>explode</code>
+see <a href="./widget.html#cad_viewer_widget.widget.CadViewerWidget.explode">CadViewerWidget.explode</a></p></div>
+</dd>
 <dt id="cad_viewer_widget.widget.CadViewer.glass"><code class="name">var <span class="ident">glass</span></code></dt>
 <dd>
 <div class="desc"><p>Get or set the CadViewerWidget traitlet <code>glass</code>
@@ -240,15 +250,15 @@ see <a href="./widget.html#cad_viewer_widget.widget.CadViewerWidget.grid">CadVie
 <div class="desc"><p>Get or set the CadViewerWidget traitlet <code>height</code>
 see <a href="./widget.html#cad_viewer_widget.widget.CadViewerWidget.height">CadViewerWidget.tools</a></p></div>
 </dd>
-<dt id="cad_viewer_widget.widget.CadViewer.js_debug"><code class="name">var <span class="ident">js_debug</span></code></dt>
-<dd>
-<div class="desc"><p>Get or set the CadViewerWidget traitlet <code>js_debug</code>
-see <a href="./widget.html#cad_viewer_widget.widget.CadViewerWidget.js_debug">CadViewerWidget.js_debug</a></p></div>
-</dd>
 <dt id="cad_viewer_widget.widget.CadViewer.last_pick"><code class="name">var <span class="ident">last_pick</span></code></dt>
 <dd>
 <div class="desc"><p>Get or set the CadViewerWidget traitlet <code>lastPick</code>
 see <a href="./widget.html#cad_viewer_widget.widget.CadViewerWidget.lastPick">CadViewerWidget.lastPick</a></p></div>
+</dd>
+<dt id="cad_viewer_widget.widget.CadViewer.metalness"><code class="name">var <span class="ident">metalness</span></code></dt>
+<dd>
+<div class="desc"><p>Get or set the CadViewerWidget traitlet <code>metalness</code>
+see <a href="./widget.html#cad_viewer_widget.widget.CadViewerWidget.metalness">CadViewerWidget.direct_intensity</a></p></div>
 </dd>
 <dt id="cad_viewer_widget.widget.CadViewer.normal_len"><code class="name">var <span class="ident">normal_len</span></code></dt>
 <dd>
@@ -283,6 +293,11 @@ see <a href="./widget.html#cad_viewer_widget.widget.CadViewerWidget.quaternion">
 <dd>
 <div class="desc"><p>Get or set the CadViewerWidget traitlet <code>rotate_speed</code>
 see <a href="./widget.html#cad_viewer_widget.widget.CadViewerWidget.rotate_speed">CadViewerWidget.rotate_speed</a></p></div>
+</dd>
+<dt id="cad_viewer_widget.widget.CadViewer.roughness"><code class="name">var <span class="ident">roughness</span></code></dt>
+<dd>
+<div class="desc"><p>Get or set the CadViewerWidget traitlet <code>roughness</code>
+see <a href="./widget.html#cad_viewer_widget.widget.CadViewerWidget.roughness">CadViewerWidget.direct_intensity</a></p></div>
 </dd>
 <dt id="cad_viewer_widget.widget.CadViewer.target"><code class="name">var <span class="ident">target</span></code></dt>
 <dd>
@@ -323,7 +338,7 @@ see <a href="./widget.html#cad_viewer_widget.widget.CadViewerWidget.zoom_speed">
 <h3>Methods</h3>
 <dl>
 <dt id="cad_viewer_widget.widget.CadViewer.add_shapes"><code class="name flex">
-<span>def <span class="ident">add_shapes</span></span>(<span>self, shapes, states, tracks=None, normal_len=0, default_edgecolor='#707070', default_opacity=0.5, ambient_intensity=0.5, direct_intensity=0.3, tools=None, glass=None, cad_width=None, tree_width=None, height=None, control='trackball', up='Z', ortho=True, axes=False, axes0=False, grid=None, ticks=10, transparent=False, black_edges=False, collapse=0, position=None, quaternion=None, target=None, zoom=None, reset_camera=True, zoom_speed=1.0, pan_speed=1.0, rotate_speed=1.0, timeit=False, js_debug=False)</span>
+<span>def <span class="ident">add_shapes</span></span>(<span>self, shapes, states, tracks=None, normal_len=0, default_edgecolor='#707070', default_opacity=0.5, ambient_intensity=1.0, direct_intensity=1.1, metalness=0.3, roughness=0.65, tools=None, glass=None, cad_width=None, tree_width=None, height=None, control='trackball', up='Z', ortho=True, axes=False, axes0=False, grid=None, explode=False, ticks=10, transparent=False, black_edges=False, collapse=1, position=None, quaternion=None, target=None, zoom=None, reset_camera='reset', zoom_speed=1.0, pan_speed=1.0, rotate_speed=1.0, timeit=False, debug=False)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Adding shapes to the CAD view</p>
@@ -359,6 +374,8 @@ see <a href="./widget.html#cad_viewer_widget.widget.CadViewerWidget.zoom_speed">
 <dd>Whether to center coordinate axes at the origin [0,0,0] (True) or at the CAD object center (False)</dd>
 <dt><strong><code>grid</code></strong> :&ensp;<code>3-dim list</code> of <code>bool</code>, default <code>None</code></dt>
 <dd>Whether to show the grids for <code>xy</code>, <code>xz</code>, <code>yz</code> (<code>None</code> means <code>(False, False, False)</code>)</dd>
+<dt><strong><code>explode</code></strong> :&ensp;<code>bool</code>, default<code>: None</code></dt>
+<dd>Whether to show the explode widget (True) or not (False)</dd>
 <dt><strong><code>ticks</code></strong> :&ensp;<code>int</code>, default <code>10</code></dt>
 <dd>Hint for the number of ticks for the grids (will be adjusted for nice intervals)</dd>
 <dt><strong><code>transparent</code></strong> :&ensp;<code>bool</code>, default <code>False</code></dt>
@@ -370,13 +387,17 @@ see <a href="./widget.html#cad_viewer_widget.widget.CadViewerWidget.zoom_speed">
 <dt><strong><code>normal_Len</code></strong> :&ensp;<code>int</code>, default <code>0</code></dt>
 <dd>If &gt; 0, the vertex normals will be rendered with the length given be this parameter</dd>
 <dt><strong><code>default_edgecolor</code></strong> :&ensp;<code>string</code>, default <code>"#707070"</code></dt>
-<dd>The default edge color in web format, e.g. '#ffaa88'</dd>
+<dd>The default edge color in web format, e.g. '#707070'</dd>
 <dt><strong><code>default_opacity</code></strong> :&ensp;<code>float</code>, default <code>0.5</code></dt>
 <dd>The default opacity level for transparency between 0.0 an 1.0</dd>
-<dt><strong><code>ambient_intensity</code></strong> :&ensp;<code>float</code>, default <code>0.9</code></dt>
+<dt><strong><code>ambient_intensity</code></strong> :&ensp;<code>float</code>, default <code>1.0</code></dt>
 <dd>The intensity of the ambient light</dd>
-<dt><strong><code>direct_intensity</code></strong> :&ensp;<code>float</code>, default <code>0.12</code></dt>
-<dd>The intensity of the 8 direct lights</dd>
+<dt><strong><code>direct_intensity</code></strong> :&ensp;<code>float</code>, default <code>1.1</code></dt>
+<dd>The intensity of the direct light</dd>
+<dt><strong><code>metalness</code></strong> :&ensp;<code>float</code>, default <code>0.3</code></dt>
+<dd>The degree of material metalness</dd>
+<dt><strong><code>roughness</code></strong> :&ensp;<code>float</code>, default <code>0.65</code></dt>
+<dd>The degree of material roughness</dd>
 <dt><strong><code>position</code></strong> :&ensp;<code>3-dim list</code> of <code>float</code>, default <code>None</code></dt>
 <dd>Position of the camera as a 3-dim tuple of float (x,y,z)</dd>
 <dt><strong><code>quaternion</code></strong> :&ensp;<code>4-dim list</code> of <code>float</code>, default <code>None</code></dt>
@@ -731,6 +752,12 @@ object notation relative to the 'CadViewer' object and <code>method</code> is th
 <dd>one of ["iso", "top", "bottom", "left", "right", "front", "rear"]</dd>
 </dl></div>
 </dd>
+<dt id="cad_viewer_widget.widget.CadViewer.status"><code class="name flex">
+<span>def <span class="ident">status</span></span>(<span>self, shapes=False)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
 <dt id="cad_viewer_widget.widget.CadViewer.stop"><code class="name flex">
 <span>def <span class="ident">stop</span></span>(<span>self)</span>
 </code></dt>
@@ -831,11 +858,15 @@ object notation relative to the 'CadViewer' object and <code>method</code> is th
 </dd>
 <dt id="cad_viewer_widget.widget.CadViewerWidget.collapse"><code class="name">var <span class="ident">collapse</span></code></dt>
 <dd>
-<div class="desc"><p>int: Collapse CAD tree (1: collapse nodes with single leaf, 2: collapse all nodes)</p></div>
+<div class="desc"><p>Enum Collapse: Collapse CAD tree (1: collapse nodes with single leaf, 2: collapse all nodes)</p></div>
 </dd>
 <dt id="cad_viewer_widget.widget.CadViewerWidget.control"><code class="name">var <span class="ident">control</span></code></dt>
 <dd>
 <div class="desc"><p>unicode: Whether to use trackball controls ('trackball') or orbit controls ('orbit')</p></div>
+</dd>
+<dt id="cad_viewer_widget.widget.CadViewerWidget.debug"><code class="name">var <span class="ident">debug</span></code></dt>
+<dd>
+<div class="desc"><p>bool: Whether to show infos in the browser console (True) or not (False)</p></div>
 </dd>
 <dt id="cad_viewer_widget.widget.CadViewerWidget.default_edgecolor"><code class="name">var <span class="ident">default_edgecolor</span></code></dt>
 <dd>
@@ -847,11 +878,15 @@ object notation relative to the 'CadViewer' object and <code>method</code> is th
 </dd>
 <dt id="cad_viewer_widget.widget.CadViewerWidget.direct_intensity"><code class="name">var <span class="ident">direct_intensity</span></code></dt>
 <dd>
-<div class="desc"><p>float: The intensity of the 8 direct lights</p></div>
+<div class="desc"><p>float: The intensity of the direct light</p></div>
 </dd>
 <dt id="cad_viewer_widget.widget.CadViewerWidget.disposed"><code class="name">var <span class="ident">disposed</span></code></dt>
 <dd>
 <div class="desc"><p>unicode string: Whether the Javascript viewer is disposed</p></div>
+</dd>
+<dt id="cad_viewer_widget.widget.CadViewerWidget.explode"><code class="name">var <span class="ident">explode</span></code></dt>
+<dd>
+<div class="desc"><p>bool: Whether to use showthe explode menu or not (False)</p></div>
 </dd>
 <dt id="cad_viewer_widget.widget.CadViewerWidget.glass"><code class="name">var <span class="ident">glass</span></code></dt>
 <dd>
@@ -873,13 +908,13 @@ object notation relative to the 'CadViewer' object and <code>method</code> is th
 <dd>
 <div class="desc"><p>bool: internally used to control initialization of view. Do not use!</p></div>
 </dd>
-<dt id="cad_viewer_widget.widget.CadViewerWidget.js_debug"><code class="name">var <span class="ident">js_debug</span></code></dt>
-<dd>
-<div class="desc"><p>bool: Whether to show infos in the browser console (True) or not (False)</p></div>
-</dd>
 <dt id="cad_viewer_widget.widget.CadViewerWidget.lastPick"><code class="name">var <span class="ident">lastPick</span></code></dt>
 <dd>
 <div class="desc"><p>dict: Describes the last picked element of the CAD view</p></div>
+</dd>
+<dt id="cad_viewer_widget.widget.CadViewerWidget.metalness"><code class="name">var <span class="ident">metalness</span></code></dt>
+<dd>
+<div class="desc"><p>float: The degree of metalness</p></div>
 </dd>
 <dt id="cad_viewer_widget.widget.CadViewerWidget.normal_len"><code class="name">var <span class="ident">normal_len</span></code></dt>
 <dd>
@@ -915,7 +950,7 @@ object notation relative to the 'CadViewer' object and <code>method</code> is th
 </dd>
 <dt id="cad_viewer_widget.widget.CadViewerWidget.reset_camera"><code class="name">var <span class="ident">reset_camera</span></code></dt>
 <dd>
-<div class="desc"><p>bool: Whether to reset camera (True) or not (False)</p></div>
+<div class="desc"><p>Enum Camera: Whether to reset camera (Camera.RESET) or not (Camera.KEEP or Camera.CENTER keep orientation but center the camera)</p></div>
 </dd>
 <dt id="cad_viewer_widget.widget.CadViewerWidget.result"><code class="name">var <span class="ident">result</span></code></dt>
 <dd>
@@ -924,6 +959,10 @@ object notation relative to the 'CadViewer' object and <code>method</code> is th
 <dt id="cad_viewer_widget.widget.CadViewerWidget.rotate_speed"><code class="name">var <span class="ident">rotate_speed</span></code></dt>
 <dd>
 <div class="desc"><p>float: Speed of rotation with the mouse</p></div>
+</dd>
+<dt id="cad_viewer_widget.widget.CadViewerWidget.roughness"><code class="name">var <span class="ident">roughness</span></code></dt>
+<dd>
+<div class="desc"><p>float: The degree of roughness</p></div>
 </dd>
 <dt id="cad_viewer_widget.widget.CadViewerWidget.shapes"><code class="name">var <span class="ident">shapes</span></code></dt>
 <dd>
@@ -1008,6 +1047,80 @@ object notation relative to the 'CadViewer' object and <code>method</code> is th
 </dd>
 </dl>
 </dd>
+<dt id="cad_viewer_widget.widget.Camera"><code class="flex name class">
+<span>class <span class="ident">Camera</span></span>
+<span>(</span><span>values, default_value=traitlets.Undefined, **kwargs)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>An enum whose value must be in a given sequence.</p>
+<p>Declare a traitlet.</p>
+<p>If <em>allow_none</em> is True, None is a valid value in addition to any
+values that are normally valid. The default is up to the subclass.
+For most trait types, the default value for <code>allow_none</code> is False.</p>
+<p>If <em>read_only</em> is True, attempts to directly modify a trait attribute raises a TraitError.</p>
+<p>Extra metadata can be associated with the traitlet using the .tag() convenience method
+or by using the traitlet instance's .metadata dictionary.</p></div>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>traitlets.traitlets.Enum</li>
+<li>traitlets.traitlets.TraitType</li>
+<li>traitlets.traitlets.BaseDescriptor</li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="cad_viewer_widget.widget.Camera.CENTER"><code class="name">var <span class="ident">CENTER</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="cad_viewer_widget.widget.Camera.KEEP"><code class="name">var <span class="ident">KEEP</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="cad_viewer_widget.widget.Camera.RESET"><code class="name">var <span class="ident">RESET</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+</dd>
+<dt id="cad_viewer_widget.widget.Collapse"><code class="flex name class">
+<span>class <span class="ident">Collapse</span></span>
+<span>(</span><span>values, default_value=traitlets.Undefined, **kwargs)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>An enum whose value must be in a given sequence.</p>
+<p>Declare a traitlet.</p>
+<p>If <em>allow_none</em> is True, None is a valid value in addition to any
+values that are normally valid. The default is up to the subclass.
+For most trait types, the default value for <code>allow_none</code> is False.</p>
+<p>If <em>read_only</em> is True, attempts to directly modify a trait attribute raises a TraitError.</p>
+<p>Extra metadata can be associated with the traitlet using the .tag() convenience method
+or by using the traitlet instance's .metadata dictionary.</p></div>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>traitlets.traitlets.Enum</li>
+<li>traitlets.traitlets.TraitType</li>
+<li>traitlets.traitlets.BaseDescriptor</li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="cad_viewer_widget.widget.Collapse.ALL"><code class="name">var <span class="ident">ALL</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="cad_viewer_widget.widget.Collapse.LEAVES"><code class="name">var <span class="ident">LEAVES</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="cad_viewer_widget.widget.Collapse.NONE"><code class="name">var <span class="ident">NONE</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="cad_viewer_widget.widget.Collapse.ROOT"><code class="name">var <span class="ident">ROOT</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+</dd>
 </dl>
 </section>
 </article>
@@ -1053,6 +1166,7 @@ object notation relative to the 'CadViewer' object and <code>method</code> is th
 <li><code><a title="cad_viewer_widget.widget.CadViewer.clip_value_2" href="#cad_viewer_widget.widget.CadViewer.clip_value_2">clip_value_2</a></code></li>
 <li><code><a title="cad_viewer_widget.widget.CadViewer.close" href="#cad_viewer_widget.widget.CadViewer.close">close</a></code></li>
 <li><code><a title="cad_viewer_widget.widget.CadViewer.control" href="#cad_viewer_widget.widget.CadViewer.control">control</a></code></li>
+<li><code><a title="cad_viewer_widget.widget.CadViewer.debug" href="#cad_viewer_widget.widget.CadViewer.debug">debug</a></code></li>
 <li><code><a title="cad_viewer_widget.widget.CadViewer.default_edgecolor" href="#cad_viewer_widget.widget.CadViewer.default_edgecolor">default_edgecolor</a></code></li>
 <li><code><a title="cad_viewer_widget.widget.CadViewer.default_opacity" href="#cad_viewer_widget.widget.CadViewer.default_opacity">default_opacity</a></code></li>
 <li><code><a title="cad_viewer_widget.widget.CadViewer.direct_intensity" href="#cad_viewer_widget.widget.CadViewer.direct_intensity">direct_intensity</a></code></li>
@@ -1060,13 +1174,14 @@ object notation relative to the 'CadViewer' object and <code>method</code> is th
 <li><code><a title="cad_viewer_widget.widget.CadViewer.disposed" href="#cad_viewer_widget.widget.CadViewer.disposed">disposed</a></code></li>
 <li><code><a title="cad_viewer_widget.widget.CadViewer.dump_model" href="#cad_viewer_widget.widget.CadViewer.dump_model">dump_model</a></code></li>
 <li><code><a title="cad_viewer_widget.widget.CadViewer.execute" href="#cad_viewer_widget.widget.CadViewer.execute">execute</a></code></li>
+<li><code><a title="cad_viewer_widget.widget.CadViewer.explode" href="#cad_viewer_widget.widget.CadViewer.explode">explode</a></code></li>
 <li><code><a title="cad_viewer_widget.widget.CadViewer.export_html" href="#cad_viewer_widget.widget.CadViewer.export_html">export_html</a></code></li>
 <li><code><a title="cad_viewer_widget.widget.CadViewer.export_png" href="#cad_viewer_widget.widget.CadViewer.export_png">export_png</a></code></li>
 <li><code><a title="cad_viewer_widget.widget.CadViewer.glass" href="#cad_viewer_widget.widget.CadViewer.glass">glass</a></code></li>
 <li><code><a title="cad_viewer_widget.widget.CadViewer.grid" href="#cad_viewer_widget.widget.CadViewer.grid">grid</a></code></li>
 <li><code><a title="cad_viewer_widget.widget.CadViewer.height" href="#cad_viewer_widget.widget.CadViewer.height">height</a></code></li>
-<li><code><a title="cad_viewer_widget.widget.CadViewer.js_debug" href="#cad_viewer_widget.widget.CadViewer.js_debug">js_debug</a></code></li>
 <li><code><a title="cad_viewer_widget.widget.CadViewer.last_pick" href="#cad_viewer_widget.widget.CadViewer.last_pick">last_pick</a></code></li>
+<li><code><a title="cad_viewer_widget.widget.CadViewer.metalness" href="#cad_viewer_widget.widget.CadViewer.metalness">metalness</a></code></li>
 <li><code><a title="cad_viewer_widget.widget.CadViewer.normal_len" href="#cad_viewer_widget.widget.CadViewer.normal_len">normal_len</a></code></li>
 <li><code><a title="cad_viewer_widget.widget.CadViewer.ortho" href="#cad_viewer_widget.widget.CadViewer.ortho">ortho</a></code></li>
 <li><code><a title="cad_viewer_widget.widget.CadViewer.pan_speed" href="#cad_viewer_widget.widget.CadViewer.pan_speed">pan_speed</a></code></li>
@@ -1083,9 +1198,11 @@ object notation relative to the 'CadViewer' object and <code>method</code> is th
 <li><code><a title="cad_viewer_widget.widget.CadViewer.rotate_x" href="#cad_viewer_widget.widget.CadViewer.rotate_x">rotate_x</a></code></li>
 <li><code><a title="cad_viewer_widget.widget.CadViewer.rotate_y" href="#cad_viewer_widget.widget.CadViewer.rotate_y">rotate_y</a></code></li>
 <li><code><a title="cad_viewer_widget.widget.CadViewer.rotate_z" href="#cad_viewer_widget.widget.CadViewer.rotate_z">rotate_z</a></code></li>
+<li><code><a title="cad_viewer_widget.widget.CadViewer.roughness" href="#cad_viewer_widget.widget.CadViewer.roughness">roughness</a></code></li>
 <li><code><a title="cad_viewer_widget.widget.CadViewer.select_clipping" href="#cad_viewer_widget.widget.CadViewer.select_clipping">select_clipping</a></code></li>
 <li><code><a title="cad_viewer_widget.widget.CadViewer.select_tree" href="#cad_viewer_widget.widget.CadViewer.select_tree">select_tree</a></code></li>
 <li><code><a title="cad_viewer_widget.widget.CadViewer.set_camera" href="#cad_viewer_widget.widget.CadViewer.set_camera">set_camera</a></code></li>
+<li><code><a title="cad_viewer_widget.widget.CadViewer.status" href="#cad_viewer_widget.widget.CadViewer.status">status</a></code></li>
 <li><code><a title="cad_viewer_widget.widget.CadViewer.stop" href="#cad_viewer_widget.widget.CadViewer.stop">stop</a></code></li>
 <li><code><a title="cad_viewer_widget.widget.CadViewer.target" href="#cad_viewer_widget.widget.CadViewer.target">target</a></code></li>
 <li><code><a title="cad_viewer_widget.widget.CadViewer.tools" href="#cad_viewer_widget.widget.CadViewer.tools">tools</a></code></li>
@@ -1118,18 +1235,20 @@ object notation relative to the 'CadViewer' object and <code>method</code> is th
 <li><code><a title="cad_viewer_widget.widget.CadViewerWidget.clip_slider_2" href="#cad_viewer_widget.widget.CadViewerWidget.clip_slider_2">clip_slider_2</a></code></li>
 <li><code><a title="cad_viewer_widget.widget.CadViewerWidget.collapse" href="#cad_viewer_widget.widget.CadViewerWidget.collapse">collapse</a></code></li>
 <li><code><a title="cad_viewer_widget.widget.CadViewerWidget.control" href="#cad_viewer_widget.widget.CadViewerWidget.control">control</a></code></li>
+<li><code><a title="cad_viewer_widget.widget.CadViewerWidget.debug" href="#cad_viewer_widget.widget.CadViewerWidget.debug">debug</a></code></li>
 <li><code><a title="cad_viewer_widget.widget.CadViewerWidget.default_edgecolor" href="#cad_viewer_widget.widget.CadViewerWidget.default_edgecolor">default_edgecolor</a></code></li>
 <li><code><a title="cad_viewer_widget.widget.CadViewerWidget.default_opacity" href="#cad_viewer_widget.widget.CadViewerWidget.default_opacity">default_opacity</a></code></li>
 <li><code><a title="cad_viewer_widget.widget.CadViewerWidget.direct_intensity" href="#cad_viewer_widget.widget.CadViewerWidget.direct_intensity">direct_intensity</a></code></li>
 <li><code><a title="cad_viewer_widget.widget.CadViewerWidget.disposed" href="#cad_viewer_widget.widget.CadViewerWidget.disposed">disposed</a></code></li>
+<li><code><a title="cad_viewer_widget.widget.CadViewerWidget.explode" href="#cad_viewer_widget.widget.CadViewerWidget.explode">explode</a></code></li>
 <li><code><a title="cad_viewer_widget.widget.CadViewerWidget.func" href="#cad_viewer_widget.widget.CadViewerWidget.func">func</a></code></li>
 <li><code><a title="cad_viewer_widget.widget.CadViewerWidget.glass" href="#cad_viewer_widget.widget.CadViewerWidget.glass">glass</a></code></li>
 <li><code><a title="cad_viewer_widget.widget.CadViewerWidget.grid" href="#cad_viewer_widget.widget.CadViewerWidget.grid">grid</a></code></li>
 <li><code><a title="cad_viewer_widget.widget.CadViewerWidget.height" href="#cad_viewer_widget.widget.CadViewerWidget.height">height</a></code></li>
 <li><code><a title="cad_viewer_widget.widget.CadViewerWidget.image_id" href="#cad_viewer_widget.widget.CadViewerWidget.image_id">image_id</a></code></li>
 <li><code><a title="cad_viewer_widget.widget.CadViewerWidget.initialize" href="#cad_viewer_widget.widget.CadViewerWidget.initialize">initialize</a></code></li>
-<li><code><a title="cad_viewer_widget.widget.CadViewerWidget.js_debug" href="#cad_viewer_widget.widget.CadViewerWidget.js_debug">js_debug</a></code></li>
 <li><code><a title="cad_viewer_widget.widget.CadViewerWidget.lastPick" href="#cad_viewer_widget.widget.CadViewerWidget.lastPick">lastPick</a></code></li>
+<li><code><a title="cad_viewer_widget.widget.CadViewerWidget.metalness" href="#cad_viewer_widget.widget.CadViewerWidget.metalness">metalness</a></code></li>
 <li><code><a title="cad_viewer_widget.widget.CadViewerWidget.normal_len" href="#cad_viewer_widget.widget.CadViewerWidget.normal_len">normal_len</a></code></li>
 <li><code><a title="cad_viewer_widget.widget.CadViewerWidget.ortho" href="#cad_viewer_widget.widget.CadViewerWidget.ortho">ortho</a></code></li>
 <li><code><a title="cad_viewer_widget.widget.CadViewerWidget.pan_speed" href="#cad_viewer_widget.widget.CadViewerWidget.pan_speed">pan_speed</a></code></li>
@@ -1141,6 +1260,7 @@ object notation relative to the 'CadViewer' object and <code>method</code> is th
 <li><code><a title="cad_viewer_widget.widget.CadViewerWidget.reset_camera" href="#cad_viewer_widget.widget.CadViewerWidget.reset_camera">reset_camera</a></code></li>
 <li><code><a title="cad_viewer_widget.widget.CadViewerWidget.result" href="#cad_viewer_widget.widget.CadViewerWidget.result">result</a></code></li>
 <li><code><a title="cad_viewer_widget.widget.CadViewerWidget.rotate_speed" href="#cad_viewer_widget.widget.CadViewerWidget.rotate_speed">rotate_speed</a></code></li>
+<li><code><a title="cad_viewer_widget.widget.CadViewerWidget.roughness" href="#cad_viewer_widget.widget.CadViewerWidget.roughness">roughness</a></code></li>
 <li><code><a title="cad_viewer_widget.widget.CadViewerWidget.shapes" href="#cad_viewer_widget.widget.CadViewerWidget.shapes">shapes</a></code></li>
 <li><code><a title="cad_viewer_widget.widget.CadViewerWidget.state_updates" href="#cad_viewer_widget.widget.CadViewerWidget.state_updates">state_updates</a></code></li>
 <li><code><a title="cad_viewer_widget.widget.CadViewerWidget.states" href="#cad_viewer_widget.widget.CadViewerWidget.states">states</a></code></li>
@@ -1159,6 +1279,23 @@ object notation relative to the 'CadViewer' object and <code>method</code> is th
 <li><code><a title="cad_viewer_widget.widget.CadViewerWidget.zoom" href="#cad_viewer_widget.widget.CadViewerWidget.zoom">zoom</a></code></li>
 <li><code><a title="cad_viewer_widget.widget.CadViewerWidget.zoom0" href="#cad_viewer_widget.widget.CadViewerWidget.zoom0">zoom0</a></code></li>
 <li><code><a title="cad_viewer_widget.widget.CadViewerWidget.zoom_speed" href="#cad_viewer_widget.widget.CadViewerWidget.zoom_speed">zoom_speed</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="cad_viewer_widget.widget.Camera" href="#cad_viewer_widget.widget.Camera">Camera</a></code></h4>
+<ul class="">
+<li><code><a title="cad_viewer_widget.widget.Camera.CENTER" href="#cad_viewer_widget.widget.Camera.CENTER">CENTER</a></code></li>
+<li><code><a title="cad_viewer_widget.widget.Camera.KEEP" href="#cad_viewer_widget.widget.Camera.KEEP">KEEP</a></code></li>
+<li><code><a title="cad_viewer_widget.widget.Camera.RESET" href="#cad_viewer_widget.widget.Camera.RESET">RESET</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="cad_viewer_widget.widget.Collapse" href="#cad_viewer_widget.widget.Collapse">Collapse</a></code></h4>
+<ul class="">
+<li><code><a title="cad_viewer_widget.widget.Collapse.ALL" href="#cad_viewer_widget.widget.Collapse.ALL">ALL</a></code></li>
+<li><code><a title="cad_viewer_widget.widget.Collapse.LEAVES" href="#cad_viewer_widget.widget.Collapse.LEAVES">LEAVES</a></code></li>
+<li><code><a title="cad_viewer_widget.widget.Collapse.NONE" href="#cad_viewer_widget.widget.Collapse.NONE">NONE</a></code></li>
+<li><code><a title="cad_viewer_widget.widget.Collapse.ROOT" href="#cad_viewer_widget.widget.Collapse.ROOT">ROOT</a></code></li>
 </ul>
 </li>
 </ul>
