@@ -72,7 +72,7 @@ before-build-npm = [
     "yarn",
     "yarn build:prod"
 ]
-before-build-python = ["yarn clean:all"]
+before-build-python = ["yarn clean"]
 
 [tool.check-wheel-contents]
 ignore = ["W002"]

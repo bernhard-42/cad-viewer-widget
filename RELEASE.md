@@ -62,7 +62,7 @@ To release a new version of cad_viewer_widget on PyPI:
 - Preparation
 
    ```bash
-   pip install -e . --config-settings editable_mode=strict
+   pip install -e . --config-settings
    jupyter labextension develop . --overwrite
    ```
 
@@ -72,3 +72,9 @@ To release a new version of cad_viewer_widget on PyPI:
    cd js
    yarn run build
    ```
+
+## build step
+
+```python
+hatch build
+```
