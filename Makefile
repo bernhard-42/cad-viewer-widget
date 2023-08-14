@@ -47,7 +47,7 @@ endif
 dist:
 	@rm -f dist/*
 	@rm -f js/dist/*
-	@rm -f cad_viewer_widget/labextension
+	@rm -fr cad_viewer_widget/labextension/*
 	hatch build
 
 docs:
