@@ -2,7 +2,7 @@
 
 PYCACHE := $(shell find . -name '__pycache__')
 EGGS := $(wildcard *.egg-info)
-CURRENT_VERSION := $(shell awk '/current_version/ {print $$3}' setup.cfg)
+CURRENT_VERSION := $(shell jq -r .version js/package.json)
 
 JQ_RULES := '(.cells[] | select(has("outputs")) | .outputs) = [] \
 | (.cells[] | select(has("execution_count")) | .execution_count) = null \
@@ -33,9 +33,9 @@ prepare: clean
 bump:
 ifdef part
 ifdef version
-	bumpversion --new-version $(version) $(part) && grep current setup.cfg
+	bumpversion --new-version $(version) $(part) && grep current .bumpversion.cfg
 else
-	bumpversion --allow-dirty $(part) && grep current setup.cfg
+	bumpversion --allow-dirty $(part) && grep current .bumpversion.cfg
 endif
 else
 	@echo "Provide part=major|minor|patch|release|build and optionally version=x.y.z..."
