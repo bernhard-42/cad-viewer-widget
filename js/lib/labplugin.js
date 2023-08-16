@@ -3,6 +3,8 @@ var plugin = require("./index");
 
 import { IJupyterWidgetRegistry } from "@jupyter-widgets/base";
 
+import "../style/index.css";
+
 import App from "./app.js";
 
 const cadViewerWidget = {
@@ -15,7 +17,7 @@ const cadViewerWidget = {
       exports: plugin
     });
     console.log(
-      `cad-viewer-widget version ${plugin.version} is registered`
+      `cad-viewer-widget version ${plugin.version} is registered (dev)`
     );
 
     App.setShell(app.shell);

@@ -119,7 +119,6 @@ export class CadViewerSidecarView extends output.OutputView {
 
       this.widget = this._outputView;
 
-      this.widget.addClass("jupyterlab-sidecar");
       this.widget.addClass("jp-LinkedOutputView");
       this.widget.addClass("cvw-sidecar");
       this.widget.title.label = this.title;

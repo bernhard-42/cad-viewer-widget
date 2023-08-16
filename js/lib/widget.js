@@ -1,5 +1,3 @@
-import "../style/index.css";
-
 import { DOMWidgetModel, DOMWidgetView } from "@jupyter-widgets/base";
 
 import { Viewer, Timer } from "three-cad-viewer";
@@ -7,6 +5,8 @@ import { Viewer, Timer } from "three-cad-viewer";
 import { decode } from "./serializer.js";
 import { isTolEqual } from "./utils.js";
 import { _module, _version } from "./version.js";
+
+import "../style/index.css";
 
 import App from "./app.js";
 
