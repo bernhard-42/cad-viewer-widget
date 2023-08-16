@@ -58,9 +58,10 @@ npm = ["yarn"]
 path = "js"
 
 [tool.hatch.build.hooks.jupyter-builder.editable-build-kwargs]
-build_cmd = "install:extension"
+build_cmd = "build"
 npm = ["yarn"]
 source_dir = "js"
+path = "js"
 build_dir = "cad_viewer_widget/labextension"
 
 [tool.jupyter-releaser.options]
