@@ -17,7 +17,7 @@ const cadViewerWidget = {
       exports: plugin
     });
     console.log(
-      `cad-viewer-widget version ${plugin.version} is registered (dev)`
+      `cad-viewer-widget version ${plugin.version} is registered`
     );
 
     App.setShell(app.shell);
