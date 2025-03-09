@@ -293,7 +293,9 @@ class CadViewerWidget(
     position = Tuple(Float(), Float(), Float(), allow_none=True).tag(sync=True)
     "tuple: Position of the camera as a 3-dim tuple of float (x,y,z)"
 
-    quaternion = Tuple(Float(), Float(), Float(), Float(), allow_none=True).tag(sync=True)
+    quaternion = Tuple(Float(), Float(), Float(), Float(), allow_none=True).tag(
+        sync=True
+    )
     "tuple: Rotation of the camera as 4-dim quaternion (x,y,z,w)"
 
     target = Tuple(Float(), Float(), Float(), allow_none=True).tag(sync=True)
@@ -470,7 +472,6 @@ class CadViewer:
     def add_shapes(
         self,
         shapes,
-        states,
         tracks=None,
         # render options
         normal_len=0,
