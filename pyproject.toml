@@ -1,5 +1,5 @@
 [build-system]
-requires = ["hatchling>=1.5.0", "jupyterlab>=4.0.0,<5", "hatch-nodejs-version", "hatch-jupyter-builder>=0.5"]
+requires = ["hatchling>=1.5.0", "jupyterlab>=4.3.5,<5", "hatch-nodejs-version", "hatch-jupyter-builder>=0.5"]
 build-backend = "hatchling.build"
 
 [project]
@@ -16,12 +16,12 @@ classifiers = [
     "License :: OSI Approved :: BSD License",
     "Programming Language :: Python",
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.8",
-    "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
 ]
-dependencies = ["ipywidgets~=8.0", "jupyterlab~=4.0", "pyparsing", "numpy"]
+dependencies = ["ipywidgets~=8.1.5", "jupyterlab~=4.3.5", "pyparsing", "numpy"]
 
 dynamic = ["version", "description", "authors", "urls", "keywords"]
 
@@ -69,7 +69,7 @@ version_cmd = "hatch version"
 
 [tool.jupyter-releaser.hooks]
 before-build-npm = [
-    "python -m pip install 'jupyterlab>=4.0.0,<5'",
+    "python -m pip install 'jupyterlab>=4.3.5,<5'",
     "yarn",
     "yarn build:prod"
 ]

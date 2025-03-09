@@ -3,7 +3,7 @@ from ._version import __version__
 
 from IPython.display import display, HTML
 
-from .widget import AnimationTrack, CadViewer, Camera, Collapse
+from .widget import AnimationTrack, CadViewer
 from .sidecar import Sidecar
 
 from .sidecar import (
@@ -131,7 +131,6 @@ def open_viewer(
 
 def show(
     shapes,
-    states,
     tracks=None,
     #
     # Viewer options
@@ -181,7 +180,6 @@ def show(
     Show CAD objects in JupyterLab
 
     - shapes:            Serialized nested tessellated shapes
-    - states:            State of the nested cad objects, key = object path, value = 2-dim tuple of 0/1 (hidden/visible) for object and edges
 
     Valid keywords:
 
@@ -220,7 +218,7 @@ def show(
     - explode:            Whether explode widget is visibe or not (default=False)
     - transparent:        Show objects transparent (default=False)
     - black_edges:        Show edges in black (default=False)
-    - collapse:           Collapse CAD tree (1: collapse nodes with single leaf, 2: collapse all nodes, default=0)
+    - collapse:           Collapse CAD tree ('1': collapse all leaf nodes, 'R': expand root level only, 'C': collapse all nodes, 'E': expand all nodes, default="R")
     - reset_camera:       Whether to reset camera (True) or not (False) (default=True)
     - position:           Absolute camera position that will be scaled (default=None)
     - quaternion:         Camera rotation as quaternion (x, y, z, w) (default=None)
@@ -239,10 +237,14 @@ def show(
         viewer = get_sidecar(title)
         if viewer is not None:
             if anchor is not None and viewer.widget.anchor != anchor:
-                warn(f"Parameter 'anchor' cannot be changed after sidecar with title '{title}' has been openend")
+                warn(
+                    f"Parameter 'anchor' cannot be changed after sidecar with title '{title}' has been openend"
+                )
                 anchor = viewer.widget.anchor
             if theme is not None and viewer.widget.theme != theme:
-                warn(f"Parameter 'theme' cannot be changed after sidecar with title '{title}' has been openend")
+                warn(
+                    f"Parameter 'theme' cannot be changed after sidecar with title '{title}' has been openend"
+                )
                 theme = viewer.widget.theme
             if pinning:
                 warn("Pinning not suported for sidecar views")
@@ -255,7 +257,16 @@ def show(
         if viewer is None or viewer.widget.shapes == {}:
             return default if val is None else val
         else:
-            if key in ("position", "quaternion", "target", "zoom", "position0", "quaternion0", "target0", "zoom0"):
+            if key in (
+                "position",
+                "quaternion",
+                "target",
+                "zoom",
+                "position0",
+                "quaternion0",
+                "target0",
+                "zoom0",
+            ):
                 return getattr(viewer.widget, key) if val is None else val
             else:
                 return default if val is None else val
@@ -274,7 +285,9 @@ def show(
     kwargs["height"] = preset("height", height, 600)
     kwargs["theme"] = preset("theme", theme, "browser")
     kwargs["normal_len"] = preset("normal_len", normal_len, 0)
-    kwargs["default_edgecolor"] = preset("default_edgecolor", default_edgecolor, "#707070")
+    kwargs["default_edgecolor"] = preset(
+        "default_edgecolor", default_edgecolor, "#707070"
+    )
     kwargs["default_opacity"] = preset("default_opacity", default_opacity, 0.5)
     kwargs["ambient_intensity"] = preset("ambient_intensity", ambient_intensity, 1.0)
     kwargs["direct_intensity"] = preset("direct_intensity", direct_intensity, 1.1)
@@ -290,8 +303,8 @@ def show(
     kwargs["explode"] = preset("explode", explode, False)
     kwargs["transparent"] = preset("transparent", transparent, False)
     kwargs["black_edges"] = preset("black_edges", black_edges, False)
-    kwargs["collapse"] = preset("collapse", collapse, 0)
-    kwargs["reset_camera"] = preset("reset_camera", reset_camera, Camera.RESET)
+    kwargs["collapse"] = preset("collapse", collapse, "R")
+    kwargs["reset_camera"] = preset("reset_camera", reset_camera, "reset")
     kwargs["zoom_speed"] = preset("zoom_speed", zoom_speed, 0.5)
     kwargs["pan_speed"] = preset("pan_speed", pan_speed, 0.5)
     kwargs["rotate_speed"] = preset("rotate_speed", rotate_speed, 1.0)
@@ -312,21 +325,29 @@ def show(
     if title is None:
         if get_default_sidecar() is None:
             viewer = open_viewer(
-                title=None, anchor=None, pinning=True if pinning is None else pinning, **display_args(kwargs)
+                title=None,
+                anchor=None,
+                pinning=True if pinning is None else pinning,
+                **display_args(kwargs),
             )
         else:
             title = get_default_sidecar()
             viewer = get_sidecar(title)
             if viewer is None:
                 viewer = open_viewer(
-                    title=title, anchor=None, pinning=False if pinning is None else pinning, **display_args(kwargs)
+                    title=title,
+                    anchor=None,
+                    pinning=False if pinning is None else pinning,
+                    **display_args(kwargs),
                 )
     else:
         viewer = get_sidecar(title)
         if viewer is None:
-            viewer = open_viewer(title=title, pinning=pinning, anchor=anchor, **display_args(kwargs))
+            viewer = open_viewer(
+                title=title, pinning=pinning, anchor=anchor, **display_args(kwargs)
+            )
 
-    viewer.add_shapes(shapes, states, tracks, **viewer_args(kwargs))
+    viewer.add_shapes(shapes, tracks, **viewer_args(kwargs))
     return viewer
 
 

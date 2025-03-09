@@ -1,9 +1,9 @@
 import { DOMWidgetModel, DOMWidgetView } from "@jupyter-widgets/base";
 
-import { Viewer, Timer } from "three-cad-viewer";
+import { Viewer, Display, Timer } from "three-cad-viewer";
 
 import { decode } from "./serializer.js";
-import { isTolEqual } from "./utils.js";
+import { isTolEqual, length } from "./utils.js";
 import { _module, _version } from "./version.js";
 
 import "../style/index.css";
@@ -117,6 +117,8 @@ export class CadViewerView extends DOMWidgetView {
     this.lastZoom = null;
     this.empty = true;
     this.activeTab = "";
+    this.display = null;
+    this.viewer = null;
   }
 
   debug(...args) {
@@ -158,6 +160,7 @@ export class CadViewerView extends DOMWidgetView {
       this.model.on("change:pan_speed", this.handle_change, this);
       this.model.on("change:rotate_speed", this.handle_change, this);
       this.model.on("change:state_updates", this.handle_change, this);
+      this.model.on("change:states", this.handle_change, this);
       this.model.on("change:tab", this.handle_change, this);
       this.model.on("change:clip_intersection", this.handle_change, this);
       this.model.on("change:clip_planes", this.handle_change, this);
@@ -170,6 +173,10 @@ export class CadViewerView extends DOMWidgetView {
       this.model.on("change:initialize", this.clearOrAddShapes, this);
       this.model.on("change:debug", this.handle_change, this);
       this.model.on("change:disposed", this.handle_change, this);
+      this.model.on("change:keymap", this.handle_change, this);
+      this.model.on("change:new_tree_behavior", this.handle_change, this);
+      this.model.on("change:center_grid", this.handle_change, this);
+      this.model.on("change:clip_object_colors", this.handle_change, this);
 
       this.listenTo(this.model, "msg:custom", this.onCustomMessage.bind(this));
 
@@ -189,11 +196,12 @@ export class CadViewerView extends DOMWidgetView {
       // find and remove old cell viewers, e.g. when run the same cell
       App.cleanupCellViewers();
 
-      this.createDisplay();
-
-      if (this.model.get("shapes") != "") {
-        this.addShapes();
-      }
+      // TODO: needed for embedding?
+      // this.showViewer();
+      
+      // if (this.model.get("shapes") != "") {
+      //   this.addShapes();
+      // }      
 
       window.getCadViewers = App.getCadViewers;
       window.currentCadViewer = this;
@@ -209,7 +217,9 @@ export class CadViewerView extends DOMWidgetView {
       theme: this.model.get("theme"),
       glass: this.model.get("glass"),
       tools: this.model.get("tools"),
-      pinning: this.model.get("pinning")
+      pinning: this.model.get("pinning"),
+      keymap: this.model.get("keymap"),
+      newTreeBehavior: true
     };
   }
 
@@ -221,13 +231,20 @@ export class CadViewerView extends DOMWidgetView {
       ambientIntensity: this.model.get("ambient_intensity"),
       directIntensity: this.model.get("direct_intensity"),
       metalness: this.model.get("metalness"),
-      roughness: this.model.get("roughness")
+      roughness: this.model.get("roughness"),
+      measureTools: true
     };
     console.log("getRenderOptions", options)
     return options;
   }
 
   getViewerOptions() {
+    let collapseMapping = {
+      "1": 1,
+      "E": 0,
+      "C": 2,
+      "R": 3
+    }
     var options = {
       control: this.model.get("control"),
       up: this.model.get("up"),
@@ -240,15 +257,26 @@ export class CadViewerView extends DOMWidgetView {
       ticks: this.model.get("ticks"),
       transparent: this.model.get("transparent"),
       blackEdges: this.model.get("black_edges"),
-      collapse: this.model.get("collapse"),
+      collapse: collapseMapping[this.model.get("collapse")],
       timeit: this.model.get("timeit"),
       zoomSpeed: this.model.get("zoom_speed"),
       panSpeed: this.model.get("pan_speed"),
       rotateSpeed: this.model.get("rotate_speed"),
-      position: this.model.get("position"),
-      quaternion: this.model.get("quaternion"),
-      target: this.model.get("target"),
-      zoom: this.model.get("zoom"),
+      centerGrid: this.model.get("center_grid"),
+      clipSlider0: this.model.get("clip_slider_0"),
+      clipSlider1: this.model.get("clip_slider_1"),
+      clipSlider2: this.model.get("clip_slider_2"),
+      clipNormal0: this.model.get("clip_normal_0"),
+      clipNormal1: this.model.get("clip_normal_1"),
+      clipNormal2: this.model.get("clip_normal_2"),
+      clipIntersection: this.model.get("clip_intersection"),
+      clipPlaneHelpers: this.model.get("clip_planes"),
+      clipObjectColors: this.model.get("clip_object_colors"),  
+      measureTools: true,
+      // position: this.model.get("position"),
+      // quaternion: this.model.get("quaternion"),
+      // target: this.model.get("target"),
+      // zoom: this.model.get("zoom"),
     };
     console.log("getViewerOptions", options)
     return options;
@@ -278,36 +306,34 @@ export class CadViewerView extends DOMWidgetView {
       this.widget.title.owner.dispose();
     }
   }
+ 
+  showViewer() {
+    const displayOptions = this.getDisplayOptions();
 
-  createDisplay() {
-    const options = this.getDisplayOptions();
+    if (this.display==null){
+      const container = document.createElement("div");
+      container.id = `cvw_${Math.random().toString().slice(2)}`; // sufficient or uuid?
+      this.container_id = container.id;
+      container.innerHTML = ""
 
-    const container = document.createElement("div");
-    container.id = `cvw_${Math.random().toString().slice(2)}`; // sufficient or uuid?
-    this.container_id = container.id;
+      if (this.title == null) {
+        App.addCellViewer(container.id, this);
+      } else {
+        App.getSidecar(this.title).registerChild(this);
+      }
+      this.el.appendChild(container);
 
-    if (this.title == null) {
-      App.addCellViewer(container.id, this);
-    } else {
-      App.getSidecar(this.title).registerChild(this);
+      this.display = new Display(container, displayOptions)
+    }      
+
+    this.display.glassMode(displayOptions.glass);
+    this.display.showTools(displayOptions.tools);
+
+    if (this.viewer != null) {
+      this.clear();
     }
 
-    this.el.appendChild(container);
-
-    this.viewer = new Viewer(
-      container,
-      options,
-      this.handleNotification.bind(this),
-      this.exportPng.bind(this),
-      true
-    );
-
-    this.viewer.display.showAnimationControl(false);
-    this.viewer.display.showTools(options.tools);
-
-    if (options.glass != null && this.title != null) {
-      this.viewer.display.glassMode(options.glass);
-    }
+    this.viewer = new Viewer(this.display, displayOptions, this.handleNotification.bind(this), this.exportPng.bind(this));
   }
 
   handleNotification(change) {
@@ -320,8 +346,11 @@ export class CadViewerView extends DOMWidgetView {
   }
 
   clear() {
-    this.viewer.clear();
-  }
+    this.viewer.hasAnimationLoop = false;
+    this.viewer.continueAnimation = false;
+    this.viewer.dispose();
+    this.viewer = null;
+}
 
   clearOrAddShapes() {
     this.init = this.model.get("initialize");
@@ -339,12 +368,9 @@ export class CadViewerView extends DOMWidgetView {
         this.lastZoom = this.viewer.getCameraZoom();
         this.lastTarget = this.viewer.getCameraTarget();
       }
-      this.clear();
+      this.showViewer();
     } else {
-      const states = this.model.get("states");
-      if (Object.keys(states).length > 0) {
-        this.addShapes();
-      }
+      this.addShapes();    
     }
   }
 
@@ -409,9 +435,16 @@ export class CadViewerView extends DOMWidgetView {
       return;
     }
 
-    this.shapes = this.model.get("shapes");
+    this.shapes = {"data": this.model.get("shapes")};
     decode(this.shapes);
-    this.states = this.clone_states();
+    this.shapes = this.shapes["data"]["shapes"];
+
+    const bbox = this.shapes["bb"];
+    const center = [(bbox.xmax+bbox.xmin)/2, (bbox.ymax+bbox.ymin)/2, (bbox.zmax+bbox.zmin)/2];
+    let bb_radius = Math.max(
+        Math.sqrt(Math.pow(bbox.xmax - bbox.xmin, 2) + Math.pow(bbox.ymax - bbox.ymin, 2) + Math.pow(bbox.zmax - bbox.zmin, 2)),
+        length(center)
+    );
 
     const timer = new Timer("addShapes", this.model.get("timeit"));
     this._debug = this.model.get("debug");
@@ -434,13 +467,9 @@ export class CadViewerView extends DOMWidgetView {
     this.viewer.glass = this.model.get("glass");
 
     this.viewer.render(
-      ...this.viewer.renderTessellatedShapes(
-        this.shapes.shapes,
-        this.states,
-        this.getRenderOptions()
-      ),
-      this.states,
-      viewerOptions
+      this.shapes,
+      this.getRenderOptions(),
+      viewerOptions,
     );
 
     // and resize the view accordingly afterwards
@@ -576,6 +605,9 @@ export class CadViewerView extends DOMWidgetView {
     var flag = null;
 
     switch (key) {
+      case "keymap":
+        // TODO
+        break;
       case "zoom":
         setKey("getCameraZoom", "setCameraZoom", key);
         break;
@@ -594,6 +626,9 @@ export class CadViewerView extends DOMWidgetView {
       case "grid":
         setKey("getGrids", "setGrids", key);
         break;
+      case "centerGrid":
+        // TODO
+        break;  
       case "axes0":
         setKey("getAxes0", "setAxes0", key);
         break;
@@ -735,6 +770,9 @@ export class CadViewerView extends DOMWidgetView {
         break;
       case "clip_slider_2":
         setKey("getClipSlider", "setClipSlider", key, 2);
+        break;
+      case "clipObjectColors":
+        // TODO
         break;
       case "debug":
         this._debug = change.changed[key];

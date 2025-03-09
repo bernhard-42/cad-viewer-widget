@@ -56,4 +56,13 @@ function isTolEqual(obj1, obj2, tol = 1e-9) {
   }
 }
 
-export { extend, isThreeType, isTolEqual };
+function length(v) {
+  return Math.sqrt(v[0] * v[0] + v[1] * v[1] + v[2] * v[2]);
+}
+
+function normalize(v) {
+  let n = length(v);
+  return [v[0] / n, v[1] / n, v[2] / n];
+}
+
+export { extend, isThreeType, isTolEqual, length, normalize };
