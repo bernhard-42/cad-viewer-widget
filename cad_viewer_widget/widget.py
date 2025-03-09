@@ -1443,27 +1443,33 @@ class CadViewer:
     def _check_track(self, track):
         paths = self.widget.states.keys()
         if not any([(f"{path}/").startswith(f"{track.path}/") for path in paths]):
-            raise ValueError(f"{track.path} is not a valid subpath of any of {list(paths)}")
+            raise ValueError(
+                f"{track.path} is not a valid subpath of any of {list(paths)}"
+            )
 
         actions = ["t", "tx", "ty", "tz", "q", "rx", "ry", "rz"]
         if not track.action in actions:
             raise ValueError(f"{track.action} is not a valid action {list(actions)}")
 
         if len(track.times) != len(track.values):
-            raise ValueError(f"Track times and values need to have same length")
+            raise ValueError("Track times and values need to have same length")
 
         if not all([isinstance(t, (int, float)) for t in track.times]):
-            raise ValueError(f"Time values need to be int or float")
+            raise ValueError("Time values need to be int or float")
 
         if track.action in ["tx", "ty", "tz", "rx", "ry", "rz"]:
             if not all([isinstance(t, (int, float)) for t in track.values]):
-                raise ValueError(f"Value values need to be int or float for action '{track.action}'")
+                raise ValueError(
+                    f"Value values need to be int or float for action '{track.action}'"
+                )
 
         if track.action in ["t", "q"]:
             size = 3 if track.action == "t" else 4
             if not all(
                 [
-                    isinstance(v, (list, tuple)) and (len(v) == size) and all([isinstance(x, (int, float)) for x in v])
+                    isinstance(v, (list, tuple))
+                    and (len(v) == size)
+                    and all([isinstance(x, (int, float)) for x in v])
                     for v in track.values
                 ]
             ):
