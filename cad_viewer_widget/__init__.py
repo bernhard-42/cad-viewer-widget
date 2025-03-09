@@ -236,6 +236,10 @@ def show(
     if title is not None:
         viewer = get_sidecar(title)
         if viewer is not None:
+
+            # clean the shapes so that the same object can be show several times
+            viewer.widget.shapes = {}
+
             if anchor is not None and viewer.widget.anchor != anchor:
                 warn(
                     f"Parameter 'anchor' cannot be changed after sidecar with title '{title}' has been openend"
