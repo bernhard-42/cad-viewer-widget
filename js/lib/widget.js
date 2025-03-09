@@ -333,7 +333,7 @@ export class CadViewerView extends DOMWidgetView {
       this.clear();
     }
 
-    this.viewer = new Viewer(this.display, displayOptions, this.handleNotification.bind(this), this.exportPng.bind(this));
+    this.viewer = new Viewer(this.display, displayOptions, this.handleNotification.bind(this), null);
   }
 
   handleNotification(change) {
