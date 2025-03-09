@@ -1,0 +1,54 @@
+{
+    "instances": [],
+    "shapes": {
+        "version": 3,
+        "parts": [
+            {
+                "id": "/Group/ShapeList(Vertex)",
+                "type": "vertices",
+                "name": "ShapeList(Vertex)",
+                "shape": {
+                    "obj_vertices": {
+                        "shape": [
+                            72
+                        ],
+                        "dtype": "float32",
+                        "buffer": "AAAAv83MTL9mZqa/AAAAv83MTL9mZqY/AAAAv83MTD9mZqa/AAAAv83MTD9mZqY/mpmZvgAAgL9mZqa/mpmZvgAAgL9mZqY/mpmZvs3MTL8AAMC/mpmZvs3MTD8AAMC/mpmZvs3MTL8AAMA/mpmZvs3MTD8AAMA/mpmZvgAAgD9mZqa/mpmZvgAAgD9mZqY/mpmZPgAAgL9mZqa/mpmZPgAAgL9mZqY/mpmZPs3MTL8AAMC/mpmZPs3MTD8AAMC/mpmZPs3MTL8AAMA/mpmZPs3MTD8AAMA/mpmZPgAAgD9mZqa/mpmZPgAAgD9mZqY/AAAAP83MTL9mZqa/AAAAP83MTL9mZqY/AAAAP83MTD9mZqa/AAAAP83MTD9mZqY/",
+                        "codec": "b64"
+                    }
+                },
+                "state": [
+                    3,
+                    1
+                ],
+                "color": "#ba55d3",
+                "loc": null,
+                "size": 6
+            }
+        ],
+        "loc": [
+            [
+                0.0,
+                0.0,
+                0.0
+            ],
+            [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+            ]
+        ],
+        "name": "Group",
+        "id": "/Group",
+        "normal_len": 0,
+        "bb": {
+            "xmin": -0.5000001,
+            "xmax": 0.5000001,
+            "ymin": -1.0000001,
+            "ymax": 1.0000001,
+            "zmin": -1.5000001,
+            "zmax": 1.5000001
+        }
+    }
+}
