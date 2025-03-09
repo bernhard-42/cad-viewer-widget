@@ -1715,8 +1715,14 @@ class CadViewer:
             args = [args]
         return wrapper()
 
-    def remove_ui_elements(self, elements):
-        self.execute("viewer.trimUI", [elements, False])
+    # def remove_ui_elements(self, elements):
+    #     """
+    #     Removes specified UI elements from the viewer.
+
+    #     Args:
+    #         elements (list): A list of UI element identifiers to be removed.
+    #     """
+    #     self.execute("viewer.trimUI", [elements, False])
 
     def status(self, shapes=False):
         """
