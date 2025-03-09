@@ -361,6 +361,18 @@ class CadViewerWidget(
 
     @observe("result")
     def func(self, change):
+        """
+        Handles changes in the observed trait and processes the new data accordingly.
+
+        Parameters:
+        change (dict): A dictionary containing information about the change.
+                       Expected to have a "new" key with a JSON string value.
+
+        The function performs the following actions based on the content of the "new" key:
+        - If "display_id" is present in the data, it updates an HTML display with an image.
+        - If "display_id" is not present and `self.test_func` is callable, it calls `self.test_func` with the decoded image data.
+        - If "display_id" is not present and `self.test_func` is not callable, it writes the decoded image data to a file specified by "filename".
+        """
         if change["new"] is not None:
             data = json.loads(change["new"])
 
@@ -369,12 +381,11 @@ class CadViewerWidget(
                 update_display(HTML(html), display_id=data["display_id"])
             else:
                 if self.test_func is not None and callable(self.test_func):
-                    self.test_func(base64.b64decode(data["src"].split(",")[1]))  # pylint: disable=not-callable
+                    # pylint: disable=not-callable
+                    self.test_func(base64.b64decode(data["src"].split(",")[1]))
                 else:
                     with open(data["filename"], "wb") as fd:
                         fd.write(base64.b64decode(data["src"].split(",")[1]))
-
-            self.result = None
 
 
 class CadViewer:
@@ -1534,9 +1545,11 @@ class CadViewer:
         """
         Save CAD View as PNG
         """
-
-        self.execute("saveAsPng", filename)
-        self.execute("viewer.update", True)
+        path = Path(filename)
+        if not path.is_absolute():
+            path = path.cwd() / path
+        print(f"Saving CAD view to {path}")
+        self.execute("saveAsPng", str(path))
 
     #
     # Tab handling

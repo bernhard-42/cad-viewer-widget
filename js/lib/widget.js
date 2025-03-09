@@ -794,8 +794,8 @@ export class CadViewerView extends DOMWidgetView {
     }
   }
 
-  exportPng(image) {
-    if (this.png_filename == null) {
+  exportPng(filename, dataUrl) {
+    if (filename == null) {
       this.model.set(
         "result",
         JSON.stringify({
@@ -813,22 +813,21 @@ export class CadViewerView extends DOMWidgetView {
       this.model.set(
         "result",
         JSON.stringify({
-          filename: this.png_filename,
-          src: image.src
+          filename: filename,
+          src: dataUrl
         })
       );
       this.model.save_changes();
-      this.png_filename = null;
     }
   }
 
   saveAsPng(filename) {
-    this.png_filename = filename;
-    this.viewer.pinAsPng();
+    this.viewer.getImage(filename).then((result) => {
+      this.exportPng(result.task, result.dataUrl)
+    })
   }
 
   pinAsPng() {
-    this.png_filename = null;
     this.viewer.pinAsPng();
   }
 
