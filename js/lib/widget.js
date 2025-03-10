@@ -191,9 +191,11 @@ export class CadViewerView extends DOMWidgetView {
       this.title = this.model.get("title");
       this.anchor = this.model.get("anchor");
 
+      this.container = null;
       this.container_id = null;
 
       this.height = null;
+      this.width = null;
 
       // find and remove old cell viewers, e.g. when run the same cell
       App.cleanupCellViewers();
@@ -309,14 +311,17 @@ export class CadViewerView extends DOMWidgetView {
     }
   }
  
+
   showViewer() {
     const displayOptions = this.getDisplayOptions();
 
     if (this.display==null){
       const container = document.createElement("div");
       container.id = `cvw_${Math.random().toString().slice(2)}`; // sufficient or uuid?
-      this.container_id = container.id;
       container.innerHTML = ""
+      
+      this.container_id = container.id;
+      this.container = container;
 
       if (this.title == null) {
         App.addCellViewer(container.id, this);
@@ -325,25 +330,43 @@ export class CadViewerView extends DOMWidgetView {
       }
       this.el.appendChild(container);
       
+      let size = container.parentNode.parentNode.getBoundingClientRect();
       if (displayOptions.height == null) {
-        let size = container.parentNode.parentNode.getBoundingClientRect();
-        this.height = size.height - 60;
+        this.height = Math.round(size.height) - 60;
         displayOptions.height = this.height;
+        this.model.set("height", this.height)
+        this.model.save_changes();
+      }
+
+      if (displayOptions.cadWidth < size.width) { // anchor != right
+        this.width = size.width - (displayOptions.glass ? 0 : displayOptions.treeWidth) - 12;
+        displayOptions.cadWidth = this.width;
+        this.model.set("cad_width", this.width)
+        this.model.save_changes();
       }
       
       this.display = new Display(container, displayOptions)
 
       const resizeObserver = new ResizeObserver((entries) => {
         for (const entry of entries) {
-          const width = entry.contentRect.width;
-          const height = entry.contentRect.height;
+          var width = Math.round(entry.contentRect.width);
+          var height = Math.round(entry.contentRect.height);
 
           const displayOptions = this.getDisplayOptions();
           if (this.viewer && this.viewer.ready) {
-            if (!displayOptions.glass) {
-              width = width - displayOptions.treeWidth;
+            if (width > 0 && height > 0) {
+              if (!displayOptions.glass) {
+                width = width - displayOptions.treeWidth;
+              }
+              
+              width = Math.max(750, width-12);
+              height = height-60;
+              this.viewer.resizeCadView(width, displayOptions.treeWidth, height, displayOptions.glass)
             }
-            this.viewer.resizeCadView(Math.max(750, width-12), displayOptions.treeWidth, height-60, displayOptions.glass)
+            
+            this.model.set("cad_width", width)
+            this.model.set("height", height)
+            this.model.save_changes();
           }
         }
       });

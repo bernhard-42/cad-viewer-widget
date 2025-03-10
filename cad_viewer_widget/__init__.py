@@ -282,8 +282,7 @@ def show(
                 return default if val is None else val
 
     kwargs = {}
-    if title is not None and viewer is None:
-        anchor = "right"
+
     if viewer is None:
         kwargs["glass"] = preset("glass", glass, False)
         kwargs["tools"] = preset("tools", tools, True)
@@ -291,6 +290,9 @@ def show(
         kwargs["glass"] = preset("glass", glass, viewer.widget.glass)
         kwargs["tools"] = preset("tools", tools, viewer.widget.tools)
 
+    if cad_width is not None and cad_width < 750:
+        cad_width = 750
+        print("`cad_width` cannot be smaller than 750")
     kwargs["cad_width"] = preset("cad_width", cad_width, 800 if title is None else None)
     kwargs["tree_width"] = preset("tree_width", tree_width, 250)
     if title is None:

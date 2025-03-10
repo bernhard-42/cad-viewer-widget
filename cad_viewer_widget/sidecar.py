@@ -16,7 +16,15 @@ class Sidecar(Output):
 
     title = Unicode("CadViewer").tag(sync=True)
     anchor = CaselessStrEnum(
-        ["split-right", "split-left", "split-top", "split-bottom", "tab-before", "tab-after", "right"],
+        [
+            "split-right",
+            "split-left",
+            "split-top",
+            "split-bottom",
+            "tab-before",
+            "tab-after",
+            "right",
+        ],
         default_value="right",
         allow_none=True,
     ).tag(sync=True)
