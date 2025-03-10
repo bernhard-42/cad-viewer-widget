@@ -16,6 +16,7 @@
 
 .cvw-sidecar>.lm-Widget>.jp-OutputPrompt {
   width: 0px !important;
+  flex: 0 0 0;
 }
 
 .jupyterlab-sidecar .jp-OutputPrompt.jp-OutputArea-prompt {

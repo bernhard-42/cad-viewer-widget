@@ -193,6 +193,8 @@ export class CadViewerView extends DOMWidgetView {
 
       this.container_id = null;
 
+      this.height = null;
+
       // find and remove old cell viewers, e.g. when run the same cell
       App.cleanupCellViewers();
 
@@ -322,9 +324,32 @@ export class CadViewerView extends DOMWidgetView {
         App.getSidecar(this.title).registerChild(this);
       }
       this.el.appendChild(container);
-
+      
+      if (displayOptions.height == null) {
+        let size = container.parentNode.parentNode.getBoundingClientRect();
+        this.height = size.height - 60;
+        displayOptions.height = this.height;
+      }
+      
       this.display = new Display(container, displayOptions)
-    }      
+
+      const resizeObserver = new ResizeObserver((entries) => {
+        for (const entry of entries) {
+          const width = entry.contentRect.width;
+          const height = entry.contentRect.height;
+
+          const displayOptions = this.getDisplayOptions();
+          if (this.viewer && this.viewer.ready) {
+            if (!displayOptions.glass) {
+              width = width - displayOptions.treeWidth;
+            }
+            this.viewer.resizeCadView(Math.max(750, width-12), displayOptions.treeWidth, height-60, displayOptions.glass)
+          }
+        }
+      });
+
+      resizeObserver.observe(container.parentNode.parentNode);
+    }
 
     this.display.glassMode(displayOptions.glass);
     this.display.showTools(displayOptions.tools);
@@ -462,8 +487,14 @@ export class CadViewerView extends DOMWidgetView {
 
     // set the latest view dimension before rendering
     this.viewer.cadWidth = this.model.get("cad_width");
+    if (this.viewer.cadWidth == null) {
+      this.viewer.cadWidth = this.width;
+    }    
     this.viewer.treeWidth = this.model.get("tree_width");
     this.viewer.height = this.model.get("height");
+    if (this.viewer.height == null) {
+      this.viewer.height = this.height;
+    }
     this.viewer.glass = this.model.get("glass");
 
     this.viewer.render(
@@ -476,7 +507,7 @@ export class CadViewerView extends DOMWidgetView {
     this.viewer.resizeCadView(
       this.model.get("cad_width"),
       this.model.get("tree_width"),
-      this.model.get("height"),
+      this.model.get("height") == null ? this.height : this.model.get("height"),
       this.model.get("glass")
     );
 

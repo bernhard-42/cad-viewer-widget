@@ -80,6 +80,12 @@ def open_viewer(
     tools=True,
     pinning=True,
 ):
+    if height is None and title is None:
+        height = 600
+
+    if cad_width is None:
+        cad_width = 800
+
     if title is None:
         viewer = CadViewer(
             title=title,
@@ -284,9 +290,16 @@ def show(
     else:
         kwargs["glass"] = preset("glass", glass, viewer.widget.glass)
         kwargs["tools"] = preset("tools", tools, viewer.widget.tools)
-    kwargs["cad_width"] = preset("cad_width", cad_width, 800)
+
+    kwargs["cad_width"] = preset("cad_width", cad_width, 800 if title is None else None)
     kwargs["tree_width"] = preset("tree_width", tree_width, 250)
-    kwargs["height"] = preset("height", height, 600)
+    if title is None:
+        kwargs["height"] = preset("height", height, 600)
+    else:
+        if height is not None:
+            print("In sidecar `height`is ignored")
+        kwargs["height"] = height = None
+
     kwargs["theme"] = preset("theme", theme, "browser")
     kwargs["normal_len"] = preset("normal_len", normal_len, 0)
     kwargs["default_edgecolor"] = preset(
@@ -322,9 +335,6 @@ def show(
         kwargs["target"] = preset("target", target, False)
     if zoom is not None:
         kwargs["zoom"] = preset("zoom", zoom, False)
-
-    if grid is None:
-        grid = [False, False, False]
 
     if title is None:
         if get_default_sidecar() is None:
