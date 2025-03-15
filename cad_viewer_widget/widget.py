@@ -1668,13 +1668,34 @@ class CadViewer:
     #
 
     def export_html(self, filename="cadquery.html", title="CadQuery"):
-        if self.widget.title != None:
-            raise RuntimeError("Export_html does not work with sidecar. Show the object again in a cell viewer")
+        """
+        Exports the current widget view to an HTML file.
+
+        Parameters:
+        filename (str): The name of the HTML file to export. Default is "cadquery.html".
+        title (str): The title of the HTML document. Default is "CadQuery".
+
+        Raises:
+        RuntimeError: If the widget is displayed in a sidecar.
+
+        Notes:
+        - This method temporarily disables pinning while exporting the HTML.
+        - The state of the widget is captured and embedded in the HTML file.
+        """
+        if self.widget.title is not None:
+            raise RuntimeError(
+                "Export_html does not work with sidecar. Show the object again in a cell viewer"
+            )
 
         pinning = self.pinning
         self.pinning = False
 
-        embed_minimal_html(filename, title=title, views=[self.widget], state=dependency_state(self.widget))
+        embed_minimal_html(
+            filename,
+            title=title,
+            views=[self.widget],
+            state=dependency_state(self.widget),
+        )
 
         self.pinning = pinning
 
