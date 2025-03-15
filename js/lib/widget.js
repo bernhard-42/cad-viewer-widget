@@ -3,7 +3,7 @@ import { DOMWidgetModel, DOMWidgetView } from "@jupyter-widgets/base";
 import { Viewer, Display, Timer } from "three-cad-viewer";
 
 import { decode } from "./serializer.js";
-import { isTolEqual, length } from "./utils.js";
+import { isTolEqual, length, normalize } from "./utils.js";
 import { _module, _version } from "./version.js";
 
 import "../style/index.css";
@@ -207,6 +207,13 @@ export class CadViewerView extends DOMWidgetView {
       //   this.addShapes();
       // }      
 
+      this._position = null;
+      this._quaternion = null;
+      this._target = null;
+      this._zoom = null;
+      this._camera_distance = null;
+      this._clipping = null;
+
       window.getCadViewers = App.getCadViewers;
       window.currentCadViewer = this;
       this.model.rendered = true;
@@ -339,7 +346,7 @@ export class CadViewerView extends DOMWidgetView {
       }
 
       if (displayOptions.cadWidth < size.width) { // anchor != right
-        this.width = size.width - (displayOptions.glass ? 0 : displayOptions.treeWidth) - 12;
+        this.width = Math.round(size.width - (displayOptions.glass ? 0 : displayOptions.treeWidth)) - 12;
         displayOptions.cadWidth = this.width;
         this.model.set("cad_width", this.width)
         this.model.save_changes();
@@ -498,10 +505,6 @@ export class CadViewerView extends DOMWidgetView {
     this._debug = this.model.get("debug");
 
     const resetCamera = this.model.get("reset_camera");
-    var position = null;
-    var quaternion = null;
-    var target = null;
-    var zoom = null;
 
     this.tracks = [];
 
@@ -520,54 +523,173 @@ export class CadViewerView extends DOMWidgetView {
     }
     this.viewer.glass = this.model.get("glass");
 
+    if (resetCamera === "reset") {
+      // even if reset is requested, respect the position settings from the object
+
+      if (this.model.get("zoom") !== undefined) {
+        viewerOptions.zoom = this.model.get("zoom");
+      }
+      if (this.model.get("position") !== undefined) {
+        viewerOptions.position = this.model.get("position");
+      }
+      if (this.model.get("quaternion") !== undefined) {
+        viewerOptions.quaternion = this.model.get("quaternion");
+      }
+      if (this.model.get("target") !== undefined) {
+        viewerOptions.target = this.model.get("target");
+      }
+      if (this.model.get("clip_slider_0") != undefined) {
+        viewerOptions.clipSlider0 = this.model.get("clip_slider_0");
+      }
+      if (this.model.get("clip_slider_1") != undefined) {
+        viewerOptions.clipSlider1 = this.model.get("clip_slider_1");
+      }
+      if (this.model.get("clip_slider_2") != undefined) {
+        viewerOptions.clipSlider2 = this.model.get("clip_slider_2");
+      }
+      if (this.model.get("clip_normal_0") != undefined) {
+        viewerOptions.clipNormal0 = this.model.get("clip_normal_0");
+      }
+      if (this.model.get("clip_normal_1") != undefined) {
+          viewerOptions.clipNormal1 = this.model.get("clip_normal_1");
+      }
+      if (this.model.get("clip_normal_2") != undefined) {
+        viewerOptions.clipNormal2 = this.model.get("clip_normal_2");
+      }
+      if (this.model.get("clip_intersection") != undefined) {
+        viewerOptions.clipIntersection = this.model.get("clip_intersection");
+      }
+      if (this.model.get("clip_planes") != undefined) {
+        viewerOptions.clipPlaneHelpers = this.model.get("clip_planes");
+      }
+      if (this.model.get("clip_object_colors") != undefined) {
+        viewerOptions.clipObjectColors = this.model.get("clip_object_colors");
+      }
+      this._camera_distance = null;
+
+    } else {
+      if (this.model.get("position")) {
+        viewerOptions.position = this.model.get("position");
+      } else if (this._position) {
+        if (resetCamera === "keep") {
+          const camera_distance = 5 * bb_radius;
+
+          var p = [0, 0, 0];
+          for (var i = 0; i < 3; i++) {
+            p[i] = this._position[i] - this._target[i];
+          }
+          p = normalize(p);
+          var offset = (resetCamera === "keep") ? this._target : [0,0,0];
+          for (var i = 0; i < 3; i++) {
+            p[i] = p[i] * camera_distance + offset[i];
+          }                       
+        } else { // center
+          var p = [0, 0, 0];
+          for (var i = 0; i < 3; i++) {
+            p[i] = this._position[i] - this._target[i] + center[i];
+          }
+          this._target = center
+        }
+      }
+      viewerOptions.position = p;
+      this._position = viewerOptions.position;
+
+      if (this.model.get("quaternion")) {
+        viewerOptions.quaternion = this.model.get("quaternion");
+      } else if (this._quaternion) {
+        viewerOptions.quaternion = this._quaternion;
+      }
+
+      if (this.model.get("target")) {
+        viewerOptions.target = this.model.get("target");
+      } else if (this._target) {
+        viewerOptions.target = this._target;
+      }
+
+      if (this.model.get("zoom")) {
+          viewerOptions.zoom = this.model.get("zoom");
+      } else if (this._zoom) {
+          viewerOptions.zoom = this._zoom;
+      }
+
+      if (this.model.get("clip_slider_0") != undefined) {
+        viewerOptions.clipSlider0 = this.model.get("clip_slider_0");
+      } else {
+          viewerOptions.clipSlider0 = this.clipping.sliders[0];
+      }
+      if (this.model.get("clip_slider_1") != undefined) {
+        viewerOptions.clipSlider1 = this.model.get("clip_slider_1");
+      } else {
+        viewerOptions.clipSlider1 = this.clipping.sliders[1];
+      }
+      if (this.model.get("clip_slider_2") != undefined) {
+        viewerOptions.clipSlider2 = this.model.get("clip_slider_2");
+      } else {
+        viewerOptions.clipSlider2 = this.clipping.sliders[2];
+      }
+      if (this.model.get("clip_normal_0") != undefined) {
+        viewerOptions.clipNormal0 = this.model.get("clip_normal_0");
+      } else {
+        viewerOptions.clipNormal0 = this.clipping.normals[0];
+      }
+      if (this.model.get("clip_normal_1") != undefined) {
+        viewerOptions.clipNormal1 = this.model.get("clip_normal_1");
+      } else {
+          viewerOptions.clipNormal1 = this.clipping.normals[1];
+      }
+      if (this.model.get("clip_normal_2") != undefined) {
+        viewerOptions.clipNormal2 = this.model.get("clip_normal_2");
+      } else {
+        viewerOptions.clipNormal2 = this.clipping.normals[2];
+      }
+      if (this.model.get("clip_intersection") != undefined) {
+        viewerOptions.clipIntersection = this.model.get("clip_intersection");
+      } else {
+        viewerOptions.clipIntersection = this.clipping.intersection;
+      }
+      if (this.model.get("clip_planes") != undefined) {
+        viewerOptions.clipPlaneHelpers = this.model.get("clip_planes");
+      } else {
+        viewerOptions.clipPlaneHelpers = this.clipping.planeHelpers;
+      }
+      if (this.model.get("clip_object_colors") != undefined) {
+        viewerOptions.clipObjectColors = this.model.get("clip_object_colors");
+      } else {
+        viewerOptions.clipObjectColors = this.clipping.objectColors;
+      }
+    }
+
     this.viewer.render(
       this.shapes,
       this.getRenderOptions(),
       viewerOptions,
     );
 
-    // and resize the view accordingly afterwards
-    this.viewer.resizeCadView(
-      this.model.get("cad_width"),
-      this.model.get("tree_width"),
-      this.model.get("height") == null ? this.height : this.model.get("height"),
-      this.model.get("glass")
-    );
+    if (resetCamera === "keep" && this.camera_distance != null) {
+      // console.log("camera_distance", this.camera_distance, viewer.camera.camera_distance, viewer.camera.camera_distance/this.camera_distance);
+      viewer.setCameraZoom((this.zoom==null ? 1.0 : this.zoom) * viewer.camera.camera_distance / this.camera_distance)
+    }
+
+    this._position = viewer.getCameraPosition();
+    this._quaternion = viewer.getCameraQuaternion();
+    this._target = viewer.controls.getTarget().toArray();
+    this._zoom = viewer.getCameraZoom();
+    this._camera_distance = viewer.camera.camera_distance;
+    
+    this.clipping = {
+        "sliders": [viewer.getClipSlider(0), viewer.getClipSlider(1), viewer.getClipSlider(2)],
+        "normals": [viewer.getClipNormal(0), viewer.getClipNormal(1), viewer.getClipNormal(2)],
+        "planeHelpers": viewer.getClipPlaneHelpers(),
+        "objectColors": viewer.getObjectColorCaps(),
+        "intersection": viewer.getClipIntersection()
+    }
 
     timer.split("renderer");
 
-    if (this.empty || resetCamera) {
-      // store inital camera location
-      position = this.viewer.getCameraPosition();
-      quaternion = this.viewer.getCameraQuaternion();
-      target = this.viewer.getCameraTarget();
-      zoom = this.viewer.getCameraZoom();
-
-      this.empty = false;
-    } else {
-      this.viewer.setResetLocation(
-        this.target0,
-        this.position0,
-        this.quaternion0,
-        this.zoom0
-      );
-
-      position = [...this.lastPosition];
-      quaternion = [...this.lastQuaternion];
-      target = [...this.lastTarget];
-      zoom = this.lastZoom;
-      this.viewer.setCameraLocationSettings(
-        this.lastPosition,
-        this.lastQuaternion,
-        this.lastTarget,
-        this.lastZoom
-      );
-    }
-
-    this.model.set("position", position);
-    this.model.set("quaternion", quaternion);
-    this.model.set("target", target);
-    this.model.set("zoom", zoom);
+    this.model.set("position", this._position);
+    this.model.set("quaternion", this._quaternion);
+    this.model.set("target", this._target);
+    this.model.set("zoom", this._zoom);
 
     this.model.save_changes();
 
@@ -664,15 +786,19 @@ export class CadViewerView extends DOMWidgetView {
         break;
       case "zoom":
         setKey("getCameraZoom", "setCameraZoom", key);
+        this._zoom = this.viewer.getCameraZoom();
         break;
       case "position":
         setKey("getCameraPosition", "setCameraPosition", key, null, false);
+        this._position = this.viewer.getCameraPosition();
         break;
       case "quaternion":
         setKey("getCameraQuaternion", "setCameraQuaternion", key);
+        this._quaternion = this.viewer.getCameraQuaternion();
         break;
       case "target":
         setKey("getCameraTarget", "setCameraTarget", key);
+        this._target = this.viewer.getCameraTarget();
         break;
       case "axes":
         setKey("getAxes", "setAxes", key);

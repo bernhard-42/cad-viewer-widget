@@ -29,9 +29,6 @@ from pyparsing import ParseException
 from .utils import get_parser, to_json, bsphere, normalize
 
 
-LAST_RADIUS = None
-
-
 # pylint: disable=too-few-public-methods
 class AnimationTrack:
     # pylint: disable=line-too-long
@@ -741,8 +738,6 @@ class CadViewer:
         }
         """
 
-        global LAST_RADIUS  # pylint: disable=global-statement
-
         if control == "orbit" and quaternion is not None:
             raise ValueError(
                 "Camera quaternion cannot be used with Orbit camera control"
@@ -758,86 +753,6 @@ class CadViewer:
 
         if grid is None:
             grid = [False, False, False]
-
-        # If one changes the control type, override reset_camera with "reset"
-        if self.empty or self.widget.control != control:
-            reset_camera = "reset"
-            self.empty = False
-
-            # Don't show warning on first call
-            if self.widget.control != "":
-                print("Camera control changed, so camera was resetted")
-
-        center, radius = bsphere(shapes["shapes"]["bb"])
-        camera_distance = 5.5 * radius
-
-        if (
-            (reset_camera == "keep")
-            and (LAST_RADIUS is not None)
-            and ((radius < LAST_RADIUS / 2) or (radius > LAST_RADIUS * 2))
-        ):
-            reset_camera = "center"
-            print(
-                "Bounding box 2 times smaller/larger than before, changed reset_camera to 'center'"
-            )
-
-        LAST_RADIUS = radius
-
-        if reset_camera == "reset":
-            if position is None:
-                direction = -1 if up == "Z" else 1
-                position = (
-                    normalize(np.array((1, direction, 1))) * camera_distance + center
-                ).tolist()
-
-            if quaternion is None and control == "trackball":
-                if up == "Y":
-                    quaternion = (
-                        -0.27984814233312133,
-                        0.3647051996310009,
-                        0.11591689595929514,
-                        0.8804762392171493,
-                    )
-                elif up == "Z":
-                    quaternion = (
-                        0.424708200277867,
-                        0.1759198966061612,
-                        0.3398511429799874,
-                        0.8204732385702832,
-                    )
-                else:  # legacy
-                    quaternion = (
-                        0.1759198966061612,
-                        0.42470820027786693,
-                        0.8204732385702833,
-                        0.33985114297998736,
-                    )
-
-            if target is None:
-                target = center.tolist()
-
-            if zoom is None:
-                zoom = 1
-
-        else:
-
-            def copy(v):
-                return None if v is None else (*v,)
-
-            position = copy(self.widget.position)
-
-            p = np.array(self.widget.position) - np.array(self.widget.target)
-            p = normalize(p)
-
-            offset = copy(self.widget.target) if reset_camera == "keep" else center
-            position = (p * camera_distance + offset).tolist()
-
-            quaternion = copy(self.widget.quaternion)
-            if reset_camera == "keep":
-                target = copy(self.widget.target)
-            else:
-                target = center.tolist()
-            zoom = self.widget.zoom
 
         self.widget.initialize = True
 
@@ -877,13 +792,6 @@ class CadViewer:
             self.widget.quaternion = quaternion
             self.widget.target = target
             self.widget.zoom = zoom
-            # If reset_camera, position0, quaternion0 and zoom0 need to be set
-            if reset_camera:
-                self.widget.position0 = (*position,)
-                if control == "trackball":
-                    self.widget.quaternion0 = (*quaternion,)
-                self.widget.target0 = (*target,)
-                self.widget.zoom0 = zoom
             self.widget.zoom_speed = zoom_speed
             self.widget.pan_speed = pan_speed
             self.widget.rotate_speed = rotate_speed
