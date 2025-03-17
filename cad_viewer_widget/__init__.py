@@ -106,6 +106,10 @@ def open_viewer(
         viewer.widget.image_id = image_id
         error = None
     else:
+        if height is not None:
+            height = None
+            print("In sidecar `height`is ignored")
+
         out = Sidecar(title=title, anchor=anchor)
         with out:
             try:
@@ -149,6 +153,7 @@ def show(
     glass=None,
     tools=None,
     pinning=None,
+    new_tree_behavior=True,
     #
     # render options
     normal_len=None,
@@ -160,18 +165,28 @@ def show(
     roughness=None,
     #
     # add_shapes options
-    control=None,
     up=None,
+    control=None,
     ortho=None,
     axes=None,
     axes0=None,
     grid=None,
+    center_grid=None,
     explode=None,
     ticks=None,
     transparent=None,
     black_edges=None,
     collapse=None,
     reset_camera=None,
+    clip_slider_0=None,
+    clip_slider_1=None,
+    clip_slider_2=None,
+    clip_normal_0=None,
+    clip_normal_1=None,
+    clip_normal_2=None,
+    clip_intersection=None,
+    clip_planes=None,
+    clip_object_colors=None,
     position=None,
     quaternion=None,
     target=None,
@@ -189,53 +204,68 @@ def show(
 
     Valid keywords:
 
+    - UI
+        glass:             Use glass mode where tree is an overlay over the cad object (default=False)
+        tools:             Show tools (default=True)
+        cad_width:         Width of the cad canvas (default=800)
+        height:            Height of the cad canvas (default=600)
+        tree_width:        Width of the object tree (default=240)
+        theme:             Theme "light" or "dark" (default="light")
+        pinning:           Allow replacing the CAD View by a canvas screenshot (default=True in cells, else False)
+        new_tree_behavior: Whether to  hide the complete shape when clicking on the eye (True, default) or only
+                           the faces (False)
 
-    DISPLAY OPTIONS
-    - title:              Name of the sidecar viewer (default=None)
-    - anchor:             How to open sidecar: "right", "split-right", "split-bottom", ... (default="right")
-    - cad_width:          Width of CAD view part of the view (default=800)
-    - tree_width:         Width of navigation tree part of the view (default=250)
-    - height:             Height of the CAD view (default=600)
-    - theme:              Theme "light" or "dark" (default="light")
-    - tools:              Show the viewer tools like the object tree (default=True)
-    - glass:              Use the glass mode, i.e. CAD navigation as transparent overlay (default=False)
-    - pinning:            Allow replacing the CAD View by a canvas screenshot (default=True in cells, else False)
+    - Viewer
+        axes:              Show axes (default=False)
+        axes0:             Show axes at (0,0,0) (default=False)
+        grid:              Show grid (default=False)
+        ortho:             Use orthographic projections (default=True)
+        transparent:       Show objects transparent (default=False)
+        default_opacity:   Opacity value for transparent objects (default=0.5)
+        black_edges:       Show edges in black color (default=False)
+        control:           Mouse control use "orbit" control instead of "trackball" control (default="trackball")
+        collapse:          Collapse.LEAVES: collapse all single leaf nodes,
+                           Collapse.ROOT: expand root only,
+                           Collapse.ALL: collapse all nodes,
+                           Collapse.NONE: expand all nodes
+                           (default=Collapse.ROOT)
+        ticks:             Hint for the number of ticks in both directions (default=10)
+        center_grid:       Center the grid at the origin or center of mass (default=False)
+        up:                Use z-axis ('Z') or y-axis ('Y') as up direction for the camera (default="Z")
+        explode:           Turn on explode mode (default=False)
 
-    TESSELLATION OPTIONS
-    - default_edgecolor: Default edge color (default="#707070")
-    - default_opacity:    Default opacity (default=0.5)
-    - ambient_intensity   Default ambient (default=1.0)
-    - direct_intensity:   Default direct (default=1.1)
-    - metalness : float:  The degree of material metalness (default 0.3)
-    - roughness : float:  The degree of material roughness (default 0.65)
-    - normal_len:         Render vertex normals if > 0 (default=0)
-    - render_edges:       Render edges  (default=True)
-    - render_mates:       Render mates (for MAssemblies, default=False)
-    - mate_scale:         Scale of rendered mates (for MAssemblies, default=1)
+        zoom:              Zoom factor of view (default=1.0)
+        position:          Camera position
+        quaternion:        Camera orientation as quaternion
+        target:            Camera look at target
+        reset_camera:      Camera.RESET: Reset camera position, rotation, zoom and target
+                           Camera.CENTER: Keep camera position, rotation, zoom, but look at center
+                           Camera.KEEP: Keep camera position, rotation, zoom, and target
+                           (default=Camera.RESET)
+        clip_slider_0:     Setting of clipping slider 0 (default=None)
+        clip_slider_1:     Setting of clipping slider 1 (default=None)
+        clip_slider_2:     Setting of clipping slider 2 (default=None)
+        clip_normal_0:     Setting of clipping normal 0 (default=[-1,0,0])
+        clip_normal_1:     Setting of clipping normal 1 (default=[0,-1,0])
+        clip_normal_2:     Setting of clipping normal 2 (default=[0,0,-1])
+        clip_intersection: Use clipping intersection mode (default=[False])
+        clip_planes:       Show clipping plane helpers (default=False)
+        clip_object_colors: Use object color for clipping caps (default=False)
 
-    VIEWER OPTIONS
-    - control:            Use trackball controls ('trackball') or orbit controls ('orbit') (default='trackball')
-    - up:                 Camera up direction is Z or Y (default='Z')
-    - ortho:              Use orthographic projections (default=True)
-    - axes:               Show axes (default=False)
-    - axes0:              Show axes at (0,0,0) (default=False)
-    - grid:               Show grid (default=[False, False, False])
-    - ticks:              Hint for the number of ticks in both directions (default=10)
-    - explode:            Whether explode widget is visibe or not (default=False)
-    - transparent:        Show objects transparent (default=False)
-    - black_edges:        Show edges in black (default=False)
-    - collapse:           Collapse CAD tree ('1': collapse all leaf nodes, 'R': expand root level only, 'C': collapse all nodes, 'E': expand all nodes, default="R")
-    - reset_camera:       Whether to reset camera (True) or not (False) (default=True)
-    - position:           Absolute camera position that will be scaled (default=None)
-    - quaternion:         Camera rotation as quaternion (x, y, z, w) (default=None)
-    - target:             Camera target to look at (default=None)
-    - zoom:               Zoom factor of view (default=2.5)
-    - reset_camera:       Reset camera position, rotation and zoom to default (default=True)
-    - zoom_speed:         Mouse zoom speed (default=1.0)
-    - pan_speed:          Mouse pan speed (default=1.0)
-    - rotate_speed:       Mouse rotate speed (default=1.0)
-    - timeit:             Show rendering times, levels = False, 0,1,2,3,4,5 (default=False)
-    - debug:           Enable debug output in browser console (default=False)
+        pan_speed:         Speed of mouse panning (default=1)
+        rotate_speed:      Speed of mouse rotate (default=1)
+        zoom_speed:        Speed of mouse zoom (default=1)
+
+    - Renderer
+        default_edgecolor: Default mesh color (default=(128, 128, 128))
+        ambient_intensity: Intensity of ambient light (default=1.00)
+        direct_intensity:  Intensity of direct light (default=1.10)
+        metalness:         Metalness property of the default material (default=0.30)
+        roughness:         Roughness property of the default material (default=0.65)
+
+    - Debug
+        debug:             Show debug statements to the VS Code browser console (default=False)
+        timeit:            Show timing information from level 0-3 (default=False)
     """
 
     viewer = None
@@ -301,7 +331,7 @@ def show(
         if height is not None:
             print("In sidecar `height`is ignored")
         kwargs["height"] = height = None
-
+    kwargs["new_tree_behavior"] = preset("new_tree_behavior", new_tree_behavior, True)
     kwargs["theme"] = preset("theme", theme, "browser")
     kwargs["normal_len"] = preset("normal_len", normal_len, 0)
     kwargs["default_edgecolor"] = preset(
@@ -318,6 +348,7 @@ def show(
     kwargs["axes"] = preset("axes", axes, False)
     kwargs["axes0"] = preset("axes0", axes0, False)
     kwargs["grid"] = preset("grid", grid, [False, False, False])
+    kwargs["center_grid"] = preset("grid", center_grid, False)
     kwargs["ticks"] = preset("ticks", ticks, 10)
     kwargs["explode"] = preset("explode", explode, False)
     kwargs["transparent"] = preset("transparent", transparent, False)
@@ -330,13 +361,24 @@ def show(
     kwargs["timeit"] = preset("timeit", timeit, False)
     kwargs["debug"] = preset("debug", debug, False)
     if position is not None:
-        kwargs["position"] = preset("position", position, False)
+        kwargs["position"] = preset("position", position, None)
     if quaternion is not None:
-        kwargs["quaternion"] = preset("quaternion", quaternion, False)
+        kwargs["quaternion"] = preset("quaternion", quaternion, None)
     if target is not None:
-        kwargs["target"] = preset("target", target, False)
+        kwargs["target"] = preset("target", target, None)
     if zoom is not None:
-        kwargs["zoom"] = preset("zoom", zoom, False)
+        kwargs["zoom"] = preset("zoom", zoom, None)
+    kwargs["clip_slider_0"] = preset("clip_slider_0", clip_slider_0, None)
+    kwargs["clip_slider_1"] = preset("clip_slider_1", clip_slider_1, None)
+    kwargs["clip_slider_2"] = preset("clip_slider_2", clip_slider_2, None)
+    kwargs["clip_normal_0"] = preset("clip_normal_0", clip_normal_0, [-1, 0, 0])
+    kwargs["clip_normal_1"] = preset("clip_normal_1", clip_normal_1, [0, -1, 0])
+    kwargs["clip_normal_2"] = preset("clip_normal_2", clip_normal_2, [0, 0, -1])
+    kwargs["clip_intersection"] = preset("clip_intersection", clip_intersection, False)
+    kwargs["clip_planes"] = preset("clip_planes", clip_planes, False)
+    kwargs["clip_object_colors"] = preset(
+        "clip_object_colors", clip_object_colors, False
+    )
 
     if title is None:
         if get_default_sidecar() is None:
@@ -362,7 +404,7 @@ def show(
             viewer = open_viewer(
                 title=title, pinning=pinning, anchor=anchor, **display_args(kwargs)
             )
-
+    # print(dict(sorted(viewer_args(kwargs).items())))
     viewer.add_shapes(shapes, tracks, **viewer_args(kwargs))
     return viewer
 

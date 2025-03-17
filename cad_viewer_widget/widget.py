@@ -155,6 +155,9 @@ class CadViewerWidget(
     pinning = Bool(allow_none=True, default_value=None).tag(sync=True)
     "bool: Whether to show the pin a png button or not"
 
+    new_tree_behavior = Bool(allow_none=True, default_value=None).tag(sync=True)
+    "bool: Whether to  hide the complete shape when clicking on the eye (True) or only the faces (False)"
+
     #
     # Viewer traits
     #
@@ -327,9 +330,6 @@ class CadViewerWidget(
     animation_speed = Float(allow_none=True).tag(sync=True)
     "float: Animation speed"
 
-    state_updates = Dict(Tuple(Integer(), Integer()), allow_none=True).tag(sync=True)
-    "dict: Dict with paths as key and a 2-dim tuple of 0/1 (hidden/visible) for object and edges"
-
     #
     # Read only traitlets
     #
@@ -428,6 +428,7 @@ class CadViewer:
         pinning=False,
         title=None,
         anchor=None,
+        new_tree_behavior=True,
     ):
         if cad_width < 750:
             raise ValueError("Ensure cad_width >= 750")
@@ -444,6 +445,7 @@ class CadViewer:
             pinning=pinning,
             title=title,
             anchor=anchor,
+            new_tree_behavior=new_tree_behavior,
         )
         self.widget.test_func = None
         self.msg_id = 0
@@ -483,26 +485,37 @@ class CadViewer:
         glass=None,
         cad_width=None,
         tree_width=None,
+        new_tree_behavior=None,
         height=None,
-        control="trackball",
-        up="Z",
+        control=None,
+        up=None,
         ortho=True,
-        axes=False,
-        axes0=False,
+        axes=None,
+        axes0=None,
         grid=None,
-        explode=False,
+        center_grid=None,
+        explode=None,
         ticks=10,
-        transparent=False,
-        black_edges=False,
-        collapse="R",
+        transparent=None,
+        black_edges=None,
+        collapse=None,
         position=None,
         quaternion=None,
         target=None,
         zoom=None,
-        reset_camera="reset",
-        zoom_speed=1.0,
-        pan_speed=1.0,
-        rotate_speed=1.0,
+        reset_camera=None,
+        clip_slider_0=None,
+        clip_slider_1=None,
+        clip_slider_2=None,
+        clip_normal_0=None,
+        clip_normal_1=None,
+        clip_normal_2=None,
+        clip_intersection=None,
+        clip_planes=None,
+        clip_object_colors=None,
+        zoom_speed=None,
+        pan_speed=None,
+        rotate_speed=None,
         timeit=False,
         debug=False,
     ):
@@ -743,7 +756,7 @@ class CadViewer:
                 "Camera quaternion cannot be used with Orbit camera control"
             )
 
-        if control == "trackball" and position is not None and quaternion is None:
+        if not control == "trackball" and position is not None and quaternion is None:
             raise ValueError(
                 "For Trackball camera control, position paramater also needs quaternion parameter"
             )
@@ -778,9 +791,11 @@ class CadViewer:
                 self.widget.tree_width = tree_width
             if height is not None:
                 self.widget.height = height
+            self.widget.new_tree_behavior = new_tree_behavior
             self.widget.axes = axes
             self.widget.axes0 = axes0
             self.widget.grid = grid
+            self.widget.center_grid = center_grid
             self.explode = explode
             self.widget.ticks = ticks
             self.widget.ortho = ortho
@@ -797,6 +812,16 @@ class CadViewer:
             self.widget.rotate_speed = rotate_speed
             self.widget.timeit = timeit
             self.widget.debug = debug
+            self.widget.clip_slider_0 = clip_slider_0
+            self.widget.clip_slider_1 = clip_slider_1
+            self.widget.clip_slider_2 = clip_slider_2
+            self.widget.clip_normal_0 = clip_normal_0
+            self.widget.clip_normal_1 = clip_normal_1
+            self.widget.clip_normal_2 = clip_normal_2
+            self.widget.clip_intersection = clip_intersection
+            self.widget.clip_planes = clip_planes
+            self.widget.clip_object_colors = clip_object_colors
+
             self.add_tracks(tracks)
 
         self.widget.initialize = False
@@ -919,6 +944,19 @@ class CadViewer:
     @grid.setter
     def grid(self, value):
         self.widget.grid = value
+
+    @property
+    def center_grid(self):
+        """
+        Get or set the CadViewerWidget traitlet `center_grid`
+        see [CadViewerWidget.grid](./widget.html#cad_viewer_widget.widget.CadViewerWidget.center_grid)
+        """
+
+        return self.widget.center_grid
+
+    @center_grid.setter
+    def center_grid(self, value):
+        self.widget.center_grid = value
 
     @property
     def explode(self):
@@ -1117,6 +1155,19 @@ class CadViewer:
         self.widget.clip_planes = value
 
     @property
+    def clip_object_colors(self):
+        """
+        Get or set the CadViewerWidget traitlet `clip_object_colors`
+        see [CadViewerWidget.clip_planes](./widget.html#cad_viewer_widget.widget.CadViewerWidget.clip_object_colors)
+        """
+
+        return self.widget.clip_planes
+
+    @clip_object_colors.setter
+    def clip_object_colors(self, value):
+        self.widget.clip_object_colors = value
+
+    @property
     def debug(self):
         """
         Get or set the CadViewerWidget traitlet `debug`
@@ -1270,7 +1321,7 @@ class CadViewer:
         see [CadViewerWidget.quaternion](./widget.html#cad_viewer_widget.widget.CadViewerWidget.quaternion)
         """
 
-        if self.widget.control == "orbit":
+        if self.widget.control:
             print("quaternion controlled internally for control=='orbit'")
             return None
         else:
@@ -1278,7 +1329,7 @@ class CadViewer:
 
     @quaternion.setter
     def quaternion(self, value):
-        if self.widget.control == "orbit":
+        if self.widget.control:
             print("quaternion controlled internally for control=='orbit'")
         else:
             self.widget.quaternion = value
@@ -1335,6 +1386,42 @@ class CadViewer:
     @pinning.setter
     def pinning(self, flag):
         self.widget.pinning = flag
+
+    @property
+    def collapse(self):
+        """
+        Get or set the CadViewerWidget traitlet `collapse`
+        see [CadViewerWidget.collapse](./widget.html#cad_viewer_widget.widget.CadViewerWidget.collapse)
+        """
+        return self.widget.collapse
+
+    @collapse.setter
+    def collapse(self, value):
+        self.widget.collapse = value
+
+    @property
+    def keymap(self):
+        """
+        Get or set the CadViewerWidget traitlet `keymap`
+        see [CadViewerWidget.keymap](./widget.html#cad_viewer_widget.widget.CadViewerWidget.keymap)
+        """
+        return self.widget.keymap
+
+    @keymap.setter
+    def keymap(self, value):
+        self.widget.keymap = value
+
+    @property
+    def new_tree_behavior(self):
+        """
+        Get or set the CadViewerWidget traitlet `new_tree_behavior`
+        see [CadViewerWidget.new_tree_behavior](./widget.html#cad_viewer_widget.widget.CadViewerWidget.new_tree_behavior)
+        """
+        return self.widget.new_tree_behavior
+
+    @new_tree_behavior.setter
+    def new_tree_behavior(self, value):
+        self.widget.new_tree_behavior = value
 
     #
     # Animation handling
@@ -1644,15 +1731,6 @@ class CadViewer:
             args = [args]
         return wrapper()
 
-    # def remove_ui_elements(self, elements):
-    #     """
-    #     Removes specified UI elements from the viewer.
-
-    #     Args:
-    #         elements (list): A list of UI element identifiers to be removed.
-    #     """
-    #     self.execute("viewer.trimUI", [elements, False])
-
     def status(self, shapes=False):
         """
         Returns the status of the widget with various properties.
@@ -1690,6 +1768,7 @@ class CadViewer:
             "axes": self.widget.axes,
             "axes0": self.widget.axes0,
             "grid": self.widget.grid,
+            "center_grid": self.widget.center_grid,
             "explode": self.widget.explode,
             "ticks": self.widget.ticks,
             "transparent": self.widget.transparent,
@@ -1717,8 +1796,9 @@ class CadViewer:
             "pan_speed": self.widget.pan_speed,
             "rotate_speed": self.widget.rotate_speed,
             "animation_speed": self.widget.animation_speed,
-            "state_updates": self.widget.state_updates,
             "lastPick": self.widget.lastPick,
+            "keymap": self.widget.keymap,
+            "new_tree_behavior": self.widget.new_tree_behavior,
         }
 
     def dump_model(self, shapes=False):
@@ -1747,12 +1827,12 @@ class CadViewer:
                             
                             RENDERER
                 normal_len:         {self.widget.normal_len}
-                default_edgecolor:  {self.widget.default_edgecolor}
+                default_edgecolor:      {self.widget.default_edgecolor}
                 default_opacity:    {self.widget.default_opacity}
                 ambient_intensity:  {self.widget.ambient_intensity}
                 direct_intensity:   {self.widget.direct_intensity}
                 metalness:          {self.widget.metalness}
-                roughness:          {self.widget.roughness}
+                roughness:          {self.widget.roughness}              
                             
                             VIEWER
                 timeit:             {self.widget.timeit}
@@ -1764,7 +1844,8 @@ class CadViewer:
                 axes:               {self.widget.axes}
                 axes0:              {self.widget.axes0}
                 grid:               {self.widget.grid}
-                explode:               {self.widget.explode}
+                center_grid:        {self.widget.center_grid}
+                explode:            {self.widget.explode}
                 ticks:              {self.widget.ticks}
                 transparent:        {self.widget.transparent}
                 black_edges:        {self.widget.black_edges}
@@ -1791,14 +1872,15 @@ class CadViewer:
                 pan_speed:          {self.widget.pan_speed}
                 rotate_speed:       {self.widget.rotate_speed}
                 animation_speed:    {self.widget.animation_speed}
-                state_updates:      {self.widget.state_updates}
                 lastPick:           {self.widget.lastPick}
+                keymap:             {self.widget.keymap}
+                new_tree_behavior:  {self.widget.new_tree_behavior}
 
                             INTERNAL
                 result:             {self.widget.result}
                 disposed:           {self.widget.disposed}
                 initialize:         {self.widget.initialize}
-                debug:           {self.widget.debug}
+                debug:              {self.widget.debug}
                 image_id:           {self.widget.image_id}
                 """
             )

@@ -66,7 +66,11 @@ def to_json(value, widget):
             elif not obj.flags["C_CONTIGUOUS"]:
                 obj = np.ascontiguousarray(obj)
             obj = obj.ravel()
-            return {"shape": obj.shape, "dtype": str(obj.dtype), "buffer": memoryview(obj)}
+            return {
+                "shape": obj.shape,
+                "dtype": str(obj.dtype),
+                "buffer": memoryview(obj),
+            }
         elif isinstance(obj, (tuple, list)):
             return [walk(el) for el in obj]
         elif isinstance(obj, dict):
@@ -148,6 +152,8 @@ def viewer_args(config):
             "default_opacity",
             "ambient_intensity",
             "direct_intensity",
+            "metalness",
+            "roughness",
             "normal_len",
             "control",
             "up",
@@ -157,14 +163,21 @@ def viewer_args(config):
             "axes",
             "axes0",
             "grid",
+            "center_grid",
             "ortho",
             "transparent",
             "black_edges",
             "explode",
             "collapse",
-            "clipIntersection",
-            "clipPlaneHelpers",
-            "clipNormal",
+            "clip_intersection",
+            "clip_object_colors",
+            "clip_planes",
+            "clip_normal_0",
+            "clip_normal_1",
+            "clip_normal_2",
+            "clip_slider_0",
+            "clip_slider_1",
+            "clip_slider_2",
             "position",
             "quaternion",
             "target",

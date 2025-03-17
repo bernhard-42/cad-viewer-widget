@@ -30,6 +30,7 @@ export class CadViewerModel extends DOMWidgetModel {
       tree_width: null,
       theme: null,
       pinning: null,
+      newTreeBehavior: null,
 
       // View traits
 
@@ -131,6 +132,7 @@ export class CadViewerView extends DOMWidgetView {
     if (!this.model.rendered) {
       super.render();
 
+      this.model.on("change:initialize", this.clearOrAddShapes, this);
       this.model.on("change:tracks", this.handle_change, this);
       this.model.on("change:position", this.handle_change, this);
       this.model.on("change:quaternion", this.handle_change, this);
@@ -170,11 +172,8 @@ export class CadViewerView extends DOMWidgetView {
       this.model.on("change:clip_slider_0", this.handle_change, this);
       this.model.on("change:clip_slider_1", this.handle_change, this);
       this.model.on("change:clip_slider_2", this.handle_change, this);
-      this.model.on("change:initialize", this.clearOrAddShapes, this);
       this.model.on("change:debug", this.handle_change, this);
       this.model.on("change:disposed", this.handle_change, this);
-      this.model.on("change:keymap", this.handle_change, this);
-      this.model.on("change:new_tree_behavior", this.handle_change, this);
       this.model.on("change:center_grid", this.handle_change, this);
       this.model.on("change:clip_object_colors", this.handle_change, this);
 
@@ -194,6 +193,8 @@ export class CadViewerView extends DOMWidgetView {
       this.container = null;
       this.container_id = null;
 
+      this.observer = null;
+
       this.height = null;
       this.width = null;
 
@@ -202,10 +203,10 @@ export class CadViewerView extends DOMWidgetView {
 
       // TODO: needed for embedding?
       // this.showViewer();
-      
+
       // if (this.model.get("shapes") != "") {
       //   this.addShapes();
-      // }      
+      // }
 
       this._position = null;
       this._quaternion = null;
@@ -230,7 +231,7 @@ export class CadViewerView extends DOMWidgetView {
       tools: this.model.get("tools"),
       pinning: this.model.get("pinning"),
       keymap: this.model.get("keymap"),
-      newTreeBehavior: true
+      newTreeBehavior: this.model.get("new_tree_behavior")
     };
   }
 
@@ -245,51 +246,57 @@ export class CadViewerView extends DOMWidgetView {
       roughness: this.model.get("roughness"),
       measureTools: true
     };
-    console.log("getRenderOptions", options)
+    this.debug("getRenderOptions", options);
     return options;
   }
 
   getViewerOptions() {
     let collapseMapping = {
-      "1": 1,
-      "E": 0,
-      "C": 2,
-      "R": 3
-    }
-    var options = {
-      control: this.model.get("control"),
-      up: this.model.get("up"),
-      tools: this.model.get("tools"),
-      glass: this.model.get("glass"),
-      axes: this.model.get("axes"),
-      axes0: this.model.get("axes0"),
-      grid: this.model.get("grid").slice(), // clone the array to ensure changes get detected
-      ortho: this.model.get("ortho"),
-      ticks: this.model.get("ticks"),
-      transparent: this.model.get("transparent"),
-      blackEdges: this.model.get("black_edges"),
-      collapse: collapseMapping[this.model.get("collapse")],
-      timeit: this.model.get("timeit"),
-      zoomSpeed: this.model.get("zoom_speed"),
-      panSpeed: this.model.get("pan_speed"),
-      rotateSpeed: this.model.get("rotate_speed"),
-      centerGrid: this.model.get("center_grid"),
-      clipSlider0: this.model.get("clip_slider_0"),
-      clipSlider1: this.model.get("clip_slider_1"),
-      clipSlider2: this.model.get("clip_slider_2"),
-      clipNormal0: this.model.get("clip_normal_0"),
-      clipNormal1: this.model.get("clip_normal_1"),
-      clipNormal2: this.model.get("clip_normal_2"),
-      clipIntersection: this.model.get("clip_intersection"),
-      clipPlaneHelpers: this.model.get("clip_planes"),
-      clipObjectColors: this.model.get("clip_object_colors"),  
-      measureTools: true,
-      // position: this.model.get("position"),
-      // quaternion: this.model.get("quaternion"),
-      // target: this.model.get("target"),
-      // zoom: this.model.get("zoom"),
+      1: 1,
+      E: 0,
+      C: 2,
+      R: 3
     };
-    console.log("getViewerOptions", options)
+    var options = {
+      measureTools: true
+    };
+    for (let key of [
+      "control",
+      "up",
+      "tools",
+      "glass",
+      "axes",
+      "axes0",
+      "ortho",
+      "ticks",
+      "transparent",
+      "black_edges",
+      "timeit",
+      "zoom_speed",
+      "pan_speed",
+      "rotate_speed",
+      "center_grid",
+      "clip_slider_0",
+      "clip_slider_1",
+      "clip_slider_2",
+      "clip_normal_0",
+      "clip_normal_1",
+      "clip_normal_2",
+      "clip_intersection",
+      "clip_planes",
+      "clip_object_colors"
+    ]) {
+      if (this.model.get(key) != null) {
+        if (key == "grid") {
+          options[key] = this.model.get(key).slice(); // clone the array to ensure changes get detected
+        } else if (key == "collapse") {
+          options[key] = collapseMapping[this.model.get(key)];
+        } else {
+          options[key] = this.model.get(key);
+        }
+      }
+    }
+    this.debug("getViewerOptions", options);
     return options;
   }
 
@@ -317,16 +324,16 @@ export class CadViewerView extends DOMWidgetView {
       this.widget.title.owner.dispose();
     }
   }
- 
 
   showViewer() {
     const displayOptions = this.getDisplayOptions();
+    this._debug = this.model.get("debug");
 
-    if (this.display==null){
+    if (this.display == null) {
       const container = document.createElement("div");
       container.id = `cvw_${Math.random().toString().slice(2)}`; // sufficient or uuid?
-      container.innerHTML = ""
-      
+      container.innerHTML = "";
+
       this.container_id = container.id;
       this.container = container;
 
@@ -336,49 +343,61 @@ export class CadViewerView extends DOMWidgetView {
         App.getSidecar(this.title).registerChild(this);
       }
       this.el.appendChild(container);
-      
+
       let size = container.parentNode.parentNode.getBoundingClientRect();
       if (displayOptions.height == null) {
         this.height = Math.round(size.height) - 60;
         displayOptions.height = this.height;
-        this.model.set("height", this.height)
+        this.model.set("height", this.height);
         this.model.save_changes();
       }
 
-      if (displayOptions.cadWidth < size.width) { // anchor != right
-        this.width = Math.round(size.width - (displayOptions.glass ? 0 : displayOptions.treeWidth)) - 12;
+      if (displayOptions.cadWidth < size.width && this.title != null) {
+        // anchor != right
+        this.width =
+          Math.round(
+            size.width - (displayOptions.glass ? 0 : displayOptions.treeWidth)
+          ) - 12;
         displayOptions.cadWidth = this.width;
-        this.model.set("cad_width", this.width)
+        this.model.set("cad_width", this.width);
         this.model.save_changes();
       }
-      
-      this.display = new Display(container, displayOptions)
 
-      const resizeObserver = new ResizeObserver((entries) => {
-        for (const entry of entries) {
-          var width = Math.round(entry.contentRect.width);
-          var height = Math.round(entry.contentRect.height);
+      this.display = new Display(container, displayOptions);
 
-          const displayOptions = this.getDisplayOptions();
-          if (this.viewer && this.viewer.ready) {
-            if (width > 0 && height > 0) {
-              if (!displayOptions.glass) {
-                width = width - displayOptions.treeWidth;
+      if (this.title != null) {
+        // do not resize cell viewers
+        this.observer = new ResizeObserver((entries) => {
+          for (const entry of entries) {
+            var width = Math.round(entry.contentRect.width);
+            var height = Math.round(entry.contentRect.height);
+
+            const displayOptions = this.getDisplayOptions();
+            if (this.viewer && this.viewer.ready) {
+              if (width > 0 && height > 0) {
+                if (!displayOptions.glass) {
+                  width = width - displayOptions.treeWidth;
+                }
+
+                width = Math.max(750, width - 12);
+                height = height - 60;
+                this.viewer.resizeCadView(
+                  width,
+                  displayOptions.treeWidth,
+                  height,
+                  displayOptions.glass
+                );
               }
-              
-              width = Math.max(750, width-12);
-              height = height-60;
-              this.viewer.resizeCadView(width, displayOptions.treeWidth, height, displayOptions.glass)
-            }
-            
-            this.model.set("cad_width", width)
-            this.model.set("height", height)
-            this.model.save_changes();
-          }
-        }
-      });
 
-      resizeObserver.observe(container.parentNode.parentNode);
+              this.model.set("cad_width", width);
+              this.model.set("height", height);
+              this.model.save_changes();
+            }
+          }
+        });
+
+        this.observer.observe(container.parentNode.parentNode);
+      }
     }
 
     this.display.glassMode(displayOptions.glass);
@@ -388,7 +407,12 @@ export class CadViewerView extends DOMWidgetView {
       this.clear();
     }
 
-    this.viewer = new Viewer(this.display, displayOptions, this.handleNotification.bind(this), null);
+    this.viewer = new Viewer(
+      this.display,
+      displayOptions,
+      this.handleNotification.bind(this),
+      null
+    );
   }
 
   handleNotification(change) {
@@ -405,7 +429,7 @@ export class CadViewerView extends DOMWidgetView {
     this.viewer.continueAnimation = false;
     this.viewer.dispose();
     this.viewer = null;
-}
+  }
 
   clearOrAddShapes() {
     this.init = this.model.get("initialize");
@@ -425,7 +449,7 @@ export class CadViewerView extends DOMWidgetView {
       }
       this.showViewer();
     } else {
-      this.addShapes();    
+      this.addShapes();
     }
   }
 
@@ -490,19 +514,26 @@ export class CadViewerView extends DOMWidgetView {
       return;
     }
 
-    this.shapes = {"data": this.model.get("shapes")};
+    this.shapes = { data: this.model.get("shapes") };
     decode(this.shapes);
     this.shapes = this.shapes["data"]["shapes"];
 
     const bbox = this.shapes["bb"];
-    const center = [(bbox.xmax+bbox.xmin)/2, (bbox.ymax+bbox.ymin)/2, (bbox.zmax+bbox.zmin)/2];
+    const center = [
+      (bbox.xmax + bbox.xmin) / 2,
+      (bbox.ymax + bbox.ymin) / 2,
+      (bbox.zmax + bbox.zmin) / 2
+    ];
     let bb_radius = Math.max(
-        Math.sqrt(Math.pow(bbox.xmax - bbox.xmin, 2) + Math.pow(bbox.ymax - bbox.ymin, 2) + Math.pow(bbox.zmax - bbox.zmin, 2)),
-        length(center)
+      Math.sqrt(
+        Math.pow(bbox.xmax - bbox.xmin, 2) +
+          Math.pow(bbox.ymax - bbox.ymin, 2) +
+          Math.pow(bbox.zmax - bbox.zmin, 2)
+      ),
+      length(center)
     );
 
     const timer = new Timer("addShapes", this.model.get("timeit"));
-    this._debug = this.model.get("debug");
 
     const resetCamera = this.model.get("reset_camera");
 
@@ -515,7 +546,7 @@ export class CadViewerView extends DOMWidgetView {
     this.viewer.cadWidth = this.model.get("cad_width");
     if (this.viewer.cadWidth == null) {
       this.viewer.cadWidth = this.width;
-    }    
+    }
     this.viewer.treeWidth = this.model.get("tree_width");
     this.viewer.height = this.model.get("height");
     if (this.viewer.height == null) {
@@ -538,35 +569,7 @@ export class CadViewerView extends DOMWidgetView {
       if (this.model.get("target") !== undefined) {
         viewerOptions.target = this.model.get("target");
       }
-      if (this.model.get("clip_slider_0") != undefined) {
-        viewerOptions.clipSlider0 = this.model.get("clip_slider_0");
-      }
-      if (this.model.get("clip_slider_1") != undefined) {
-        viewerOptions.clipSlider1 = this.model.get("clip_slider_1");
-      }
-      if (this.model.get("clip_slider_2") != undefined) {
-        viewerOptions.clipSlider2 = this.model.get("clip_slider_2");
-      }
-      if (this.model.get("clip_normal_0") != undefined) {
-        viewerOptions.clipNormal0 = this.model.get("clip_normal_0");
-      }
-      if (this.model.get("clip_normal_1") != undefined) {
-          viewerOptions.clipNormal1 = this.model.get("clip_normal_1");
-      }
-      if (this.model.get("clip_normal_2") != undefined) {
-        viewerOptions.clipNormal2 = this.model.get("clip_normal_2");
-      }
-      if (this.model.get("clip_intersection") != undefined) {
-        viewerOptions.clipIntersection = this.model.get("clip_intersection");
-      }
-      if (this.model.get("clip_planes") != undefined) {
-        viewerOptions.clipPlaneHelpers = this.model.get("clip_planes");
-      }
-      if (this.model.get("clip_object_colors") != undefined) {
-        viewerOptions.clipObjectColors = this.model.get("clip_object_colors");
-      }
       this._camera_distance = null;
-
     } else {
       if (this.model.get("position")) {
         viewerOptions.position = this.model.get("position");
@@ -579,16 +582,17 @@ export class CadViewerView extends DOMWidgetView {
             p[i] = this._position[i] - this._target[i];
           }
           p = normalize(p);
-          var offset = (resetCamera === "keep") ? this._target : [0,0,0];
+          var offset = resetCamera === "keep" ? this._target : [0, 0, 0];
           for (var i = 0; i < 3; i++) {
             p[i] = p[i] * camera_distance + offset[i];
-          }                       
-        } else { // center
+          }
+        } else {
+          // center
           var p = [0, 0, 0];
           for (var i = 0; i < 3; i++) {
             p[i] = this._position[i] - this._target[i] + center[i];
           }
-          this._target = center
+          this._target = center;
         }
       }
       viewerOptions.position = p;
@@ -607,67 +611,20 @@ export class CadViewerView extends DOMWidgetView {
       }
 
       if (this.model.get("zoom")) {
-          viewerOptions.zoom = this.model.get("zoom");
+        viewerOptions.zoom = this.model.get("zoom");
       } else if (this._zoom) {
-          viewerOptions.zoom = this._zoom;
-      }
-
-      if (this.model.get("clip_slider_0") != undefined) {
-        viewerOptions.clipSlider0 = this.model.get("clip_slider_0");
-      } else {
-          viewerOptions.clipSlider0 = this.clipping.sliders[0];
-      }
-      if (this.model.get("clip_slider_1") != undefined) {
-        viewerOptions.clipSlider1 = this.model.get("clip_slider_1");
-      } else {
-        viewerOptions.clipSlider1 = this.clipping.sliders[1];
-      }
-      if (this.model.get("clip_slider_2") != undefined) {
-        viewerOptions.clipSlider2 = this.model.get("clip_slider_2");
-      } else {
-        viewerOptions.clipSlider2 = this.clipping.sliders[2];
-      }
-      if (this.model.get("clip_normal_0") != undefined) {
-        viewerOptions.clipNormal0 = this.model.get("clip_normal_0");
-      } else {
-        viewerOptions.clipNormal0 = this.clipping.normals[0];
-      }
-      if (this.model.get("clip_normal_1") != undefined) {
-        viewerOptions.clipNormal1 = this.model.get("clip_normal_1");
-      } else {
-          viewerOptions.clipNormal1 = this.clipping.normals[1];
-      }
-      if (this.model.get("clip_normal_2") != undefined) {
-        viewerOptions.clipNormal2 = this.model.get("clip_normal_2");
-      } else {
-        viewerOptions.clipNormal2 = this.clipping.normals[2];
-      }
-      if (this.model.get("clip_intersection") != undefined) {
-        viewerOptions.clipIntersection = this.model.get("clip_intersection");
-      } else {
-        viewerOptions.clipIntersection = this.clipping.intersection;
-      }
-      if (this.model.get("clip_planes") != undefined) {
-        viewerOptions.clipPlaneHelpers = this.model.get("clip_planes");
-      } else {
-        viewerOptions.clipPlaneHelpers = this.clipping.planeHelpers;
-      }
-      if (this.model.get("clip_object_colors") != undefined) {
-        viewerOptions.clipObjectColors = this.model.get("clip_object_colors");
-      } else {
-        viewerOptions.clipObjectColors = this.clipping.objectColors;
+        viewerOptions.zoom = this._zoom;
       }
     }
-
-    this.viewer.render(
-      this.shapes,
-      this.getRenderOptions(),
-      viewerOptions,
-    );
+    this.viewer.render(this.shapes, this.getRenderOptions(), viewerOptions);
 
     if (resetCamera === "keep" && this.camera_distance != null) {
       // console.log("camera_distance", this.camera_distance, viewer.camera.camera_distance, viewer.camera.camera_distance/this.camera_distance);
-      viewer.setCameraZoom((this.zoom==null ? 1.0 : this.zoom) * viewer.camera.camera_distance / this.camera_distance)
+      viewer.setCameraZoom(
+        ((this.zoom == null ? 1.0 : this.zoom) *
+          viewer.camera.camera_distance) /
+          this.camera_distance
+      );
     }
 
     this._position = viewer.getCameraPosition();
@@ -675,14 +632,22 @@ export class CadViewerView extends DOMWidgetView {
     this._target = viewer.controls.getTarget().toArray();
     this._zoom = viewer.getCameraZoom();
     this._camera_distance = viewer.camera.camera_distance;
-    
+
     this.clipping = {
-        "sliders": [viewer.getClipSlider(0), viewer.getClipSlider(1), viewer.getClipSlider(2)],
-        "normals": [viewer.getClipNormal(0), viewer.getClipNormal(1), viewer.getClipNormal(2)],
-        "planeHelpers": viewer.getClipPlaneHelpers(),
-        "objectColors": viewer.getObjectColorCaps(),
-        "intersection": viewer.getClipIntersection()
-    }
+      sliders: [
+        viewer.getClipSlider(0),
+        viewer.getClipSlider(1),
+        viewer.getClipSlider(2)
+      ],
+      normals: [
+        viewer.getClipNormal(0),
+        viewer.getClipNormal(1),
+        viewer.getClipNormal(2)
+      ],
+      planeHelpers: viewer.getClipPlaneHelpers(),
+      objectColors: viewer.getObjectColorCaps(),
+      intersection: viewer.getClipIntersection()
+    };
 
     timer.split("renderer");
 
@@ -704,7 +669,8 @@ export class CadViewerView extends DOMWidgetView {
 
     if (this.model.get("explode") != null) {
       let flag = this.model.get("explode");
-      this.viewer.display.setExplode({ target: { checked: flag } });
+      this.viewer.display.setExplode("", !flag); // workaround
+      this.viewer.display.setExplode("", flag);
       this.viewer.display.setExplodeCheck(flag);
     }
 
@@ -779,11 +745,8 @@ export class CadViewerView extends DOMWidgetView {
     var tracks = "";
     var value = null;
     var flag = null;
-
+    this.debug("handle_change:", key, change.changed[key]);
     switch (key) {
-      case "keymap":
-        // TODO
-        break;
       case "zoom":
         setKey("getCameraZoom", "setCameraZoom", key);
         this._zoom = this.viewer.getCameraZoom();
@@ -806,9 +769,9 @@ export class CadViewerView extends DOMWidgetView {
       case "grid":
         setKey("getGrids", "setGrids", key);
         break;
-      case "centerGrid":
-        // TODO
-        break;  
+      case "center_grid":
+        this.viewer.setGridCenter(change.changed[key]);
+        break;
       case "axes0":
         setKey("getAxes0", "setAxes0", key);
         break;
@@ -824,7 +787,8 @@ export class CadViewerView extends DOMWidgetView {
       case "explode":
         if (this.model.get("explode") != null) {
           let flag = change.changed[key];
-          this.viewer.display.setExplode({ target: { checked: flag } });
+          this.viewer.display.setExplode("", flag);
+          this.viewer.display.setExplodeCheck(!flag); // workaround
           this.viewer.display.setExplodeCheck(flag);
         }
         break;
@@ -905,9 +869,6 @@ export class CadViewerView extends DOMWidgetView {
       case "rotate_speed":
         setKey("getRotateSpeed", "setRotateSpeed", key);
         break;
-      case "state_updates":
-        setKey("getStates", "setStates", key);
-        break;
       case "tracks":
         tracks = this.model.get("tracks");
         if (tracks == "") {
@@ -951,8 +912,8 @@ export class CadViewerView extends DOMWidgetView {
       case "clip_slider_2":
         setKey("getClipSlider", "setClipSlider", key, 2);
         break;
-      case "clipObjectColors":
-        // TODO
+      case "clip_object_colors":
+        this.viewer.setClipObjectColorCaps(change.changed[key]);
         break;
       case "debug":
         this._debug = change.changed[key];
@@ -1003,8 +964,8 @@ export class CadViewerView extends DOMWidgetView {
 
   saveAsPng(filename) {
     this.viewer.getImage(filename).then((result) => {
-      this.exportPng(result.task, result.dataUrl)
-    })
+      this.exportPng(result.task, result.dataUrl);
+    });
   }
 
   pinAsPng() {
