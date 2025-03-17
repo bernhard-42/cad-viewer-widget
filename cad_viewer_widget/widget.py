@@ -483,10 +483,7 @@ class CadViewer:
         # viewer options
         tools=None,
         glass=None,
-        cad_width=None,
-        tree_width=None,
         new_tree_behavior=None,
-        height=None,
         control=None,
         up=None,
         ortho=True,
@@ -769,6 +766,9 @@ class CadViewer:
 
         self.widget.initialize = True
 
+        # set shapes to None so that the same object can be shown again
+        self.widget.shapes = None
+
         with self.widget.hold_trait_notifications():
             self.widget.shapes = shapes
 
@@ -785,12 +785,6 @@ class CadViewer:
                 self.widget.tools = tools
             if glass is not None:
                 self.widget.glass = glass
-            if cad_width is not None:
-                self.widget.cad_width = cad_width
-            if tree_width is not None:
-                self.widget.tree_width = tree_width
-            if height is not None:
-                self.widget.height = height
             self.widget.new_tree_behavior = new_tree_behavior
             self.widget.axes = axes
             self.widget.axes0 = axes0

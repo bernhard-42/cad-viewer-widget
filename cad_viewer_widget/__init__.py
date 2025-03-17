@@ -69,6 +69,16 @@ def _jupyter_nbextension_paths():
     ]
 
 
+MESSAGES = {
+    "split-left": "split-left window",
+    "split-right": "split-right window",
+    "split-top": "split-top window",
+    "split_bottom": "split-bottom window",
+    "right": "sidecar",
+    None: "sidecar",
+}
+
+
 def open_viewer(
     title=None,
     anchor="right",
@@ -80,11 +90,20 @@ def open_viewer(
     tools=True,
     pinning=True,
 ):
-    if height is None and title is None:
-        height = 600
 
-    if cad_width is None:
-        cad_width = 800
+    if title is not None:
+        if height is not None:
+            print(f"In a {MESSAGES.get(anchor, "unknown anchor")} `height` is ignored")
+            height = None
+
+        if cad_width is not None and anchor not in [None, "right"]:
+            print(
+                f"In a {MESSAGES.get(anchor, "unknown anchor")} `cad_width` is ignored"
+            )
+
+    if cad_width is not None and cad_width < 750:
+        cad_width = 750
+        print("`cad_width` cannot be smaller than 750")
 
     if title is None:
         viewer = CadViewer(
@@ -106,10 +125,6 @@ def open_viewer(
         viewer.widget.image_id = image_id
         error = None
     else:
-        if height is not None:
-            height = None
-            print("In sidecar `height`is ignored")
-
         out = Sidecar(title=title, anchor=anchor)
         with out:
             try:
@@ -270,6 +285,10 @@ def show(
 
     viewer = None
     if title is not None:
+
+        if anchor is None:
+            anchor = "right"
+
         viewer = get_sidecar(title)
         if viewer is not None:
 
@@ -320,17 +339,10 @@ def show(
         kwargs["glass"] = preset("glass", glass, viewer.widget.glass)
         kwargs["tools"] = preset("tools", tools, viewer.widget.tools)
 
-    if cad_width is not None and cad_width < 750:
-        cad_width = 750
-        print("`cad_width` cannot be smaller than 750")
-    kwargs["cad_width"] = preset("cad_width", cad_width, 800 if title is None else None)
+    kwargs["height"] = preset("height", height, 600)
+    kwargs["cad_width"] = preset("cad_width", cad_width, 800)
     kwargs["tree_width"] = preset("tree_width", tree_width, 250)
-    if title is None:
-        kwargs["height"] = preset("height", height, 600)
-    else:
-        if height is not None:
-            print("In sidecar `height`is ignored")
-        kwargs["height"] = height = None
+
     kwargs["new_tree_behavior"] = preset("new_tree_behavior", new_tree_behavior, True)
     kwargs["theme"] = preset("theme", theme, "browser")
     kwargs["normal_len"] = preset("normal_len", normal_len, 0)

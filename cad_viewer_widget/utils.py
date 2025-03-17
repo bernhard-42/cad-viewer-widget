@@ -145,9 +145,6 @@ def viewer_args(config):
         for k, v in config.items()
         if k
         in [
-            "cad_width",
-            "height",
-            "tree_width",
             "default_edgecolor",
             "default_opacity",
             "ambient_intensity",
