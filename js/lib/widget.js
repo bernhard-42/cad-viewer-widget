@@ -267,6 +267,7 @@ export class CadViewerView extends DOMWidgetView {
       "glass",
       "axes",
       "axes0",
+      "grid",
       "ortho",
       "ticks",
       "transparent",
