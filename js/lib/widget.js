@@ -247,43 +247,47 @@ export class CadViewerView extends DOMWidgetView {
       C: 2,
       R: 3
     };
+
+    const optionsMapping = {
+      control: "control",
+      up: "up",
+      tools: "tools",
+      glass: "glass",
+      axes: "axes",
+      axes0: "axes0",
+      grid: "grid",
+      ortho: "ortho",
+      ticks: "ticks",
+      collapse: "collapse",
+      transparent: "transparent",
+      black_edges: "blackEdges",
+      timeit: "timeit",
+      zoom_speed: "zoomSpeed",
+      pan_speed: "panSpeed",
+      rotate_speed: "rotateSpeed",
+      center_grid: "centerGrid",
+      clip_slider_0: "clipSlider0",
+      clip_slider_1: "clipSlider1",
+      clip_slider_2: "clipSlider2",
+      clip_normal_0: "clipNormal0",
+      clip_normal_1: "clipNormal1",
+      clip_normal_2: "clipNormal2",
+      clip_intersection: "clipIntersection",
+      clip_planes: "clipPlanes",
+      clip_object_colors: "clipObjectColors"
+    };
     var options = {
       measureTools: true
     };
-    for (let key of [
-      "control",
-      "up",
-      "tools",
-      "glass",
-      "axes",
-      "axes0",
-      "grid",
-      "ortho",
-      "ticks",
-      "transparent",
-      "black_edges",
-      "timeit",
-      "zoom_speed",
-      "pan_speed",
-      "rotate_speed",
-      "center_grid",
-      "clip_slider_0",
-      "clip_slider_1",
-      "clip_slider_2",
-      "clip_normal_0",
-      "clip_normal_1",
-      "clip_normal_2",
-      "clip_intersection",
-      "clip_planes",
-      "clip_object_colors"
-    ]) {
+    for (let key of Object.keys(optionsMapping)) {
       if (this.model.get(key) != null) {
+        var jkey = optionsMapping[key];
         if (key == "grid") {
-          options[key] = this.model.get(key).slice(); // clone the array to ensure changes get detected
+          options[jkey] = this.model.get(key).slice(); // clone the array to ensure changes get detected
         } else if (key == "collapse") {
-          options[key] = collapseMapping[this.model.get(key)];
+          options[jkey] = collapseMapping[this.model.get(key)];
         } else {
-          options[key] = this.model.get(key);
+          options[jkey] = this.model.get(key);
         }
       }
     }
