@@ -239,11 +239,11 @@ def show(
         default_opacity:   Opacity value for transparent objects (default=0.5)
         black_edges:       Show edges in black color (default=False)
         control:           Mouse control use "orbit" control instead of "trackball" control (default="trackball")
-        collapse:          Collapse.LEAVES: collapse all single leaf nodes,
-                           Collapse.ROOT: expand root only,
-                           Collapse.ALL: collapse all nodes,
-                           Collapse.NONE: expand all nodes
-                           (default=Collapse.ROOT)
+        collapse:          "1": collapse all single leaf nodes,
+                           "R": expand root only,
+                           "C": collapse all nodes,
+                           "E"": expand all nodes
+                           (default="R"")
         ticks:             Hint for the number of ticks in both directions (default=10)
         center_grid:       Center the grid at the origin or center of mass (default=False)
         up:                Use z-axis ('Z') or y-axis ('Y') as up direction for the camera (default="Z")
