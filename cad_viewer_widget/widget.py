@@ -304,20 +304,6 @@ class CadViewerWidget(
     zoom = Float(allow_none=True).tag(sync=True)
     "float: Zoom value of the camera"
 
-    position0 = Tuple(Float(), Float(), Float(), allow_none=True).tag(sync=True)
-    "tuple: Initial position of the camera as a 3-dim tuple of float (x,y,z)"
-
-    quaternion0 = Tuple(Float(), Float(), Float(), Float(), allow_none=True).tag(
-        sync=True
-    )
-    "tuple: Initial rotation of the camera as 4-dim quaternion (x,y,z,w)"
-
-    zoom0 = Float(allow_none=True).tag(sync=True)
-    "float: Initial zoom value of the camera"
-
-    target0 = Tuple(Float(), Float(), Float(), allow_none=True).tag(sync=True)
-    "tuple: Initial camera target to look at as 3-dim tuple (x,y,z)"
-
     zoom_speed = Float(allow_none=True).tag(sync=True)
     "float: Speed of zooming with the mouse"
 
@@ -1782,10 +1768,6 @@ class CadViewer:
             "quaternion": self.widget.quaternion,
             "target": self.widget.target,
             "zoom": self.widget.zoom,
-            "position0": self.widget.position0,
-            "quaternion0": self.widget.quaternion0,
-            "target0": self.widget.target0,
-            "zoom0": self.widget.zoom0,
             "zoom_speed": self.widget.zoom_speed,
             "pan_speed": self.widget.pan_speed,
             "rotate_speed": self.widget.rotate_speed,

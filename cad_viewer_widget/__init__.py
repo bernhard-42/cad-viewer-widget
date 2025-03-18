@@ -320,10 +320,6 @@ def show(
                 "quaternion",
                 "target",
                 "zoom",
-                "position0",
-                "quaternion0",
-                "target0",
-                "zoom0",
             ):
                 return getattr(viewer.widget, key) if val is None else val
             else:

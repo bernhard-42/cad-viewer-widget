@@ -80,11 +80,6 @@ export class CadViewerModel extends DOMWidgetModel {
       target: null,
       zoom: null,
 
-      position0: null,
-      quaternion0: null,
-      target0: null,
-      zoom0: null,
-
       zoom_speed: null,
       pan_speed: null,
       rotate_speed: null,
@@ -442,11 +437,6 @@ export class CadViewerView extends DOMWidgetView {
     if (this.init) {
       // support rest initial position and  keeping camera location
       if (!this.empty) {
-        this.position0 = this.model.get("position0");
-        this.quaternion0 = this.model.get("quaternion0");
-        this.zoom0 = this.model.get("zoom0");
-        this.target0 = this.model.get("target0");
-
         this.lastPosition = this.viewer.getCameraPosition();
         this.lastQuaternion = this.viewer.getCameraQuaternion();
         this.lastZoom = this.viewer.getCameraZoom();
