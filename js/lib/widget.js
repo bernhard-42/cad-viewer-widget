@@ -326,6 +326,33 @@ export class CadViewerView extends DOMWidgetView {
     }
   }
 
+  resize = (rect) => {
+    var width = Math.round(rect.width);
+    var height = Math.round(rect.height);
+
+    const displayOptions = this.getDisplayOptions();
+    if (this.viewer && this.viewer.ready) {
+      if (width > 0 && height > 0) {
+        if (!displayOptions.glass) {
+          width = width - displayOptions.treeWidth;
+        }
+
+        width = Math.max(750, width - 12);
+        height = height - 60;
+        this.viewer.resizeCadView(
+          width,
+          displayOptions.treeWidth,
+          height,
+          displayOptions.glass
+        );
+      }
+
+      this.model.set("cad_width", width);
+      this.model.set("height", height);
+      this.model.save_changes();
+    }
+  };
+
   showViewer() {
     const displayOptions = this.getDisplayOptions();
     this._debug = this.model.get("debug");
@@ -370,30 +397,7 @@ export class CadViewerView extends DOMWidgetView {
         // do not resize cell viewers
         this.observer = new ResizeObserver((entries) => {
           for (const entry of entries) {
-            var width = Math.round(entry.contentRect.width);
-            var height = Math.round(entry.contentRect.height);
-
-            const displayOptions = this.getDisplayOptions();
-            if (this.viewer && this.viewer.ready) {
-              if (width > 0 && height > 0) {
-                if (!displayOptions.glass) {
-                  width = width - displayOptions.treeWidth;
-                }
-
-                width = Math.max(750, width - 12);
-                height = height - 60;
-                this.viewer.resizeCadView(
-                  width,
-                  displayOptions.treeWidth,
-                  height,
-                  displayOptions.glass
-                );
-              }
-
-              this.model.set("cad_width", width);
-              this.model.set("height", height);
-              this.model.save_changes();
-            }
+            this.resize(entry.contentRect);
           }
         });
 
@@ -451,6 +455,7 @@ export class CadViewerView extends DOMWidgetView {
       this.showViewer();
     } else {
       this.addShapes();
+      this.resize(this.container.parentNode.parentNode.getBoundingClientRect());
     }
   }
 

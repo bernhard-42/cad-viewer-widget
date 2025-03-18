@@ -86,7 +86,7 @@ def open_viewer(
     tree_width=250,
     height=600,
     theme="browser",
-    glass=False,
+    glass=True,
     tools=True,
     pinning=True,
 ):
@@ -220,7 +220,7 @@ def show(
     Valid keywords:
 
     - UI
-        glass:             Use glass mode where tree is an overlay over the cad object (default=False)
+        glass:             Use glass mode where tree is an overlay over the cad object (default=True)
         tools:             Show tools (default=True)
         cad_width:         Width of the cad canvas (default=800)
         height:            Height of the cad canvas (default=600)
@@ -286,12 +286,11 @@ def show(
     viewer = None
     if title is not None:
 
-        if anchor is None:
-            anchor = "right"
-
         viewer = get_sidecar(title)
-        if viewer is not None:
-
+        if viewer is None:
+            if anchor is None:
+                anchor = "right"
+        else:
             # clean the shapes so that the same object can be show several times
             viewer.widget.shapes = {}
 
@@ -333,7 +332,7 @@ def show(
     kwargs = {}
 
     if viewer is None:
-        kwargs["glass"] = preset("glass", glass, False)
+        kwargs["glass"] = preset("glass", glass, True)
         kwargs["tools"] = preset("tools", tools, True)
     else:
         kwargs["glass"] = preset("glass", glass, viewer.widget.glass)
