@@ -156,7 +156,6 @@ export class CadViewerView extends DOMWidgetView {
       this.model.on("change:zoom_speed", this.handle_change, this);
       this.model.on("change:pan_speed", this.handle_change, this);
       this.model.on("change:rotate_speed", this.handle_change, this);
-      this.model.on("change:state_updates", this.handle_change, this);
       this.model.on("change:states", this.handle_change, this);
       this.model.on("change:tab", this.handle_change, this);
       this.model.on("change:clip_intersection", this.handle_change, this);
@@ -872,6 +871,10 @@ export class CadViewerView extends DOMWidgetView {
         } else {
           this.addTracks(tracks);
         }
+        break;
+      case "states":
+        var states = change.changed[key];
+        this.viewer.setStates(states);
         break;
       case "tab":
         value = change.changed[key];

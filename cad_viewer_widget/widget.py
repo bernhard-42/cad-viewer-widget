@@ -822,6 +822,13 @@ class CadViewer:
         """
         self.widget.disposed = True
 
+    def update_states(self, states):
+        old_states = self.widget.states.copy()
+        for k, v in states.items():
+            if old_states.get(k) is not None:
+                old_states[k] = v
+        self.widget.states = old_states
+
     @property
     def disposed(self):
         """
