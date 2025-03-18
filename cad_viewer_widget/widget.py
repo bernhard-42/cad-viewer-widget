@@ -739,7 +739,7 @@ class CadViewer:
                 "Camera quaternion cannot be used with Orbit camera control"
             )
 
-        if not control == "trackball" and position is not None and quaternion is None:
+        if control == "trackball" and position is not None and quaternion is None:
             raise ValueError(
                 "For Trackball camera control, position paramater also needs quaternion parameter"
             )
