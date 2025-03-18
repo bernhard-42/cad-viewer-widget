@@ -103,10 +103,6 @@ export class CadViewerModel extends DOMWidgetModel {
 export class CadViewerView extends DOMWidgetView {
   initialize(...args) {
     super.initialize(...args);
-    this.position0 = null;
-    this.quaternion0 = null;
-    this.target0 = null;
-    this.zoom0 = null;
     this.lastPosition = null;
     this.lastQuaternion = null;
     this.lastTarget = null;
