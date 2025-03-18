@@ -440,7 +440,11 @@ export class CadViewerView extends DOMWidgetView {
       this.showViewer();
     } else {
       this.addShapes();
-      this.resize(this.container.parentNode.parentNode.getBoundingClientRect());
+      if (this.title != null) {
+        this.resize(
+          this.container.parentNode.parentNode.getBoundingClientRect()
+        );
+      }
     }
   }
 
