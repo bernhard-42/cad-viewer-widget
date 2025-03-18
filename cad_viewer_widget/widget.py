@@ -750,6 +750,7 @@ class CadViewer:
         if grid is None:
             grid = [False, False, False]
 
+        self.widget.debug = debug
         self.widget.initialize = True
 
         # set shapes to None so that the same object can be shown again
@@ -791,7 +792,6 @@ class CadViewer:
             self.widget.pan_speed = pan_speed
             self.widget.rotate_speed = rotate_speed
             self.widget.timeit = timeit
-            self.widget.debug = debug
             self.widget.clip_slider_0 = clip_slider_0
             self.widget.clip_slider_1 = clip_slider_1
             self.widget.clip_slider_2 = clip_slider_2
