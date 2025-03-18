@@ -1308,15 +1308,11 @@ class CadViewer:
         see [CadViewerWidget.quaternion](./widget.html#cad_viewer_widget.widget.CadViewerWidget.quaternion)
         """
 
-        if self.widget.control:
-            print("quaternion controlled internally for control=='orbit'")
-            return None
-        else:
-            return self.widget.quaternion
+        return self.widget.quaternion
 
     @quaternion.setter
     def quaternion(self, value):
-        if self.widget.control:
+        if self.widget.control == "orbit":
             print("quaternion controlled internally for control=='orbit'")
         else:
             self.widget.quaternion = value
