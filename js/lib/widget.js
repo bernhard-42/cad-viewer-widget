@@ -152,7 +152,7 @@ export class CadViewerView extends DOMWidgetView {
       this.model.on("change:zoom_speed", this.handle_change, this);
       this.model.on("change:pan_speed", this.handle_change, this);
       this.model.on("change:rotate_speed", this.handle_change, this);
-      this.model.on("change:states", this.handle_change, this);
+      this.model.on("change:state_updates", this.handle_change, this);
       this.model.on("change:tab", this.handle_change, this);
       this.model.on("change:clip_intersection", this.handle_change, this);
       this.model.on("change:clip_planes", this.handle_change, this);
@@ -450,15 +450,6 @@ export class CadViewerView extends DOMWidgetView {
         );
       }
     }
-  }
-
-  clone_states() {
-    const states = this.model.get("states");
-    const states2 = {};
-    for (var key in states) {
-      states2[key] = states[key].slice();
-    }
-    return states2;
   }
 
   backupClipping() {
@@ -870,9 +861,12 @@ export class CadViewerView extends DOMWidgetView {
           this.addTracks(tracks);
         }
         break;
-      case "states":
+      case "state_updates":
         var states = change.changed[key];
-        this.viewer.setStates(states);
+        for (var k in states) {
+          // supports leaves only. TODO: extend to full sub trees
+          this.viewer.setState(k, states[k], false);
+        }
         break;
       case "tab":
         value = change.changed[key];

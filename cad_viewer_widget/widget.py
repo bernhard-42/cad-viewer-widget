@@ -172,6 +172,10 @@ class CadViewerWidget(
     # pylint: disable=line-too-long
     "dict: State of the nested cad objects, key = object path, value = 2-dim tuple of 0/1 (hidden/visible) for object and edges"
 
+    state_updates = Dict(Tuple(Integer(), Integer()), allow_none=True).tag(sync=True)
+    # pylint: disable=line-too-long
+    "dict: Updates to the state of the nested cad objects, key = object path, value = 2-dim tuple of 0/1 (hidden/visible) for object and edges"
+
     tracks = List(allow_none=True).tag(sync=True)
     # pylint: disable=line-too-long
     "unicode: Serialized list of animation track arrays, see [AnimationTrack.to_array](/widget.html#cad_viewer_widget.widget.AnimationTrack.to_array)"
@@ -822,12 +826,22 @@ class CadViewer:
         """
         self.widget.disposed = True
 
+    @property
+    def states(self):
+        """
+        Get the states of the objects in the navigation tree
+        """
+
+        return self.widget.states
+
     def update_states(self, states):
         old_states = self.widget.states.copy()
+        new_states = {}
+        # validation that path exists
         for k, v in states.items():
             if old_states.get(k) is not None:
-                old_states[k] = v
-        self.widget.states = old_states
+                new_states[k] = v
+        self.widget.state_updates = new_states
 
     @property
     def disposed(self):
