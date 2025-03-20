@@ -166,6 +166,7 @@ export class CadViewerView extends DOMWidgetView {
       this.model.on("change:disposed", this.handle_change, this);
       this.model.on("change:center_grid", this.handle_change, this);
       this.model.on("change:clip_object_colors", this.handle_change, this);
+      this.model.on("change:measure", this.handle_change, this);
 
       this.listenTo(this.model, "msg:custom", this.onCustomMessage.bind(this));
 
@@ -922,6 +923,9 @@ export class CadViewerView extends DOMWidgetView {
         } else {
           this.dispose();
         }
+        break;
+      case "measure":
+        console.log("measure:", change.changed[key]);
         break;
     }
   }

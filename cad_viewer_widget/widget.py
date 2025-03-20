@@ -348,6 +348,15 @@ class CadViewerWidget(
     image_id = Unicode(allow_none=True).tag(sync=True)
     "unicode string: the id of the image tag to use for pin as png"
 
+    activeTool = Unicode(allow_none=True).tag(sync=True)
+    "unicode: Active measurement tool"
+
+    selectedShapeIDs = List(allow_none=True).tag(sync=True)
+    "list: List of selected object paths"
+
+    measure = Unicode(allow_none=True).tag(sync=True)
+    "list: JSON of calculated measures"
+
     @observe("result")
     def func(self, change):
         """
@@ -375,6 +384,11 @@ class CadViewerWidget(
                 else:
                     with open(data["filename"], "wb") as fd:
                         fd.write(base64.b64decode(data["src"].split(",")[1]))
+
+    @observe("selectedShapeIDs")
+    def selected_shape_ids(self, change):
+        print(change["new"])
+        self.measure = json.dumps({"area": 42})
 
 
 class CadViewer:
