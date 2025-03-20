@@ -31,12 +31,11 @@ prepare: clean
 	git commit -m "cleanup before release"
 
 bump:
+	@echo Current version: $(CURRENT_VERSION)
 ifdef part
-ifdef version
-	bumpversion --new-version $(version) $(part) && grep current .bumpversion.cfg
-else
-	bumpversion --allow-dirty $(part) && grep current .bumpversion.cfg
-endif
+	bump-my-version bump $(part) --allow-dirty && grep current pyproject.toml
+else ifdef version
+	bump-my-version bump --allow-dirty --new-version $(version) && grep current pyproject.toml
 else
 	@echo "Provide part=major|minor|patch|release|build and optionally version=x.y.z..."
 	exit 1
