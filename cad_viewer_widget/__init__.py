@@ -89,6 +89,7 @@ def open_viewer(
     glass=True,
     tools=True,
     pinning=True,
+    default=True,
 ):
 
     if title is not None and title != "":
