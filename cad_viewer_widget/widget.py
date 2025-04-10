@@ -802,7 +802,7 @@ class CadViewer:
             )
 
         if up not in ["Z", "Y", "L"]:
-            raise ValueError("Camera up value can only be Y or Z or L")
+            raise ValueError(f"Camera up value '{up}' can only be Y or Z or L")
 
         if grid is None:
             grid = [False, False, False]
@@ -1377,7 +1377,7 @@ class CadViewer:
     @quaternion.setter
     def quaternion(self, value):
         if self.widget.control == "orbit":
-            print("quaternion controlled internally for control=='orbit'")
+            print("quaternion controlled internally for orbit control")
         else:
             self.widget.quaternion = value
 
@@ -1722,7 +1722,7 @@ class CadViewer:
         - This method temporarily disables pinning while exporting the HTML.
         - The state of the widget is captured and embedded in the HTML file.
         """
-        if self.widget.title is not None:
+        if not (self.widget.title is None or self.widget.title == ""):
             raise RuntimeError(
                 "Export_html does not work with sidecar. Show the object again in a cell viewer"
             )
@@ -1765,8 +1765,8 @@ class CadViewer:
                 content = {
                     "type": "cad_viewer_method",
                     "id": self.msg_id,
-                    "method": json.dumps(path),
-                    "args": json.dumps(args),
+                    "method": path,
+                    "args": args,
                 }
                 self.widget.send(content=content, buffers=None)
 
@@ -1776,7 +1776,7 @@ class CadViewer:
             args = [args]
         return wrapper()
 
-    def status(self, shapes=False):
+    def status(self, all=False):
         """
         Returns the status of the widget with various properties.
 
@@ -1786,7 +1786,7 @@ class CadViewer:
         Returns:
             dict: A dictionary containing the status of the widget
         """
-        return {
+        result = {
             "title": self.widget.title,
             "anchor": self.widget.anchor,
             "cad_width": self.widget.cad_width,
@@ -1794,17 +1794,14 @@ class CadViewer:
             "tree_width": self.widget.tree_width,
             "theme": self.widget.theme,
             "pinning": self.widget.pinning,
-            "shapes": self.widget.shapes if shapes else "... (set shapes=True)",
             "states": self.widget.states,
             "tracks": self.widget.tracks,
-            "normal_len": self.widget.normal_len,
             "default_edgecolor": self.widget.default_edgecolor,
             "default_opacity": self.widget.default_opacity,
             "ambient_intensity": self.widget.ambient_intensity,
             "direct_intensity": self.widget.direct_intensity,
             "metalness": self.widget.metalness,
             "roughness": self.widget.roughness,
-            "timeit": self.widget.timeit,
             "tools": self.widget.tools,
             "glass": self.widget.glass,
             "ortho": self.widget.ortho,
@@ -1821,6 +1818,7 @@ class CadViewer:
             "collapse": self.widget.collapse,
             "tab": self.widget.tab,
             "clip_intersection": self.widget.clip_intersection,
+            "clip_object_colors": self.widget.clip_object_colors,
             "clip_planes": self.widget.clip_planes,
             "clip_normal_0": self.widget.clip_normal_0,
             "clip_normal_1": self.widget.clip_normal_1,
@@ -1838,9 +1836,18 @@ class CadViewer:
             "rotate_speed": self.widget.rotate_speed,
             "animation_speed": self.widget.animation_speed,
             "lastPick": self.widget.lastPick,
-            "keymap": self.widget.keymap,
-            "new_tree_behavior": self.widget.new_tree_behavior,
         }
+        if all:
+            result.update(
+                {
+                    "keymap": self.widget.keymap,
+                    "shapes": self.widget.shapes,
+                    "normal_len": self.widget.normal_len,
+                    "timeit": self.widget.timeit,
+                    "new_tree_behavior": self.widget.new_tree_behavior,
+                }
+            )
+        return {k: v for k, v in result.items() if v is not None and v != {}}
 
     def dump_model(self, shapes=False):
         """
