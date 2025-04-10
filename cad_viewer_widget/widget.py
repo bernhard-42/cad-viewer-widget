@@ -1118,7 +1118,7 @@ class CadViewer:
         self.widget.clip_normal_2 = value
 
     @property
-    def clip_value_0(self):
+    def clip_slider_0(self):
         """
         Get or set the CadViewerWidget traitlet `clip_slider_0`
         see [CadViewerWidget.clip_slider_0](./widget.html#cad_viewer_widget.widget.CadViewerWidget.clip_slider_0)
@@ -1126,12 +1126,12 @@ class CadViewer:
 
         return self.widget.clip_slider_0
 
-    @clip_value_0.setter
-    def clip_value_0(self, value):
+    @clip_slider_0.setter
+    def clip_slider_0(self, value):
         self.widget.clip_slider_0 = value
 
     @property
-    def clip_value_1(self):
+    def clip_slider_1(self):
         """
         Get or set the CadViewerWidget traitlet `clip_slider_1`
         see [CadViewerWidget.clip_slider_1](./widget.html#cad_viewer_widget.widget.CadViewerWidget.clip_slider_1)
@@ -1139,12 +1139,12 @@ class CadViewer:
 
         return self.widget.clip_slider_1
 
-    @clip_value_1.setter
-    def clip_value_1(self, value):
+    @clip_slider_1.setter
+    def clip_slider_1(self, value):
         self.widget.clip_slider_1 = value
 
     @property
-    def clip_value_2(self):
+    def clip_slider_2(self):
         """
         Get or set the CadViewerWidget traitlet `clip_slider_2`
         see [CadViewerWidget.clip_slider_2](./widget.html#cad_viewer_widget.widget.CadViewerWidget.clip_slider_2)
@@ -1152,8 +1152,8 @@ class CadViewer:
 
         return self.widget.clip_slider_2
 
-    @clip_value_2.setter
-    def clip_value_2(self, value):
+    @clip_slider_2.setter
+    def clip_slider_2(self, value):
         self.widget.clip_slider_2 = value
 
     @property
@@ -1176,7 +1176,7 @@ class CadViewer:
         see [CadViewerWidget.clip_planes](./widget.html#cad_viewer_widget.widget.CadViewerWidget.clip_object_colors)
         """
 
-        return self.widget.clip_planes
+        return self.widget.clip_object_colors
 
     @clip_object_colors.setter
     def clip_object_colors(self, value):

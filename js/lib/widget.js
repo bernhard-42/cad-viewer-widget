@@ -274,8 +274,9 @@ export class CadViewerView extends DOMWidgetView {
       clip_normal_1: "clipNormal1",
       clip_normal_2: "clipNormal2",
       clip_intersection: "clipIntersection",
-      clip_planes: "clipPlanes",
-      clip_object_colors: "clipObjectColors"
+      clip_planes: "clipPlaneHelpers",
+      clip_object_colors: "clipObjectColors",
+      new_tree_behavior: "newTreeBehavior"
     };
     var options = {
       measureTools: true
@@ -711,6 +712,8 @@ export class CadViewerView extends DOMWidgetView {
 
   handle_change(change) {
     const setKey = (getter, setter, key, arg = null, arg2 = null) => {
+      if (this.viewer == null) return;
+
       const value = change.changed[key];
       const oldValue =
         arg == null ? this.viewer[getter]() : this.viewer[getter](arg);
@@ -718,6 +721,8 @@ export class CadViewerView extends DOMWidgetView {
         this.debug(`Setting Javascript attribute ${key} to`, value);
         if (arg == null && arg2 == null) {
           this.viewer[setter](value, true);
+        } else if (arg != null && arg2 != null) {
+          this.viewer[setter](arg, value, arg2, true);
         } else if (arg != null) {
           this.viewer[setter](arg, value, true);
         } else if (arg2 != null) {
@@ -887,13 +892,16 @@ export class CadViewerView extends DOMWidgetView {
         setKey("getClipPlaneHelpers", "setClipPlaneHelpers", key);
         break;
       case "clip_normal_0":
-        setKey("getClipNormal", "setClipNormal", key, 0);
+        const slider_0 = this.viewer.getClipSlider(0);
+        setKey("getClipNormal", "setClipNormal", key, 0, slider_0);
         break;
       case "clip_normal_1":
-        setKey("getClipNormal", "setClipNormal", key, 1);
+        const slider_1 = this.viewer.getClipSlider(1);
+        setKey("getClipNormal", "setClipNormal", key, 1, slider_1);
         break;
       case "clip_normal_2":
-        setKey("getClipNormal", "setClipNormal", key, 2);
+        const slider_2 = this.viewer.getClipSlider(2);
+        setKey("getClipNormal", "setClipNormal", key, 2, slider_2);
         break;
       case "clip_slider_0":
         setKey("getClipSlider", "setClipSlider", key, 0);
