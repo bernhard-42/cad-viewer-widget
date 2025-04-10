@@ -994,7 +994,7 @@ export class CadViewerView extends DOMWidgetView {
     );
 
     var object = this;
-    var path = JSON.parse(msg.method);
+    var path = msg.method;
     var method = path.pop();
 
     try {
@@ -1007,7 +1007,7 @@ export class CadViewerView extends DOMWidgetView {
 
     var args = null;
     try {
-      args = JSON.parse(msg.args);
+      args = msg.args;
       this.debug("args:", args);
     } catch (error) {
       console.error(error);

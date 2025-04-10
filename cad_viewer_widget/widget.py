@@ -2,7 +2,7 @@
 """This module is the Python part of the CAD Viewer widget"""
 
 import base64
-import json
+import orjson
 from pathlib import Path
 from textwrap import dedent
 
@@ -392,7 +392,7 @@ class CadViewerWidget(
         - If "display_id" is not present and `self.test_func` is not callable, it writes the decoded image data to a file specified by "filename".
         """
         if change["new"] is not None:
-            data = json.loads(change["new"])
+            data = orjson.loads(change["new"])
 
             if data.get("display_id") is not None:
                 html = f"""<img src="{data['src']}" width="{data['width']}px" height="{data['height']}px"/>"""
