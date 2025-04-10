@@ -21,12 +21,24 @@ from traitlets import (
     Any,
     Bool,
     Enum,
+    Callable,
     observe,
 )
 from IPython.display import HTML, update_display
 from pyparsing import ParseException
 
 from .utils import get_parser, to_json, bsphere, normalize
+
+
+VIEWER = {}
+
+
+def get_viewer_by_id(id_):
+    return VIEWER.get(id_)
+
+
+def get_viewers_by_id():
+    return VIEWER
 
 
 # pylint: disable=too-few-public-methods
@@ -129,6 +141,12 @@ class CadViewerWidget(
     _model_module = Unicode("cad-viewer-widget").tag(sync=True)
     _view_module_version = Unicode("3.0.0").tag(sync=True)
     _model_module_version = Unicode("3.0.0").tag(sync=True)
+
+    #
+    # Internal id
+    #
+    id = Unicode(allow_none=True).tag(sync=True)
+    "unicode uuid4 string serving as internal id of the widget"
 
     #
     # Display traits
@@ -354,8 +372,10 @@ class CadViewerWidget(
     selectedShapeIDs = List(allow_none=True).tag(sync=True)
     "list: List of selected object paths"
 
-    measure = Unicode(allow_none=True).tag(sync=True)
+    measure = Dict(allow_none=True).tag(sync=True)
     "list: JSON of calculated measures"
+
+    measure_callback = Callable(allow_none=True)
 
     @observe("result")
     def func(self, change):
@@ -385,10 +405,23 @@ class CadViewerWidget(
                     with open(data["filename"], "wb") as fd:
                         fd.write(base64.b64decode(data["src"].split(",")[1]))
 
+    @observe("activeTool")
+    def active_tool(self, change):
+        if change["new"]:
+            status, result = self.measure_callback(
+                self.id, {"activeTool": change["new"]}
+            )
+
     @observe("selectedShapeIDs")
     def selected_shape_ids(self, change):
-        print(change["new"])
-        self.measure = json.dumps({"area": 42})
+        if change["new"]:
+            status, result = self.measure_callback(
+                self.id, {"selectedShapeIDs": change["new"]}
+            )
+            if status == 200:
+                self.measure = orjson.loads(result)["success"]
+            else:
+                print("Error:", result)
 
 
 class CadViewer:
@@ -450,6 +483,7 @@ class CadViewer:
             title=title,
             anchor=anchor,
             new_tree_behavior=new_tree_behavior,
+            id=id_,
         )
         self.widget.test_func = None
         self.msg_id = 0
@@ -458,6 +492,10 @@ class CadViewer:
         self.empty = True
 
         self.tracks = []
+
+    def register_viewer(self):
+        global VIEWER
+        VIEWER[self.widget.id] = self
 
     def _parse(self, string):
         try:

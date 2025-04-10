@@ -101,9 +101,7 @@ def open_viewer(
                 f"In a {MESSAGES.get(anchor, "unknown anchor")} `cad_width` is ignored"
             )
 
-    if cad_width is not None and cad_width < 750:
-        cad_width = 750
-        print("`cad_width` cannot be smaller than 750")
+    id_ = str(uuid.uuid4())
 
     if title is None:
         viewer = CadViewer(
@@ -116,10 +114,12 @@ def open_viewer(
             glass=glass,
             tools=tools,
             pinning=pinning,
+            id_=id_,
         )
+
         display(viewer.widget)
 
-        image_id = "img_" + str(uuid.uuid4())
+        image_id = f"img_{id_}"
         html = "<div></div>"
         display(HTML(html), display_id=image_id)
         viewer.widget.image_id = image_id
@@ -138,9 +138,11 @@ def open_viewer(
                     glass=glass,
                     tools=tools,
                     pinning=False,
+                    id_=id_,
                 )
                 display(viewer.widget)
                 error = None
+
             except Exception as ex:
                 error = ex
 
@@ -149,6 +151,7 @@ def open_viewer(
 
             set_sidecar(title, viewer)
     if error is None:
+        viewer.register_viewer()
         return viewer
     else:
         raise RuntimeError(error)

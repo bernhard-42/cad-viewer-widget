@@ -21,6 +21,10 @@ export class CadViewerModel extends DOMWidgetModel {
       _view_module: _module,
       _view_module_version: _version,
 
+      // Internal trait
+
+      id: null,
+
       // Display traits
 
       title: null,
@@ -933,7 +937,7 @@ export class CadViewerView extends DOMWidgetView {
         }
         break;
       case "measure":
-        console.log("measure:", change.changed[key]);
+        this.viewer.handleBackendResponse(change.changed[key]);
         break;
     }
   }
