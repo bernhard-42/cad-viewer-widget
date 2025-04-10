@@ -839,16 +839,16 @@ export class CadViewerView extends DOMWidgetView {
         setKey("getOpacity", "setOpacity", key);
         break;
       case "ambient_intensity":
-        setKey("getAmbientLight", "setAmbientLight", key);
+        setKey("getAmbientLight", "setAmbientLight", key, null, true);
         break;
       case "direct_intensity":
-        setKey("getDirectLight", "setDirectLight", key);
+        setKey("getDirectLight", "setDirectLight", key, null, true);
         break;
       case "metalness":
-        setKey("getMetalness", "setMetalness", key);
+        setKey("getMetalness", "setMetalness", key, null, true);
         break;
       case "roughness":
-        setKey("getRoughness", "setRoughness", key);
+        setKey("getRoughness", "setRoughness", key, null, true);
         break;
       case "zoom_speed":
         setKey("getZoomSpeed", "setZoomSpeed", key);

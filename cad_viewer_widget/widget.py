@@ -237,16 +237,16 @@ class CadViewerWidget(
     default_opacity = Float(allow_none=True).tag(sync=True)
     "unicode: The default opacity for transparent objects"
 
-    ambient_intensity = Float(allow_none=True).tag(sync=True)
+    ambient_intensity = Float(allow_none=True, default_value=None).tag(sync=True)
     "float: The intensity of the ambient light"
 
-    direct_intensity = Float(allow_none=True).tag(sync=True)
+    direct_intensity = Float(allow_none=True, default_value=None).tag(sync=True)
     "float: The intensity of the direct light"
 
-    metalness = Float(allow_none=True).tag(sync=True)
+    metalness = Float(allow_none=True, default_value=None).tag(sync=True)
     "float: The degree of metalness"
 
-    roughness = Float(allow_none=True).tag(sync=True)
+    roughness = Float(allow_none=True, default_value=None).tag(sync=True)
     "float: The degree of roughness"
 
     #
@@ -915,7 +915,7 @@ class CadViewer:
         see [CadViewerWidget.direct_intensity](./widget.html#cad_viewer_widget.widget.CadViewerWidget.roughness)
         """
 
-        return self.widget.direct_intensity
+        return self.widget.roughness
 
     @roughness.setter
     def roughness(self, value):
