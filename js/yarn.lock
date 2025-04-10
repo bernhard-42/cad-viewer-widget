@@ -3423,10 +3423,10 @@ terser@^5.31.1:
     commander "^2.20.0"
     source-map-support "~0.5.20"
 
-three-cad-viewer@3.2.3:
-  version "3.2.3"
-  resolved "https://registry.yarnpkg.com/three-cad-viewer/-/three-cad-viewer-3.2.3.tgz#14edf45f4d0b00b18cc58af7457a521155bc5e4d"
-  integrity sha512-4A5w6biZR0KeGL2hx/VX/lThDZmgD6JV3LjsZDj6fVGTJ7ebTbvcqRUHnMuqyt048hjtWVO6uKWtKXZySaG/9w==
+three-cad-viewer@3.3.2:
+  version "3.3.2"
+  resolved "https://registry.yarnpkg.com/three-cad-viewer/-/three-cad-viewer-3.3.2.tgz#fdec61d5495bb30d538897961b14e0436472f97e"
+  integrity sha512-emePDo2z6SEFpgKK/sCaBSHMz/8pnCy78lws5vYYfi4FACTSeOcnZbAJifF7PKB8/yis1/r1u1/PQXenJT1mkA==
   dependencies:
     cross-spawn "^7.0.6"
     html-minifier "^4.0.0"
