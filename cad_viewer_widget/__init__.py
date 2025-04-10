@@ -3,7 +3,7 @@ from ._version import __version__
 
 from IPython.display import display, HTML
 
-from .widget import AnimationTrack, CadViewer
+from .widget import AnimationTrack, CadViewer, get_viewer_by_id, get_viewers_by_id
 from .sidecar import Sidecar
 
 from .sidecar import (
@@ -74,8 +74,8 @@ MESSAGES = {
     "split-right": "split-right window",
     "split-top": "split-top window",
     "split_bottom": "split-bottom window",
-    "right": "sidecar",
-    None: "sidecar",
+    "right": "sidecar window",
+    None: "sidecar window",
 }
 
 
@@ -91,22 +91,23 @@ def open_viewer(
     pinning=True,
 ):
 
-    if title is not None:
-        if height is not None:
-            print(f"In a {MESSAGES.get(anchor, "unknown anchor")} `height` is ignored")
-            height = None
-
+    if title is not None and title != "":
         if cad_width is not None and anchor not in [None, "right"]:
-            print(
-                f"In a {MESSAGES.get(anchor, "unknown anchor")} `cad_width` is ignored"
-            )
+            print(f"In a {MESSAGES.get(anchor, anchor)} `cad_width` is ignored")
+
+    if cad_width is None:
+        cad_width = 800
+
+    if cad_width is not None and cad_width < 780:
+        cad_width = 780
+        print("`cad_width` cannot be smaller than 780, setting to 780")
 
     id_ = str(uuid.uuid4())
 
-    if title is None:
+    if title is None or title == "":
         viewer = CadViewer(
-            title=title,
-            anchor=anchor,
+            title=None,
+            anchor=None,
             cad_width=cad_width,
             tree_width=tree_width,
             height=height,
@@ -150,6 +151,9 @@ def open_viewer(
             out.resize_sidebar(cad_width + (0 if glass else tree_width) + 12)
 
             set_sidecar(title, viewer)
+            if default:
+                _set_default_sidecar(title)
+
     if error is None:
         viewer.register_viewer()
         return viewer

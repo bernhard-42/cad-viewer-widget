@@ -337,7 +337,7 @@ export class CadViewerView extends DOMWidgetView {
           width = width - displayOptions.treeWidth;
         }
 
-        width = Math.max(750, width - 12);
+        width = Math.max(780, width - 12);
         height = height - 60;
         this.viewer.resizeCadView(
           width,

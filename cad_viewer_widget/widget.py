@@ -466,9 +466,10 @@ class CadViewer:
         title=None,
         anchor=None,
         new_tree_behavior=True,
+        id_=None,
     ):
-        if cad_width < 750:
-            raise ValueError("Ensure cad_width >= 750")
+        if cad_width < 780:
+            raise ValueError("Ensure cad_width >= 780")
         if tree_width < 240:
             raise ValueError("Ensure tree_width >= 240")
 
