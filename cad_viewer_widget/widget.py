@@ -249,10 +249,10 @@ class CadViewerWidget(
     normal_len = Float(allow_none=True).tag(sync=True)
     "float: If > 0, the vertex normals will be rendered with the length given be this parameter"
 
-    default_edgecolor = Unicode(allow_none=True).tag(sync=True)
+    default_edgecolor = Unicode(allow_none=True, default_value=None).tag(sync=True)
     "unicode: The default edge color in web format, e.g. '#ffaa88'"
 
-    default_opacity = Float(allow_none=True).tag(sync=True)
+    default_opacity = Float(allow_none=True, default_value=None).tag(sync=True)
     "unicode: The default opacity for transparent objects"
 
     ambient_intensity = Float(allow_none=True, default_value=None).tag(sync=True)
@@ -271,8 +271,8 @@ class CadViewerWidget(
     # Generic UI traits
     #
 
-    tab = Unicode(allow_none=True).tag(sync=True)
-    "unicode: Whether to show the navigation tree ('tree') or the clipping UI ('clip')"
+    tab = Enum(["tree", "clip", "material"], allow_none=True).tag(sync=True)
+    "unicode: Whether to show the navigation tree ('tree'), clipping UI ('clip') or material UI ('material')"
 
     clip_intersection = Bool(allow_none=True, default_value=None).tag(sync=True)
     "bool: Whether to use intersection clipping (True) or not (False)"
@@ -1099,10 +1099,7 @@ class CadViewer:
 
     @default_opacity.setter
     def default_opacity(self, value):
-        if value.startswith("#"):
-            self.widget.default_opacity = value
-        else:
-            self.widget.default_opacity = f"#{value}"
+        self.widget.default_opacity = value
 
     @property
     def clip_intersection(self):
@@ -1607,19 +1604,17 @@ class CadViewer:
     # Tab handling
     #
 
-    def select_tree(self):
+    @property
+    def tab(self):
         """
-        Select Navigation tree tab
+        Get or set the CadViewerWidget traitlet `tab`
+        see [CadViewerWidget.tab](./widget.html#cad_viewer_widget.widget.CadViewerWidget.tab)
         """
+        return self.widget.tab
 
-        self.widget.tab = "tree"
-
-    def select_clipping(self):
-        """
-        Select Clipping tab
-        """
-
-        self.widget.tab = "clip"
+    @keymap.setter
+    def tab(self, value):
+        self.widget.tab = value
 
     #
     # Rotations

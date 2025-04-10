@@ -175,6 +175,7 @@ def viewer_args(config):
             "clip_slider_0",
             "clip_slider_1",
             "clip_slider_2",
+            "new_tree_behavior",
             "position",
             "quaternion",
             "target",
