@@ -28,7 +28,7 @@ To install use pip:
 
     $ pip install cad_viewer_widget
 
-For a development installation (requires [Node.js](https://nodejs.org) and [Yarn version 1](https://classic.yarnpkg.com/)),
+For a development installation (requires [Node.js](https://nodejs.org >=21.1.0) and [Yarn version 1](https://classic.yarnpkg.com/)),
 
     $ git clone https://github.com/bernhard-42/cad-viewer-widget.git
     $ cd cad-viewer-widget
@@ -44,7 +44,11 @@ Then you need to rebuild the JS when you make a code change:
     $ cd js
     $ yarn run build
 
-You then need to refresh the JupyterLab page when your javascript changes.
+You then need to refresh the JupyterLab page when your javascript changes:
+- save your notebook
+- restart the kernel
+- delete all output cells
+- refresh the browser page
 
 
 ## Build step
