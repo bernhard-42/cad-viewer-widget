@@ -41,7 +41,7 @@
     "@jupyter-widgets/base": "^6.0.10",
     "@jupyter-widgets/jupyterlab-manager": "^5.0.13",
     "@jupyterlab/apputils": "^4.4.5",
-    "three-cad-viewer": "3.3.2"
+    "three-cad-viewer": "3.3.3"
   },
   "devDependencies": {
     "@jupyterlab/builder": "^4.3.5",
