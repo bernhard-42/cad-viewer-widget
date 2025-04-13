@@ -419,7 +419,11 @@ class CadViewerWidget(
                 self.id, {"selectedShapeIDs": change["new"]}
             )
             if status == 200:
-                self.measure = orjson.loads(result)["success"]
+                result = orjson.loads(result)
+                if result.get("success") is not None:
+                    self.measure = result["success"]
+                elif result.get("error") is not None:
+                    print("Error:", result["error"])
             else:
                 print("Error:", result)
 
