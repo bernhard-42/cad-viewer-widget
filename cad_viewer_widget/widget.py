@@ -493,7 +493,7 @@ class CadViewer:
         self.parser = get_parser()
 
         self.empty = True
-
+        self._splash = True
         self.tracks = []
 
     def register_viewer(self):
@@ -560,6 +560,7 @@ class CadViewer:
         rotate_speed=None,
         timeit=False,
         debug=False,
+        _is_logo=False,
     ):
         # pylint: disable=line-too-long
         """
@@ -870,6 +871,9 @@ class CadViewer:
 
         if glass is not None:
             self.widget.glass = glass
+
+        if not _is_logo:
+            self._splash = False
 
     def update_camera_location(self):
         """Sync position, quaternion and zoom of camera to Python"""
