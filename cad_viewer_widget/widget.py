@@ -484,6 +484,8 @@ class CadViewer:
             title=title,
             anchor=anchor,
             new_tree_behavior=new_tree_behavior,
+            up="Z",
+            control="trackball",
             id=id_,
         )
         self.widget.test_func = None
@@ -1912,10 +1914,6 @@ class CadViewer:
                 quaternion:         {self.widget.quaternion}
                 target:             {self.widget.target}
                 zoom:               {self.widget.zoom}
-                position0:          {self.widget.position0}
-                quaternion0:        {self.widget.quaternion0}
-                target0:            {self.widget.target0}
-                zoom0:              {self.widget.zoom0}
                 zoom_speed:         {self.widget.zoom_speed}
                 pan_speed:          {self.widget.pan_speed}
                 rotate_speed:       {self.widget.rotate_speed}
