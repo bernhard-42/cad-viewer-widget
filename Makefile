@@ -62,6 +62,7 @@ create-release:
 	@github-release release -u bernhard-42 -r cad-viewer-widget -t v$(CURRENT_VERSION) -n cad-viewer-widget-$(CURRENT_VERSION)
 	@sleep 2
 	@github-release upload  -u bernhard-42 -r cad-viewer-widget -t v$(CURRENT_VERSION) -n cad_viewer_widget-$(CURRENT_VERSION).tar.gz -f dist/cad_viewer_widget-$(CURRENT_VERSION).tar.gz
+	@github-release upload  -u bernhard-42 -r cad-viewer-widget -t v$(CURRENT_VERSION) -n cad_viewer_widget-$(CURRENT_VERSION)-py3-none-any.whl -f dist/cad_viewer_widget-$(CURRENT_VERSION)-py3-none-any.whl
 
 install: dist
 	@echo "=> Installing cad-viewer-widget"
