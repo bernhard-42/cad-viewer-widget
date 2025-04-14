@@ -32,6 +32,7 @@ export class CadViewerModel extends DOMWidgetModel {
       cad_width: null,
       height: null,
       tree_width: null,
+      aspect_ratio: null,
       theme: null,
       pinning: null,
       newTreeBehavior: null,
@@ -51,6 +52,7 @@ export class CadViewerModel extends DOMWidgetModel {
       axes: null,
       axes0: null,
       grid: null,
+      center_grid: null,
       explode: null,
       ticks: null,
       transparent: null,
@@ -339,6 +341,17 @@ export class CadViewerView extends DOMWidgetView {
 
         width = Math.max(780, width - 12);
         height = height - 60;
+        const aspect_ratio = this.model.get("aspect_ratio");
+
+        if (this.title != null && aspect_ratio > 0) {
+          height = Math.round(Math.min(height, aspect_ratio * width));
+          if (width < height) {
+            height = Math.round(Math.min(height, aspect_ratio * width));
+          } else {
+            width = Math.round(Math.min(width, height / aspect_ratio));
+          }
+        }
+
         this.viewer.resizeCadView(
           width,
           displayOptions.treeWidth,

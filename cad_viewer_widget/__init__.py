@@ -85,6 +85,7 @@ def open_viewer(
     cad_width=800,
     tree_width=250,
     height=600,
+    aspect_ratio=0.75,
     theme="browser",
     glass=True,
     tools=True,
@@ -135,6 +136,7 @@ def open_viewer(
                     anchor=anchor,
                     cad_width=cad_width,
                     tree_width=tree_width,
+                    aspect_ratio=aspect_ratio,
                     height=height,
                     theme=theme,
                     glass=glass,
@@ -171,6 +173,7 @@ def show(
     anchor=None,
     cad_width=None,
     tree_width=None,
+    aspect_ratio=None,
     height=None,
     theme=None,
     glass=None,
@@ -345,6 +348,7 @@ def show(
     kwargs["height"] = preset("height", height, 600)
     kwargs["cad_width"] = preset("cad_width", cad_width, 800)
     kwargs["tree_width"] = preset("tree_width", tree_width, 250)
+    kwargs["aspect_ratio"] = preset("aspect_ratio", aspect_ratio, 0.75)
 
     kwargs["new_tree_behavior"] = preset("new_tree_behavior", new_tree_behavior, True)
     kwargs["theme"] = preset("theme", theme, "browser")

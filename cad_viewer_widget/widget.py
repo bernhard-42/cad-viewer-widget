@@ -159,13 +159,16 @@ class CadViewerWidget(
     "unicode string whether to add a view to the right sidebar ('right') or as a tab to the main window ('tab')"
 
     cad_width = Integer().tag(sync=True)
-    "unicode string: Width of the canvas element"
+    "unicode string: Width of the canvas element for cell viewer and right sidecar"
 
     height = Integer(allow_none=True).tag(sync=True)
-    "int: Height of the canvas element"
+    "int: Height of the canvas element for cell viewer"
 
     tree_width = Integer(allow_none=True).tag(sync=True)
     "int: Width of the navigation tree element"
+
+    aspect_ratio = Float(allow_none=True, default_value=None).tag(sync=True)
+    "float: aspect ratio for sidecar"
 
     theme = Unicode(allow_none=True).tag(sync=True)
     "unicode string: UI theme, can be 'dark' or 'light' (default)"
@@ -463,6 +466,7 @@ class CadViewer:
         cad_width=800,
         height=600,
         tree_width=240,
+        aspect_ratio=0.75,
         theme="browser",
         glass=False,
         tools=True,
@@ -481,6 +485,7 @@ class CadViewer:
             cad_width=cad_width,
             height=height,
             tree_width=tree_width,
+            aspect_ratio=aspect_ratio,
             theme=theme,
             glass=glass,
             tools=tools,
@@ -819,6 +824,9 @@ class CadViewer:
 
         # set shapes to None so that the same object can be shown again
         self.widget.shapes = None
+
+        if self.widget.aspect_ratio is None:
+            self.widget.aspect_ratio = 0.75
 
         with self.widget.hold_trait_notifications():
             self.widget.shapes = shapes
