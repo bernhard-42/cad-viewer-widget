@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1">
-<meta name="generator" content="pdoc3 0.11.5">
+<meta name="generator" content="pdoc3 0.11.6">
 <title>cad_viewer_widget API documentation</title>
 <meta name="description" content="">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/13.0.0/sanitize.min.css" integrity="sha512-y1dtMcuvtTMJc1yPgEqF0ZjQbhnc/bFhyvIyVNb9Zk5mIGtqVaAB1Ttl28su8AvFMOY0EwRbAe+HCLqj6W7/KA==" crossorigin>
@@ -60,7 +60,7 @@ el.replaceWith(d);
 <h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
 <dt id="cad_viewer_widget.open_viewer"><code class="name flex">
-<span>def <span class="ident">open_viewer</span></span>(<span>title=None,<br>anchor='right',<br>cad_width=800,<br>tree_width=250,<br>height=600,<br>theme='browser',<br>glass=False,<br>tools=True,<br>pinning=True)</span>
+<span>def <span class="ident">open_viewer</span></span>(<span>title=None,<br>anchor='right',<br>cad_width=800,<br>tree_width=250,<br>height=600,<br>aspect_ratio=0.75,<br>theme='browser',<br>glass=True,<br>tools=True,<br>pinning=True,<br>default=True)</span>
 </code></dt>
 <dd>
 <div class="desc"></div>
@@ -72,7 +72,7 @@ el.replaceWith(d);
 <div class="desc"></div>
 </dd>
 <dt id="cad_viewer_widget.show"><code class="name flex">
-<span>def <span class="ident">show</span></span>(<span>shapes,<br>tracks=None,<br>title=None,<br>anchor=None,<br>cad_width=None,<br>tree_width=None,<br>height=None,<br>theme=None,<br>glass=None,<br>tools=None,<br>pinning=None,<br>normal_len=None,<br>default_edgecolor=None,<br>default_opacity=None,<br>ambient_intensity=None,<br>direct_intensity=None,<br>metalness=None,<br>roughness=None,<br>control=None,<br>up=None,<br>ortho=None,<br>axes=None,<br>axes0=None,<br>grid=None,<br>explode=None,<br>ticks=None,<br>transparent=None,<br>black_edges=None,<br>collapse=None,<br>reset_camera=None,<br>position=None,<br>quaternion=None,<br>target=None,<br>zoom=None,<br>zoom_speed=None,<br>pan_speed=None,<br>rotate_speed=None,<br>timeit=None,<br>debug=None)</span>
+<span>def <span class="ident">show</span></span>(<span>shapes,<br>tracks=None,<br>title=None,<br>anchor=None,<br>cad_width=None,<br>tree_width=None,<br>aspect_ratio=None,<br>height=None,<br>theme=None,<br>glass=None,<br>tools=None,<br>pinning=None,<br>new_tree_behavior=True,<br>normal_len=None,<br>default_edgecolor=None,<br>default_opacity=None,<br>ambient_intensity=None,<br>direct_intensity=None,<br>metalness=None,<br>roughness=None,<br>up=None,<br>control=None,<br>ortho=None,<br>axes=None,<br>axes0=None,<br>grid=None,<br>center_grid=None,<br>explode=None,<br>ticks=None,<br>transparent=None,<br>black_edges=None,<br>collapse=None,<br>reset_camera=None,<br>clip_slider_0=None,<br>clip_slider_1=None,<br>clip_slider_2=None,<br>clip_normal_0=None,<br>clip_normal_1=None,<br>clip_normal_2=None,<br>clip_intersection=None,<br>clip_planes=None,<br>clip_object_colors=None,<br>position=None,<br>quaternion=None,<br>target=None,<br>zoom=None,<br>zoom_speed=None,<br>pan_speed=None,<br>rotate_speed=None,<br>timeit=None,<br>debug=None)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Show CAD objects in JupyterLab</p>
@@ -81,91 +81,114 @@ el.replaceWith(d);
 Serialized nested tessellated shapes</li>
 </ul>
 <p>Valid keywords:</p>
-<p>DISPLAY OPTIONS
-- title:
-Name of the sidecar viewer (default=None)
-- anchor:
-How to open sidecar: "right", "split-right", "split-bottom", &hellip; (default="right")
-- cad_width:
-Width of CAD view part of the view (default=800)
-- tree_width:
-Width of navigation tree part of the view (default=250)
-- height:
-Height of the CAD view (default=600)
-- theme:
+<ul>
+<li>
+<p>UI
+glass:
+Use glass mode where tree is an overlay over the cad object (default=True)
+tools:
+Show tools (default=True)
+cad_width:
+Width of the cad canvas (default=800)
+height:
+Height of the cad canvas (default=600)
+tree_width:
+Width of the object tree (default=240)
+theme:
 Theme "light" or "dark" (default="light")
-- tools:
-Show the viewer tools like the object tree (default=True)
-- glass:
-Use the glass mode, i.e. CAD navigation as transparent overlay (default=False)
-- pinning:
-Allow replacing the CAD View by a canvas screenshot (default=True in cells, else False)</p>
-<p>TESSELLATION OPTIONS
-- default_edgecolor: Default edge color (default="#707070")
-- default_opacity:
-Default opacity (default=0.5)
-- ambient_intensity
-Default ambient (default=1.0)
-- direct_intensity:
-Default direct (default=1.1)
-- metalness : float:
-The degree of material metalness (default 0.3)
-- roughness : float:
-The degree of material roughness (default 0.65)
-- normal_len:
-Render vertex normals if &gt; 0 (default=0)
-- render_edges:
-Render edges
-(default=True)
-- render_mates:
-Render mates (for MAssemblies, default=False)
-- mate_scale:
-Scale of rendered mates (for MAssemblies, default=1)</p>
-<p>VIEWER OPTIONS
-- control:
-Use trackball controls ('trackball') or orbit controls ('orbit') (default='trackball')
-- up:
-Camera up direction is Z or Y (default='Z')
-- ortho:
-Use orthographic projections (default=True)
-- axes:
+pinning:
+Allow replacing the CAD View by a canvas screenshot (default=True in cells, else False)
+new_tree_behavior: Whether to
+hide the complete shape when clicking on the eye (True, default) or only
+the faces (False)</p>
+</li>
+<li>
+<p>Viewer
+axes:
 Show axes (default=False)
-- axes0:
+axes0:
 Show axes at (0,0,0) (default=False)
-- grid:
-Show grid (default=[False, False, False])
-- ticks:
-Hint for the number of ticks in both directions (default=10)
-- explode:
-Whether explode widget is visibe or not (default=False)
-- transparent:
+grid:
+Show grid (default=False)
+ortho:
+Use orthographic projections (default=True)
+transparent:
 Show objects transparent (default=False)
-- black_edges:
-Show edges in black (default=False)
-- collapse:
-Collapse CAD tree ('1': collapse all leaf nodes, 'R': expand root level only, 'C': collapse all nodes, 'E': expand all nodes, default="R")
-- reset_camera:
-Whether to reset camera (True) or not (False) (default=True)
-- position:
-Absolute camera position that will be scaled (default=None)
-- quaternion:
-Camera rotation as quaternion (x, y, z, w) (default=None)
-- target:
-Camera target to look at (default=None)
-- zoom:
-Zoom factor of view (default=2.5)
-- reset_camera:
-Reset camera position, rotation and zoom to default (default=True)
-- zoom_speed:
-Mouse zoom speed (default=1.0)
-- pan_speed:
-Mouse pan speed (default=1.0)
-- rotate_speed:
-Mouse rotate speed (default=1.0)
-- timeit:
-Show rendering times, levels = False, 0,1,2,3,4,5 (default=False)
-- debug:
-Enable debug output in browser console (default=False)</p></div>
+default_opacity:
+Opacity value for transparent objects (default=0.5)
+black_edges:
+Show edges in black color (default=False)
+control:
+Mouse control use "orbit" control instead of "trackball" control (default="trackball")
+collapse:
+"1": collapse all single leaf nodes,
+"R": expand root only,
+"C": collapse all nodes,
+"E"": expand all nodes
+(default="R"")
+ticks:
+Hint for the number of ticks in both directions (default=10)
+center_grid:
+Center the grid at the origin or center of mass (default=False)
+up:
+Use z-axis ('Z') or y-axis ('Y') as up direction for the camera (default="Z")
+explode:
+Turn on explode mode (default=False)</p>
+<p>zoom:
+Zoom factor of view (default=1.0)
+position:
+Camera position
+quaternion:
+Camera orientation as quaternion
+target:
+Camera look at target
+reset_camera:
+Camera.RESET: Reset camera position, rotation, zoom and target
+Camera.CENTER: Keep camera position, rotation, zoom, but look at center
+Camera.KEEP: Keep camera position, rotation, zoom, and target
+(default=Camera.RESET)
+clip_slider_0:
+Setting of clipping slider 0 (default=None)
+clip_slider_1:
+Setting of clipping slider 1 (default=None)
+clip_slider_2:
+Setting of clipping slider 2 (default=None)
+clip_normal_0:
+Setting of clipping normal 0 (default=[-1,0,0])
+clip_normal_1:
+Setting of clipping normal 1 (default=[0,-1,0])
+clip_normal_2:
+Setting of clipping normal 2 (default=[0,0,-1])
+clip_intersection: Use clipping intersection mode (default=[False])
+clip_planes:
+Show clipping plane helpers (default=False)
+clip_object_colors: Use object color for clipping caps (default=False)</p>
+<p>pan_speed:
+Speed of mouse panning (default=1)
+rotate_speed:
+Speed of mouse rotate (default=1)
+zoom_speed:
+Speed of mouse zoom (default=1)</p>
+</li>
+<li>
+<p>Renderer
+default_edgecolor: Default mesh color (default=(128, 128, 128))
+ambient_intensity: Intensity of ambient light (default=1.00)
+direct_intensity:
+Intensity of direct light (default=1.10)
+metalness:
+Metalness property of the default material (default=0.30)
+roughness:
+Roughness property of the default material (default=0.65)</p>
+</li>
+<li>
+<p>Debug
+debug:
+Show debug statements to the VS Code browser console (default=False)
+timeit:
+Show timing information from level 0-3 (default=False)</p>
+</li>
+</ul></div>
 </dd>
 </dl>
 </section>
@@ -195,7 +218,7 @@ Enable debug output in browser console (default=False)</p></div>
 </nav>
 </main>
 <footer id="footer">
-<p>Generated by <a href="https://pdoc3.github.io/pdoc" title="pdoc: Python API documentation generator"><cite>pdoc</cite> 0.11.5</a>.</p>
+<p>Generated by <a href="https://pdoc3.github.io/pdoc" title="pdoc: Python API documentation generator"><cite>pdoc</cite> 0.11.6</a>.</p>
 </footer>
 </body>
 </html>

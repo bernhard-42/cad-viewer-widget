@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1">
-<meta name="generator" content="pdoc3 0.11.5">
+<meta name="generator" content="pdoc3 0.11.6">
 <title>cad_viewer_widget.widget API documentation</title>
 <meta name="description" content="This module is the Python part of the CAD Viewer widget">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/13.0.0/sanitize.min.css" integrity="sha512-y1dtMcuvtTMJc1yPgEqF0ZjQbhnc/bFhyvIyVNb9Zk5mIGtqVaAB1Ttl28su8AvFMOY0EwRbAe+HCLqj6W7/KA==" crossorigin>
@@ -43,6 +43,21 @@ el.replaceWith(d);
 <section>
 </section>
 <section>
+<h2 class="section-title" id="header-functions">Functions</h2>
+<dl>
+<dt id="cad_viewer_widget.widget.get_viewer_by_id"><code class="name flex">
+<span>def <span class="ident">get_viewer_by_id</span></span>(<span>id_)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="cad_viewer_widget.widget.get_viewers_by_id"><code class="name flex">
+<span>def <span class="ident">get_viewers_by_id</span></span>(<span>)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
 </section>
 <section>
 <h2 class="section-title" id="header-classes">Classes</h2>
@@ -122,7 +137,7 @@ AnimationTrack(
 </dd>
 <dt id="cad_viewer_widget.widget.CadViewer"><code class="flex name class">
 <span>class <span class="ident">CadViewer</span></span>
-<span>(</span><span>cad_width=800,<br>height=600,<br>tree_width=240,<br>theme='browser',<br>glass=False,<br>tools=True,<br>pinning=False,<br>title=None,<br>anchor=None)</span>
+<span>(</span><span>cad_width=800,<br>height=600,<br>tree_width=240,<br>aspect_ratio=0.75,<br>theme='browser',<br>glass=False,<br>tools=True,<br>pinning=False,<br>title=None,<br>anchor=None,<br>new_tree_behavior=True,<br>id_=None)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>The main class for the CAD Viewer encapsulating the three-cad-viewer Javascript module</p>
@@ -175,6 +190,11 @@ see <a href="./widget.html#cad_viewer_widget.widget.CadViewerWidget.black_edges"
 <div class="desc"><p>Get or set the CadViewerWidget traitlet <code>cad_width</code>
 see <a href="./widget.html#cad_viewer_widget.widget.CadViewerWidget.cad_width">CadViewerWidget.tools</a></p></div>
 </dd>
+<dt id="cad_viewer_widget.widget.CadViewer.center_grid"><code class="name">prop <span class="ident">center_grid</span></code></dt>
+<dd>
+<div class="desc"><p>Get or set the CadViewerWidget traitlet <code>center_grid</code>
+see <a href="./widget.html#cad_viewer_widget.widget.CadViewerWidget.center_grid">CadViewerWidget.grid</a></p></div>
+</dd>
 <dt id="cad_viewer_widget.widget.CadViewer.clip_intersection"><code class="name">prop <span class="ident">clip_intersection</span></code></dt>
 <dd>
 <div class="desc"><p>Get or set the CadViewerWidget traitlet <code>clip_intersection</code>
@@ -195,25 +215,35 @@ see <a href="./widget.html#cad_viewer_widget.widget.CadViewerWidget.clip_normal_
 <div class="desc"><p>Get or set the CadViewerWidget traitlet <code>clip_normal_2</code>
 see <a href="./widget.html#cad_viewer_widget.widget.CadViewerWidget.clip_normal_2">CadViewerWidget.clip_normal_2</a></p></div>
 </dd>
+<dt id="cad_viewer_widget.widget.CadViewer.clip_object_colors"><code class="name">prop <span class="ident">clip_object_colors</span></code></dt>
+<dd>
+<div class="desc"><p>Get or set the CadViewerWidget traitlet <code>clip_object_colors</code>
+see <a href="./widget.html#cad_viewer_widget.widget.CadViewerWidget.clip_object_colors">CadViewerWidget.clip_planes</a></p></div>
+</dd>
 <dt id="cad_viewer_widget.widget.CadViewer.clip_planes"><code class="name">prop <span class="ident">clip_planes</span></code></dt>
 <dd>
 <div class="desc"><p>Get or set the CadViewerWidget traitlet <code>clip_planes</code>
 see <a href="./widget.html#cad_viewer_widget.widget.CadViewerWidget.clip_planes">CadViewerWidget.clip_planes</a></p></div>
 </dd>
-<dt id="cad_viewer_widget.widget.CadViewer.clip_value_0"><code class="name">prop <span class="ident">clip_value_0</span></code></dt>
+<dt id="cad_viewer_widget.widget.CadViewer.clip_slider_0"><code class="name">prop <span class="ident">clip_slider_0</span></code></dt>
 <dd>
 <div class="desc"><p>Get or set the CadViewerWidget traitlet <code>clip_slider_0</code>
 see <a href="./widget.html#cad_viewer_widget.widget.CadViewerWidget.clip_slider_0">CadViewerWidget.clip_slider_0</a></p></div>
 </dd>
-<dt id="cad_viewer_widget.widget.CadViewer.clip_value_1"><code class="name">prop <span class="ident">clip_value_1</span></code></dt>
+<dt id="cad_viewer_widget.widget.CadViewer.clip_slider_1"><code class="name">prop <span class="ident">clip_slider_1</span></code></dt>
 <dd>
 <div class="desc"><p>Get or set the CadViewerWidget traitlet <code>clip_slider_1</code>
 see <a href="./widget.html#cad_viewer_widget.widget.CadViewerWidget.clip_slider_1">CadViewerWidget.clip_slider_1</a></p></div>
 </dd>
-<dt id="cad_viewer_widget.widget.CadViewer.clip_value_2"><code class="name">prop <span class="ident">clip_value_2</span></code></dt>
+<dt id="cad_viewer_widget.widget.CadViewer.clip_slider_2"><code class="name">prop <span class="ident">clip_slider_2</span></code></dt>
 <dd>
 <div class="desc"><p>Get or set the CadViewerWidget traitlet <code>clip_slider_2</code>
 see <a href="./widget.html#cad_viewer_widget.widget.CadViewerWidget.clip_slider_2">CadViewerWidget.clip_slider_2</a></p></div>
+</dd>
+<dt id="cad_viewer_widget.widget.CadViewer.collapse"><code class="name">prop <span class="ident">collapse</span></code></dt>
+<dd>
+<div class="desc"><p>Get or set the CadViewerWidget traitlet <code>collapse</code>
+see <a href="./widget.html#cad_viewer_widget.widget.CadViewerWidget.collapse">CadViewerWidget.collapse</a></p></div>
 </dd>
 <dt id="cad_viewer_widget.widget.CadViewer.control"><code class="name">prop <span class="ident">control</span></code></dt>
 <dd>
@@ -264,6 +294,11 @@ see <a href="./widget.html#cad_viewer_widget.widget.CadViewerWidget.grid">CadVie
 <div class="desc"><p>Get or set the CadViewerWidget traitlet <code>height</code>
 see <a href="./widget.html#cad_viewer_widget.widget.CadViewerWidget.height">CadViewerWidget.tools</a></p></div>
 </dd>
+<dt id="cad_viewer_widget.widget.CadViewer.keymap"><code class="name">prop <span class="ident">keymap</span></code></dt>
+<dd>
+<div class="desc"><p>Get or set the CadViewerWidget traitlet <code>keymap</code>
+see <a href="./widget.html#cad_viewer_widget.widget.CadViewerWidget.keymap">CadViewerWidget.keymap</a></p></div>
+</dd>
 <dt id="cad_viewer_widget.widget.CadViewer.last_pick"><code class="name">prop <span class="ident">last_pick</span></code></dt>
 <dd>
 <div class="desc"><p>Get or set the CadViewerWidget traitlet <code>lastPick</code>
@@ -273,6 +308,11 @@ see <a href="./widget.html#cad_viewer_widget.widget.CadViewerWidget.lastPick">Ca
 <dd>
 <div class="desc"><p>Get or set the CadViewerWidget traitlet <code>metalness</code>
 see <a href="./widget.html#cad_viewer_widget.widget.CadViewerWidget.metalness">CadViewerWidget.direct_intensity</a></p></div>
+</dd>
+<dt id="cad_viewer_widget.widget.CadViewer.new_tree_behavior"><code class="name">prop <span class="ident">new_tree_behavior</span></code></dt>
+<dd>
+<div class="desc"><p>Get or set the CadViewerWidget traitlet <code>new_tree_behavior</code>
+see <a href="./widget.html#cad_viewer_widget.widget.CadViewerWidget.new_tree_behavior">CadViewerWidget.new_tree_behavior</a></p></div>
 </dd>
 <dt id="cad_viewer_widget.widget.CadViewer.normal_len"><code class="name">prop <span class="ident">normal_len</span></code></dt>
 <dd>
@@ -313,6 +353,15 @@ see <a href="./widget.html#cad_viewer_widget.widget.CadViewerWidget.rotate_speed
 <div class="desc"><p>Get or set the CadViewerWidget traitlet <code>roughness</code>
 see <a href="./widget.html#cad_viewer_widget.widget.CadViewerWidget.roughness">CadViewerWidget.direct_intensity</a></p></div>
 </dd>
+<dt id="cad_viewer_widget.widget.CadViewer.states"><code class="name">prop <span class="ident">states</span></code></dt>
+<dd>
+<div class="desc"><p>Get the states of the objects in the navigation tree</p></div>
+</dd>
+<dt id="cad_viewer_widget.widget.CadViewer.tab"><code class="name">prop <span class="ident">tab</span></code></dt>
+<dd>
+<div class="desc"><p>Get or set the CadViewerWidget traitlet <code>keymap</code>
+see <a href="./widget.html#cad_viewer_widget.widget.CadViewerWidget.keymap">CadViewerWidget.keymap</a></p></div>
+</dd>
 <dt id="cad_viewer_widget.widget.CadViewer.target"><code class="name">prop <span class="ident">target</span></code></dt>
 <dd>
 <div class="desc"><p>Get or set the CadViewerWidget traitlet <code>target</code>
@@ -352,7 +401,7 @@ see <a href="./widget.html#cad_viewer_widget.widget.CadViewerWidget.zoom_speed">
 <h3>Methods</h3>
 <dl>
 <dt id="cad_viewer_widget.widget.CadViewer.add_shapes"><code class="name flex">
-<span>def <span class="ident">add_shapes</span></span>(<span>self,<br>shapes,<br>tracks=None,<br>normal_len=0,<br>default_edgecolor='#707070',<br>default_opacity=0.5,<br>ambient_intensity=1.0,<br>direct_intensity=1.1,<br>metalness=0.3,<br>roughness=0.65,<br>tools=None,<br>glass=None,<br>cad_width=None,<br>tree_width=None,<br>height=None,<br>control='trackball',<br>up='Z',<br>ortho=True,<br>axes=False,<br>axes0=False,<br>grid=None,<br>explode=False,<br>ticks=10,<br>transparent=False,<br>black_edges=False,<br>collapse='R',<br>position=None,<br>quaternion=None,<br>target=None,<br>zoom=None,<br>reset_camera='reset',<br>zoom_speed=1.0,<br>pan_speed=1.0,<br>rotate_speed=1.0,<br>timeit=False,<br>debug=False)</span>
+<span>def <span class="ident">add_shapes</span></span>(<span>self,<br>shapes,<br>tracks=None,<br>normal_len=0,<br>default_edgecolor='#707070',<br>default_opacity=0.5,<br>ambient_intensity=1.0,<br>direct_intensity=1.1,<br>metalness=0.3,<br>roughness=0.65,<br>tools=None,<br>glass=None,<br>new_tree_behavior=None,<br>control=None,<br>up=None,<br>ortho=True,<br>axes=None,<br>axes0=None,<br>grid=None,<br>center_grid=None,<br>explode=None,<br>ticks=10,<br>transparent=None,<br>black_edges=None,<br>collapse=None,<br>position=None,<br>quaternion=None,<br>target=None,<br>zoom=None,<br>reset_camera=None,<br>clip_slider_0=None,<br>clip_slider_1=None,<br>clip_slider_2=None,<br>clip_normal_0=None,<br>clip_normal_1=None,<br>clip_normal_2=None,<br>clip_intersection=None,<br>clip_planes=None,<br>clip_object_colors=None,<br>zoom_speed=None,<br>pan_speed=None,<br>rotate_speed=None,<br>timeit=False,<br>debug=False)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Adding shapes to the CAD view</p>
@@ -693,6 +742,12 @@ RuntimeError: If the widget is displayed in a sidecar.</p>
 <dd>
 <div class="desc"><p>Start or unpause animation</p></div>
 </dd>
+<dt id="cad_viewer_widget.widget.CadViewer.register_viewer"><code class="name flex">
+<span>def <span class="ident">register_viewer</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
 <dt id="cad_viewer_widget.widget.CadViewer.rotate_left"><code class="name flex">
 <span>def <span class="ident">rotate_left</span></span>(<span>self, angle)</span>
 </code></dt>
@@ -748,18 +803,6 @@ RuntimeError: If the widget is displayed in a sidecar.</p>
 <dd>The rotation angle in degrees</dd>
 </dl></div>
 </dd>
-<dt id="cad_viewer_widget.widget.CadViewer.select_clipping"><code class="name flex">
-<span>def <span class="ident">select_clipping</span></span>(<span>self)</span>
-</code></dt>
-<dd>
-<div class="desc"><p>Select Clipping tab</p></div>
-</dd>
-<dt id="cad_viewer_widget.widget.CadViewer.select_tree"><code class="name flex">
-<span>def <span class="ident">select_tree</span></span>(<span>self)</span>
-</code></dt>
-<dd>
-<div class="desc"><p>Select Navigation tree tab</p></div>
-</dd>
 <dt id="cad_viewer_widget.widget.CadViewer.set_camera"><code class="name flex">
 <span>def <span class="ident">set_camera</span></span>(<span>self, direction)</span>
 </code></dt>
@@ -772,7 +815,7 @@ RuntimeError: If the widget is displayed in a sidecar.</p>
 </dl></div>
 </dd>
 <dt id="cad_viewer_widget.widget.CadViewer.status"><code class="name flex">
-<span>def <span class="ident">status</span></span>(<span>self, shapes=False)</span>
+<span>def <span class="ident">status</span></span>(<span>self, all=False)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Returns the status of the widget with various properties.</p>
@@ -799,6 +842,12 @@ RuntimeError: If the widget is displayed in a sidecar.</p>
 <dd>
 <div class="desc"><p>Sync position, quaternion and zoom of camera to Python</p></div>
 </dd>
+<dt id="cad_viewer_widget.widget.CadViewer.update_states"><code class="name flex">
+<span>def <span class="ident">update_states</span></span>(<span>self, states)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
 </dl>
 </dd>
 <dt id="cad_viewer_widget.widget.CadViewerWidget"><code class="flex name class">
@@ -819,6 +868,10 @@ RuntimeError: If the widget is displayed in a sidecar.</p>
 </ul>
 <h3>Instance variables</h3>
 <dl>
+<dt id="cad_viewer_widget.widget.CadViewerWidget.activeTool"><code class="name">var <span class="ident">activeTool</span> : Self | G</code></dt>
+<dd>
+<div class="desc"><p>unicode: Active measurement tool</p></div>
+</dd>
 <dt id="cad_viewer_widget.widget.CadViewerWidget.ambient_intensity"><code class="name">var <span class="ident">ambient_intensity</span> : Self | G</code></dt>
 <dd>
 <div class="desc"><p>float: The intensity of the ambient light</p></div>
@@ -830,6 +883,10 @@ RuntimeError: If the widget is displayed in a sidecar.</p>
 <dt id="cad_viewer_widget.widget.CadViewerWidget.animation_speed"><code class="name">var <span class="ident">animation_speed</span> : Self | G</code></dt>
 <dd>
 <div class="desc"><p>float: Animation speed</p></div>
+</dd>
+<dt id="cad_viewer_widget.widget.CadViewerWidget.aspect_ratio"><code class="name">var <span class="ident">aspect_ratio</span> : Self | G</code></dt>
+<dd>
+<div class="desc"><p>float: aspect ratio for sidecar</p></div>
 </dd>
 <dt id="cad_viewer_widget.widget.CadViewerWidget.axes"><code class="name">var <span class="ident">axes</span> : Self | G</code></dt>
 <dd>
@@ -845,7 +902,7 @@ RuntimeError: If the widget is displayed in a sidecar.</p>
 </dd>
 <dt id="cad_viewer_widget.widget.CadViewerWidget.cad_width"><code class="name">var <span class="ident">cad_width</span> : Self | G</code></dt>
 <dd>
-<div class="desc"><p>unicode string: Width of the canvas element</p></div>
+<div class="desc"><p>unicode string: Width of the canvas element for cell viewer and right sidecar</p></div>
 </dd>
 <dt id="cad_viewer_widget.widget.CadViewerWidget.center_grid"><code class="name">var <span class="ident">center_grid</span> : Self | G</code></dt>
 <dd>
@@ -929,7 +986,11 @@ RuntimeError: If the widget is displayed in a sidecar.</p>
 </dd>
 <dt id="cad_viewer_widget.widget.CadViewerWidget.height"><code class="name">var <span class="ident">height</span> : Self | G</code></dt>
 <dd>
-<div class="desc"><p>int: Height of the canvas element</p></div>
+<div class="desc"><p>int: Height of the canvas element for cell viewer</p></div>
+</dd>
+<dt id="cad_viewer_widget.widget.CadViewerWidget.id"><code class="name">var <span class="ident">id</span> : Self | G</code></dt>
+<dd>
+<div class="desc"><p>unicode uuid4 string serving as internal id of the widget</p></div>
 </dd>
 <dt id="cad_viewer_widget.widget.CadViewerWidget.image_id"><code class="name">var <span class="ident">image_id</span> : Self | G</code></dt>
 <dd>
@@ -947,9 +1008,25 @@ RuntimeError: If the widget is displayed in a sidecar.</p>
 <dd>
 <div class="desc"><p>dict: Describes the last picked element of the CAD view</p></div>
 </dd>
+<dt id="cad_viewer_widget.widget.CadViewerWidget.measure"><code class="name">var <span class="ident">measure</span> : Self | G</code></dt>
+<dd>
+<div class="desc"><p>list: JSON of calculated measures</p></div>
+</dd>
+<dt id="cad_viewer_widget.widget.CadViewerWidget.measure_callback"><code class="name">var <span class="ident">measure_callback</span> : Self | G</code></dt>
+<dd>
+<div class="desc"><p>A trait which is callable.</p>
+<h2 id="notes">Notes</h2>
+<p>Classes are callable, as are instances
+with a <strong>call</strong>() method.</p></div>
+</dd>
 <dt id="cad_viewer_widget.widget.CadViewerWidget.metalness"><code class="name">var <span class="ident">metalness</span> : Self | G</code></dt>
 <dd>
 <div class="desc"><p>float: The degree of metalness</p></div>
+</dd>
+<dt id="cad_viewer_widget.widget.CadViewerWidget.new_tree_behavior"><code class="name">var <span class="ident">new_tree_behavior</span> : Self | G</code></dt>
+<dd>
+<div class="desc"><p>bool: Whether to
+hide the complete shape when clicking on the eye (True) or only the faces (False)</p></div>
 </dd>
 <dt id="cad_viewer_widget.widget.CadViewerWidget.normal_len"><code class="name">var <span class="ident">normal_len</span> : Self | G</code></dt>
 <dd>
@@ -971,17 +1048,9 @@ RuntimeError: If the widget is displayed in a sidecar.</p>
 <dd>
 <div class="desc"><p>tuple: Position of the camera as a 3-dim tuple of float (x,y,z)</p></div>
 </dd>
-<dt id="cad_viewer_widget.widget.CadViewerWidget.position0"><code class="name">var <span class="ident">position0</span> : Self | G</code></dt>
-<dd>
-<div class="desc"><p>tuple: Initial position of the camera as a 3-dim tuple of float (x,y,z)</p></div>
-</dd>
 <dt id="cad_viewer_widget.widget.CadViewerWidget.quaternion"><code class="name">var <span class="ident">quaternion</span> : Self | G</code></dt>
 <dd>
 <div class="desc"><p>tuple: Rotation of the camera as 4-dim quaternion (x,y,z,w)</p></div>
-</dd>
-<dt id="cad_viewer_widget.widget.CadViewerWidget.quaternion0"><code class="name">var <span class="ident">quaternion0</span> : Self | G</code></dt>
-<dd>
-<div class="desc"><p>tuple: Initial rotation of the camera as 4-dim quaternion (x,y,z,w)</p></div>
 </dd>
 <dt id="cad_viewer_widget.widget.CadViewerWidget.reset_camera"><code class="name">var <span class="ident">reset_camera</span> : Self | G</code></dt>
 <dd>
@@ -999,13 +1068,17 @@ RuntimeError: If the widget is displayed in a sidecar.</p>
 <dd>
 <div class="desc"><p>float: The degree of roughness</p></div>
 </dd>
+<dt id="cad_viewer_widget.widget.CadViewerWidget.selectedShapeIDs"><code class="name">var <span class="ident">selectedShapeIDs</span> : Self | G</code></dt>
+<dd>
+<div class="desc"><p>list: List of selected object paths</p></div>
+</dd>
 <dt id="cad_viewer_widget.widget.CadViewerWidget.shapes"><code class="name">var <span class="ident">shapes</span> : Self | G</code></dt>
 <dd>
 <div class="desc"><p>unicode: Serialized nested tessellated shapes</p></div>
 </dd>
 <dt id="cad_viewer_widget.widget.CadViewerWidget.state_updates"><code class="name">var <span class="ident">state_updates</span> : Self | G</code></dt>
 <dd>
-<div class="desc"><p>dict: Dict with paths as key and a 2-dim tuple of 0/1 (hidden/visible) for object and edges</p></div>
+<div class="desc"><p>dict: Updates to the state of the nested cad objects, key = object path, value = 2-dim tuple of 0/1 (hidden/visible) for object and edges</p></div>
 </dd>
 <dt id="cad_viewer_widget.widget.CadViewerWidget.states"><code class="name">var <span class="ident">states</span> : Self | G</code></dt>
 <dd>
@@ -1013,15 +1086,11 @@ RuntimeError: If the widget is displayed in a sidecar.</p>
 </dd>
 <dt id="cad_viewer_widget.widget.CadViewerWidget.tab"><code class="name">var <span class="ident">tab</span> : Self | G</code></dt>
 <dd>
-<div class="desc"><p>unicode: Whether to show the navigation tree ('tree') or the clipping UI ('clip')</p></div>
+<div class="desc"><p>unicode: Whether to show the navigation tree ('tree'), clipping UI ('clip') or material UI ('material')</p></div>
 </dd>
 <dt id="cad_viewer_widget.widget.CadViewerWidget.target"><code class="name">var <span class="ident">target</span> : Self | G</code></dt>
 <dd>
 <div class="desc"><p>tuple: Camera target to look at as 3-dim tuple (x,y,z)</p></div>
-</dd>
-<dt id="cad_viewer_widget.widget.CadViewerWidget.target0"><code class="name">var <span class="ident">target0</span> : Self | G</code></dt>
-<dd>
-<div class="desc"><p>tuple: Initial camera target to look at as 3-dim tuple (x,y,z)</p></div>
 </dd>
 <dt id="cad_viewer_widget.widget.CadViewerWidget.theme"><code class="name">var <span class="ident">theme</span> : Self | G</code></dt>
 <dd>
@@ -1063,10 +1132,6 @@ RuntimeError: If the widget is displayed in a sidecar.</p>
 <dd>
 <div class="desc"><p>float: Zoom value of the camera</p></div>
 </dd>
-<dt id="cad_viewer_widget.widget.CadViewerWidget.zoom0"><code class="name">var <span class="ident">zoom0</span> : Self | G</code></dt>
-<dd>
-<div class="desc"><p>float: Initial zoom value of the camera</p></div>
-</dd>
 <dt id="cad_viewer_widget.widget.CadViewerWidget.zoom_speed"><code class="name">var <span class="ident">zoom_speed</span> : Self | G</code></dt>
 <dd>
 <div class="desc"><p>float: Speed of zooming with the mouse</p></div>
@@ -1074,8 +1139,20 @@ RuntimeError: If the widget is displayed in a sidecar.</p>
 </dl>
 <h3>Methods</h3>
 <dl>
+<dt id="cad_viewer_widget.widget.CadViewerWidget.active_tool"><code class="name flex">
+<span>def <span class="ident">active_tool</span></span>(<span>...) ‑> types.MethodType | EventHandler</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
 <dt id="cad_viewer_widget.widget.CadViewerWidget.func"><code class="name flex">
 <span>def <span class="ident">func</span></span>(<span>...) ‑> types.MethodType | EventHandler</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="cad_viewer_widget.widget.CadViewerWidget.selected_shape_ids"><code class="name flex">
+<span>def <span class="ident">selected_shape_ids</span></span>(<span>...) ‑> types.MethodType | EventHandler</span>
 </code></dt>
 <dd>
 <div class="desc"></div>
@@ -1093,6 +1170,12 @@ RuntimeError: If the widget is displayed in a sidecar.</p>
 <li><h3>Super-module</h3>
 <ul>
 <li><code><a title="cad_viewer_widget" href="index.html">cad_viewer_widget</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-functions">Functions</a></h3>
+<ul class="">
+<li><code><a title="cad_viewer_widget.widget.get_viewer_by_id" href="#cad_viewer_widget.widget.get_viewer_by_id">get_viewer_by_id</a></code></li>
+<li><code><a title="cad_viewer_widget.widget.get_viewers_by_id" href="#cad_viewer_widget.widget.get_viewers_by_id">get_viewers_by_id</a></code></li>
 </ul>
 </li>
 <li><h3><a href="#header-classes">Classes</a></h3>
@@ -1115,16 +1198,19 @@ RuntimeError: If the widget is displayed in a sidecar.</p>
 <li><code><a title="cad_viewer_widget.widget.CadViewer.axes0" href="#cad_viewer_widget.widget.CadViewer.axes0">axes0</a></code></li>
 <li><code><a title="cad_viewer_widget.widget.CadViewer.black_edges" href="#cad_viewer_widget.widget.CadViewer.black_edges">black_edges</a></code></li>
 <li><code><a title="cad_viewer_widget.widget.CadViewer.cad_width" href="#cad_viewer_widget.widget.CadViewer.cad_width">cad_width</a></code></li>
+<li><code><a title="cad_viewer_widget.widget.CadViewer.center_grid" href="#cad_viewer_widget.widget.CadViewer.center_grid">center_grid</a></code></li>
 <li><code><a title="cad_viewer_widget.widget.CadViewer.clear_tracks" href="#cad_viewer_widget.widget.CadViewer.clear_tracks">clear_tracks</a></code></li>
 <li><code><a title="cad_viewer_widget.widget.CadViewer.clip_intersection" href="#cad_viewer_widget.widget.CadViewer.clip_intersection">clip_intersection</a></code></li>
 <li><code><a title="cad_viewer_widget.widget.CadViewer.clip_normal_0" href="#cad_viewer_widget.widget.CadViewer.clip_normal_0">clip_normal_0</a></code></li>
 <li><code><a title="cad_viewer_widget.widget.CadViewer.clip_normal_1" href="#cad_viewer_widget.widget.CadViewer.clip_normal_1">clip_normal_1</a></code></li>
 <li><code><a title="cad_viewer_widget.widget.CadViewer.clip_normal_2" href="#cad_viewer_widget.widget.CadViewer.clip_normal_2">clip_normal_2</a></code></li>
+<li><code><a title="cad_viewer_widget.widget.CadViewer.clip_object_colors" href="#cad_viewer_widget.widget.CadViewer.clip_object_colors">clip_object_colors</a></code></li>
 <li><code><a title="cad_viewer_widget.widget.CadViewer.clip_planes" href="#cad_viewer_widget.widget.CadViewer.clip_planes">clip_planes</a></code></li>
-<li><code><a title="cad_viewer_widget.widget.CadViewer.clip_value_0" href="#cad_viewer_widget.widget.CadViewer.clip_value_0">clip_value_0</a></code></li>
-<li><code><a title="cad_viewer_widget.widget.CadViewer.clip_value_1" href="#cad_viewer_widget.widget.CadViewer.clip_value_1">clip_value_1</a></code></li>
-<li><code><a title="cad_viewer_widget.widget.CadViewer.clip_value_2" href="#cad_viewer_widget.widget.CadViewer.clip_value_2">clip_value_2</a></code></li>
+<li><code><a title="cad_viewer_widget.widget.CadViewer.clip_slider_0" href="#cad_viewer_widget.widget.CadViewer.clip_slider_0">clip_slider_0</a></code></li>
+<li><code><a title="cad_viewer_widget.widget.CadViewer.clip_slider_1" href="#cad_viewer_widget.widget.CadViewer.clip_slider_1">clip_slider_1</a></code></li>
+<li><code><a title="cad_viewer_widget.widget.CadViewer.clip_slider_2" href="#cad_viewer_widget.widget.CadViewer.clip_slider_2">clip_slider_2</a></code></li>
 <li><code><a title="cad_viewer_widget.widget.CadViewer.close" href="#cad_viewer_widget.widget.CadViewer.close">close</a></code></li>
+<li><code><a title="cad_viewer_widget.widget.CadViewer.collapse" href="#cad_viewer_widget.widget.CadViewer.collapse">collapse</a></code></li>
 <li><code><a title="cad_viewer_widget.widget.CadViewer.control" href="#cad_viewer_widget.widget.CadViewer.control">control</a></code></li>
 <li><code><a title="cad_viewer_widget.widget.CadViewer.debug" href="#cad_viewer_widget.widget.CadViewer.debug">debug</a></code></li>
 <li><code><a title="cad_viewer_widget.widget.CadViewer.default_edgecolor" href="#cad_viewer_widget.widget.CadViewer.default_edgecolor">default_edgecolor</a></code></li>
@@ -1140,8 +1226,10 @@ RuntimeError: If the widget is displayed in a sidecar.</p>
 <li><code><a title="cad_viewer_widget.widget.CadViewer.glass" href="#cad_viewer_widget.widget.CadViewer.glass">glass</a></code></li>
 <li><code><a title="cad_viewer_widget.widget.CadViewer.grid" href="#cad_viewer_widget.widget.CadViewer.grid">grid</a></code></li>
 <li><code><a title="cad_viewer_widget.widget.CadViewer.height" href="#cad_viewer_widget.widget.CadViewer.height">height</a></code></li>
+<li><code><a title="cad_viewer_widget.widget.CadViewer.keymap" href="#cad_viewer_widget.widget.CadViewer.keymap">keymap</a></code></li>
 <li><code><a title="cad_viewer_widget.widget.CadViewer.last_pick" href="#cad_viewer_widget.widget.CadViewer.last_pick">last_pick</a></code></li>
 <li><code><a title="cad_viewer_widget.widget.CadViewer.metalness" href="#cad_viewer_widget.widget.CadViewer.metalness">metalness</a></code></li>
+<li><code><a title="cad_viewer_widget.widget.CadViewer.new_tree_behavior" href="#cad_viewer_widget.widget.CadViewer.new_tree_behavior">new_tree_behavior</a></code></li>
 <li><code><a title="cad_viewer_widget.widget.CadViewer.normal_len" href="#cad_viewer_widget.widget.CadViewer.normal_len">normal_len</a></code></li>
 <li><code><a title="cad_viewer_widget.widget.CadViewer.ortho" href="#cad_viewer_widget.widget.CadViewer.ortho">ortho</a></code></li>
 <li><code><a title="cad_viewer_widget.widget.CadViewer.pan_speed" href="#cad_viewer_widget.widget.CadViewer.pan_speed">pan_speed</a></code></li>
@@ -1151,6 +1239,7 @@ RuntimeError: If the widget is displayed in a sidecar.</p>
 <li><code><a title="cad_viewer_widget.widget.CadViewer.play" href="#cad_viewer_widget.widget.CadViewer.play">play</a></code></li>
 <li><code><a title="cad_viewer_widget.widget.CadViewer.position" href="#cad_viewer_widget.widget.CadViewer.position">position</a></code></li>
 <li><code><a title="cad_viewer_widget.widget.CadViewer.quaternion" href="#cad_viewer_widget.widget.CadViewer.quaternion">quaternion</a></code></li>
+<li><code><a title="cad_viewer_widget.widget.CadViewer.register_viewer" href="#cad_viewer_widget.widget.CadViewer.register_viewer">register_viewer</a></code></li>
 <li><code><a title="cad_viewer_widget.widget.CadViewer.rotate_left" href="#cad_viewer_widget.widget.CadViewer.rotate_left">rotate_left</a></code></li>
 <li><code><a title="cad_viewer_widget.widget.CadViewer.rotate_speed" href="#cad_viewer_widget.widget.CadViewer.rotate_speed">rotate_speed</a></code></li>
 <li><code><a title="cad_viewer_widget.widget.CadViewer.rotate_up" href="#cad_viewer_widget.widget.CadViewer.rotate_up">rotate_up</a></code></li>
@@ -1158,17 +1247,18 @@ RuntimeError: If the widget is displayed in a sidecar.</p>
 <li><code><a title="cad_viewer_widget.widget.CadViewer.rotate_y" href="#cad_viewer_widget.widget.CadViewer.rotate_y">rotate_y</a></code></li>
 <li><code><a title="cad_viewer_widget.widget.CadViewer.rotate_z" href="#cad_viewer_widget.widget.CadViewer.rotate_z">rotate_z</a></code></li>
 <li><code><a title="cad_viewer_widget.widget.CadViewer.roughness" href="#cad_viewer_widget.widget.CadViewer.roughness">roughness</a></code></li>
-<li><code><a title="cad_viewer_widget.widget.CadViewer.select_clipping" href="#cad_viewer_widget.widget.CadViewer.select_clipping">select_clipping</a></code></li>
-<li><code><a title="cad_viewer_widget.widget.CadViewer.select_tree" href="#cad_viewer_widget.widget.CadViewer.select_tree">select_tree</a></code></li>
 <li><code><a title="cad_viewer_widget.widget.CadViewer.set_camera" href="#cad_viewer_widget.widget.CadViewer.set_camera">set_camera</a></code></li>
+<li><code><a title="cad_viewer_widget.widget.CadViewer.states" href="#cad_viewer_widget.widget.CadViewer.states">states</a></code></li>
 <li><code><a title="cad_viewer_widget.widget.CadViewer.status" href="#cad_viewer_widget.widget.CadViewer.status">status</a></code></li>
 <li><code><a title="cad_viewer_widget.widget.CadViewer.stop" href="#cad_viewer_widget.widget.CadViewer.stop">stop</a></code></li>
+<li><code><a title="cad_viewer_widget.widget.CadViewer.tab" href="#cad_viewer_widget.widget.CadViewer.tab">tab</a></code></li>
 <li><code><a title="cad_viewer_widget.widget.CadViewer.target" href="#cad_viewer_widget.widget.CadViewer.target">target</a></code></li>
 <li><code><a title="cad_viewer_widget.widget.CadViewer.tools" href="#cad_viewer_widget.widget.CadViewer.tools">tools</a></code></li>
 <li><code><a title="cad_viewer_widget.widget.CadViewer.transparent" href="#cad_viewer_widget.widget.CadViewer.transparent">transparent</a></code></li>
 <li><code><a title="cad_viewer_widget.widget.CadViewer.tree_width" href="#cad_viewer_widget.widget.CadViewer.tree_width">tree_width</a></code></li>
 <li><code><a title="cad_viewer_widget.widget.CadViewer.up" href="#cad_viewer_widget.widget.CadViewer.up">up</a></code></li>
 <li><code><a title="cad_viewer_widget.widget.CadViewer.update_camera_location" href="#cad_viewer_widget.widget.CadViewer.update_camera_location">update_camera_location</a></code></li>
+<li><code><a title="cad_viewer_widget.widget.CadViewer.update_states" href="#cad_viewer_widget.widget.CadViewer.update_states">update_states</a></code></li>
 <li><code><a title="cad_viewer_widget.widget.CadViewer.zoom" href="#cad_viewer_widget.widget.CadViewer.zoom">zoom</a></code></li>
 <li><code><a title="cad_viewer_widget.widget.CadViewer.zoom_speed" href="#cad_viewer_widget.widget.CadViewer.zoom_speed">zoom_speed</a></code></li>
 </ul>
@@ -1176,9 +1266,12 @@ RuntimeError: If the widget is displayed in a sidecar.</p>
 <li>
 <h4><code><a title="cad_viewer_widget.widget.CadViewerWidget" href="#cad_viewer_widget.widget.CadViewerWidget">CadViewerWidget</a></code></h4>
 <ul class="two-column">
+<li><code><a title="cad_viewer_widget.widget.CadViewerWidget.activeTool" href="#cad_viewer_widget.widget.CadViewerWidget.activeTool">activeTool</a></code></li>
+<li><code><a title="cad_viewer_widget.widget.CadViewerWidget.active_tool" href="#cad_viewer_widget.widget.CadViewerWidget.active_tool">active_tool</a></code></li>
 <li><code><a title="cad_viewer_widget.widget.CadViewerWidget.ambient_intensity" href="#cad_viewer_widget.widget.CadViewerWidget.ambient_intensity">ambient_intensity</a></code></li>
 <li><code><a title="cad_viewer_widget.widget.CadViewerWidget.anchor" href="#cad_viewer_widget.widget.CadViewerWidget.anchor">anchor</a></code></li>
 <li><code><a title="cad_viewer_widget.widget.CadViewerWidget.animation_speed" href="#cad_viewer_widget.widget.CadViewerWidget.animation_speed">animation_speed</a></code></li>
+<li><code><a title="cad_viewer_widget.widget.CadViewerWidget.aspect_ratio" href="#cad_viewer_widget.widget.CadViewerWidget.aspect_ratio">aspect_ratio</a></code></li>
 <li><code><a title="cad_viewer_widget.widget.CadViewerWidget.axes" href="#cad_viewer_widget.widget.CadViewerWidget.axes">axes</a></code></li>
 <li><code><a title="cad_viewer_widget.widget.CadViewerWidget.axes0" href="#cad_viewer_widget.widget.CadViewerWidget.axes0">axes0</a></code></li>
 <li><code><a title="cad_viewer_widget.widget.CadViewerWidget.black_edges" href="#cad_viewer_widget.widget.CadViewerWidget.black_edges">black_edges</a></code></li>
@@ -1205,29 +1298,32 @@ RuntimeError: If the widget is displayed in a sidecar.</p>
 <li><code><a title="cad_viewer_widget.widget.CadViewerWidget.glass" href="#cad_viewer_widget.widget.CadViewerWidget.glass">glass</a></code></li>
 <li><code><a title="cad_viewer_widget.widget.CadViewerWidget.grid" href="#cad_viewer_widget.widget.CadViewerWidget.grid">grid</a></code></li>
 <li><code><a title="cad_viewer_widget.widget.CadViewerWidget.height" href="#cad_viewer_widget.widget.CadViewerWidget.height">height</a></code></li>
+<li><code><a title="cad_viewer_widget.widget.CadViewerWidget.id" href="#cad_viewer_widget.widget.CadViewerWidget.id">id</a></code></li>
 <li><code><a title="cad_viewer_widget.widget.CadViewerWidget.image_id" href="#cad_viewer_widget.widget.CadViewerWidget.image_id">image_id</a></code></li>
 <li><code><a title="cad_viewer_widget.widget.CadViewerWidget.initialize" href="#cad_viewer_widget.widget.CadViewerWidget.initialize">initialize</a></code></li>
 <li><code><a title="cad_viewer_widget.widget.CadViewerWidget.keymap" href="#cad_viewer_widget.widget.CadViewerWidget.keymap">keymap</a></code></li>
 <li><code><a title="cad_viewer_widget.widget.CadViewerWidget.lastPick" href="#cad_viewer_widget.widget.CadViewerWidget.lastPick">lastPick</a></code></li>
+<li><code><a title="cad_viewer_widget.widget.CadViewerWidget.measure" href="#cad_viewer_widget.widget.CadViewerWidget.measure">measure</a></code></li>
+<li><code><a title="cad_viewer_widget.widget.CadViewerWidget.measure_callback" href="#cad_viewer_widget.widget.CadViewerWidget.measure_callback">measure_callback</a></code></li>
 <li><code><a title="cad_viewer_widget.widget.CadViewerWidget.metalness" href="#cad_viewer_widget.widget.CadViewerWidget.metalness">metalness</a></code></li>
+<li><code><a title="cad_viewer_widget.widget.CadViewerWidget.new_tree_behavior" href="#cad_viewer_widget.widget.CadViewerWidget.new_tree_behavior">new_tree_behavior</a></code></li>
 <li><code><a title="cad_viewer_widget.widget.CadViewerWidget.normal_len" href="#cad_viewer_widget.widget.CadViewerWidget.normal_len">normal_len</a></code></li>
 <li><code><a title="cad_viewer_widget.widget.CadViewerWidget.ortho" href="#cad_viewer_widget.widget.CadViewerWidget.ortho">ortho</a></code></li>
 <li><code><a title="cad_viewer_widget.widget.CadViewerWidget.pan_speed" href="#cad_viewer_widget.widget.CadViewerWidget.pan_speed">pan_speed</a></code></li>
 <li><code><a title="cad_viewer_widget.widget.CadViewerWidget.pinning" href="#cad_viewer_widget.widget.CadViewerWidget.pinning">pinning</a></code></li>
 <li><code><a title="cad_viewer_widget.widget.CadViewerWidget.position" href="#cad_viewer_widget.widget.CadViewerWidget.position">position</a></code></li>
-<li><code><a title="cad_viewer_widget.widget.CadViewerWidget.position0" href="#cad_viewer_widget.widget.CadViewerWidget.position0">position0</a></code></li>
 <li><code><a title="cad_viewer_widget.widget.CadViewerWidget.quaternion" href="#cad_viewer_widget.widget.CadViewerWidget.quaternion">quaternion</a></code></li>
-<li><code><a title="cad_viewer_widget.widget.CadViewerWidget.quaternion0" href="#cad_viewer_widget.widget.CadViewerWidget.quaternion0">quaternion0</a></code></li>
 <li><code><a title="cad_viewer_widget.widget.CadViewerWidget.reset_camera" href="#cad_viewer_widget.widget.CadViewerWidget.reset_camera">reset_camera</a></code></li>
 <li><code><a title="cad_viewer_widget.widget.CadViewerWidget.result" href="#cad_viewer_widget.widget.CadViewerWidget.result">result</a></code></li>
 <li><code><a title="cad_viewer_widget.widget.CadViewerWidget.rotate_speed" href="#cad_viewer_widget.widget.CadViewerWidget.rotate_speed">rotate_speed</a></code></li>
 <li><code><a title="cad_viewer_widget.widget.CadViewerWidget.roughness" href="#cad_viewer_widget.widget.CadViewerWidget.roughness">roughness</a></code></li>
+<li><code><a title="cad_viewer_widget.widget.CadViewerWidget.selectedShapeIDs" href="#cad_viewer_widget.widget.CadViewerWidget.selectedShapeIDs">selectedShapeIDs</a></code></li>
+<li><code><a title="cad_viewer_widget.widget.CadViewerWidget.selected_shape_ids" href="#cad_viewer_widget.widget.CadViewerWidget.selected_shape_ids">selected_shape_ids</a></code></li>
 <li><code><a title="cad_viewer_widget.widget.CadViewerWidget.shapes" href="#cad_viewer_widget.widget.CadViewerWidget.shapes">shapes</a></code></li>
 <li><code><a title="cad_viewer_widget.widget.CadViewerWidget.state_updates" href="#cad_viewer_widget.widget.CadViewerWidget.state_updates">state_updates</a></code></li>
 <li><code><a title="cad_viewer_widget.widget.CadViewerWidget.states" href="#cad_viewer_widget.widget.CadViewerWidget.states">states</a></code></li>
 <li><code><a title="cad_viewer_widget.widget.CadViewerWidget.tab" href="#cad_viewer_widget.widget.CadViewerWidget.tab">tab</a></code></li>
 <li><code><a title="cad_viewer_widget.widget.CadViewerWidget.target" href="#cad_viewer_widget.widget.CadViewerWidget.target">target</a></code></li>
-<li><code><a title="cad_viewer_widget.widget.CadViewerWidget.target0" href="#cad_viewer_widget.widget.CadViewerWidget.target0">target0</a></code></li>
 <li><code><a title="cad_viewer_widget.widget.CadViewerWidget.theme" href="#cad_viewer_widget.widget.CadViewerWidget.theme">theme</a></code></li>
 <li><code><a title="cad_viewer_widget.widget.CadViewerWidget.ticks" href="#cad_viewer_widget.widget.CadViewerWidget.ticks">ticks</a></code></li>
 <li><code><a title="cad_viewer_widget.widget.CadViewerWidget.timeit" href="#cad_viewer_widget.widget.CadViewerWidget.timeit">timeit</a></code></li>
@@ -1238,7 +1334,6 @@ RuntimeError: If the widget is displayed in a sidecar.</p>
 <li><code><a title="cad_viewer_widget.widget.CadViewerWidget.tree_width" href="#cad_viewer_widget.widget.CadViewerWidget.tree_width">tree_width</a></code></li>
 <li><code><a title="cad_viewer_widget.widget.CadViewerWidget.up" href="#cad_viewer_widget.widget.CadViewerWidget.up">up</a></code></li>
 <li><code><a title="cad_viewer_widget.widget.CadViewerWidget.zoom" href="#cad_viewer_widget.widget.CadViewerWidget.zoom">zoom</a></code></li>
-<li><code><a title="cad_viewer_widget.widget.CadViewerWidget.zoom0" href="#cad_viewer_widget.widget.CadViewerWidget.zoom0">zoom0</a></code></li>
 <li><code><a title="cad_viewer_widget.widget.CadViewerWidget.zoom_speed" href="#cad_viewer_widget.widget.CadViewerWidget.zoom_speed">zoom_speed</a></code></li>
 </ul>
 </li>
@@ -1248,7 +1343,7 @@ RuntimeError: If the widget is displayed in a sidecar.</p>
 </nav>
 </main>
 <footer id="footer">
-<p>Generated by <a href="https://pdoc3.github.io/pdoc" title="pdoc: Python API documentation generator"><cite>pdoc</cite> 0.11.5</a>.</p>
+<p>Generated by <a href="https://pdoc3.github.io/pdoc" title="pdoc: Python API documentation generator"><cite>pdoc</cite> 0.11.6</a>.</p>
 </footer>
 </body>
 </html>
