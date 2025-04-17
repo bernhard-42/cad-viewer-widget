@@ -1475,8 +1475,13 @@ class CadViewer:
 
     @collapse.setter
     def collapse(self, value):
-        rev_mapping = {v: k for k, v in COLLAPSE.items()}
-        self.widget.collapse = rev_mapping[value]
+        if isinstance(value, str):
+            self.widget.collapse = value
+        elif isinstance(value, Enum):
+            rev_mapping = {v: k for k, v in COLLAPSE.items()}
+            self.widget.collapse = rev_mapping[value]
+        else:
+            raise TypeError(f"Unknown type {type(value)} for collapse")
 
     @property
     def keymap(self):
