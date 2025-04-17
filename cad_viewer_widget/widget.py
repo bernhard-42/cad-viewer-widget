@@ -152,8 +152,8 @@ class CadViewerWidget(
     _model_name = Unicode("CadViewerModel").tag(sync=True)
     _view_module = Unicode("cad-viewer-widget").tag(sync=True)
     _model_module = Unicode("cad-viewer-widget").tag(sync=True)
-    _view_module_version = Unicode("3.0.0").tag(sync=True)
-    _model_module_version = Unicode("3.0.0").tag(sync=True)
+    _view_module_version = Unicode("3.0.1").tag(sync=True)
+    _model_module_version = Unicode("3.0.1").tag(sync=True)
 
     #
     # Internal id
