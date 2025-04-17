@@ -348,7 +348,9 @@ export class CadViewerView extends DOMWidgetView {
           if (width < height) {
             height = Math.round(Math.min(height, aspect_ratio * width));
           } else {
-            width = Math.round(Math.min(width, height / aspect_ratio));
+            width = Math.round(
+              Math.max(780, Math.min(width, height / aspect_ratio))
+            );
           }
         }
 
