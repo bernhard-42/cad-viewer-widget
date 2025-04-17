@@ -31,6 +31,19 @@ from .utils import get_parser, to_json, bsphere, normalize
 
 
 VIEWER = {}
+COLLAPSE = {
+    "R": "R",
+    "C": "C",
+    "E": "E",
+    "1": "1",
+}
+
+
+def _set_collapse(collapse):
+    # Allows injecting Collapse enum. Import would lead to circular import
+    global COLLAPSE
+    for k, v in collapse.items():
+        COLLAPSE[k] = v
 
 
 def get_viewer_by_id(id_):
@@ -1458,11 +1471,12 @@ class CadViewer:
         Get or set the CadViewerWidget traitlet `collapse`
         see [CadViewerWidget.collapse](./widget.html#cad_viewer_widget.widget.CadViewerWidget.collapse)
         """
-        return self.widget.collapse
+        return COLLAPSE[self.widget.collapse]
 
     @collapse.setter
     def collapse(self, value):
-        self.widget.collapse = value
+        rev_mapping = {v: k for k, v in COLLAPSE.items()}
+        self.widget.collapse = rev_mapping[value]
 
     @property
     def keymap(self):
