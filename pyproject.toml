@@ -4,6 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "cad_viewer_widget"
+version = "4.0.0"
 readme = "README.md"
 license = { file = "LICENSE" }
 requires-python = ">=3.8"
@@ -23,11 +24,7 @@ classifiers = [
 ]
 dependencies = ["ipywidgets~=8.1.5", "jupyterlab~=4.6.2", "pyparsing", "numpy"]
 
-dynamic = ["version", "description", "authors", "urls", "keywords"]
-
-[tool.hatch.version]
-source = "nodejs"
-path = "js/package.json"
+dynamic = ["description", "authors", "urls", "keywords"]
 
 [tool.hatch.metadata.hooks.nodejs]
 fields = ["description", "authors", "urls"]
@@ -100,11 +97,6 @@ pre_commit_hooks = []
 post_commit_hooks = []
 
 [[tool.bumpversion.part.build]]
-
-[[tool.bumpversion.files]]
-filename = "cad_viewer_widget/_version.py"
-search = 'VERSION = "{current_version}"'
-replace = 'VERSION = "{new_version}"'
 
 [[tool.bumpversion.files]]
 filename = "cad_viewer_widget/widget.py"
