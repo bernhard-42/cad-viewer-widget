@@ -1,4 +1,4 @@
-@import "~three-cad-viewer/dist/three-cad-viewer.css";
+@import "~three-cad-viewer/css";
 
 .cvw-sidecar {
   background: var(--jp-layout-color0);

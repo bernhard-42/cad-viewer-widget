@@ -1,6 +1,6 @@
 import { DOMWidgetModel, DOMWidgetView } from "@jupyter-widgets/base";
 
-import { Viewer, Display, Timer } from "three-cad-viewer";
+import { Viewer, Display, Timer, CollapseState } from "three-cad-viewer";
 
 import { decode } from "./serializer.js";
 import { isTolEqual, length, normalize } from "./utils.js";
@@ -9,6 +9,64 @@ import { _module, _version } from "./version.js";
 import "../style/index.css";
 
 import App from "./app.js";
+
+// Mapping of the Python collapse trait ("1"/"R"/"C"/"E") to the
+// three-cad-viewer CollapseState enum, and back for notifications
+const COLLAPSE_MAPPING = {
+  1: CollapseState.LEAVES,
+  R: CollapseState.ROOT,
+  C: CollapseState.COLLAPSED,
+  E: CollapseState.EXPANDED
+};
+const COLLAPSE_REVERSE_MAPPING = {
+  [CollapseState.LEAVES]: "1",
+  [CollapseState.ROOT]: "R",
+  [CollapseState.COLLAPSED]: "C",
+  [CollapseState.EXPANDED]: "E"
+};
+
+// Notification keys of three-cad-viewer that are forwarded to Python;
+// each name must match a traitlet on CadViewerWidget. All other keys
+// (e.g. zebra_*, studio_*, holroyd, selected) are ignored.
+const NOTIFICATION_TRAITS = new Set([
+  "position",
+  "quaternion",
+  "target",
+  "zoom",
+  "axes",
+  "axes0",
+  "grid",
+  "ortho",
+  "transparent",
+  "black_edges",
+  "tools",
+  "glass",
+  "tab",
+  "center_grid",
+  "explode",
+  "states",
+  "ambient_intensity",
+  "direct_intensity",
+  "metalness",
+  "roughness",
+  "default_edgecolor",
+  "default_opacity",
+  "zoom_speed",
+  "pan_speed",
+  "rotate_speed",
+  "clip_intersection",
+  "clip_planes",
+  "clip_object_colors",
+  "clip_slider_0",
+  "clip_slider_1",
+  "clip_slider_2",
+  "clip_normal_0",
+  "clip_normal_1",
+  "clip_normal_2",
+  "lastPick",
+  "activeTool",
+  "selectedShapeIDs"
+]);
 
 export class CadViewerModel extends DOMWidgetModel {
   defaults() {
@@ -35,12 +93,14 @@ export class CadViewerModel extends DOMWidgetModel {
       aspect_ratio: null,
       theme: null,
       pinning: null,
-      newTreeBehavior: null,
+      new_tree_behavior: null,
+      keymap: null,
 
       // View traits
 
       shapes: null,
       states: null,
+      state_updates: null,
       tracks: null,
       timeit: null,
       tools: null,
@@ -71,6 +131,7 @@ export class CadViewerModel extends DOMWidgetModel {
 
       tab: null,
       clip_intersection: null,
+      clip_object_colors: null,
       clip_planes: null,
       clip_normal_0: null,
       clip_normal_1: null,
@@ -94,6 +155,9 @@ export class CadViewerModel extends DOMWidgetModel {
       // Read only traitlets
 
       lastPick: null,
+      activeTool: null,
+      selectedShapeIDs: null,
+      measure: null,
 
       initialize: null,
       image_id: null,
@@ -228,7 +292,16 @@ export class CadViewerView extends DOMWidgetView {
       tools: this.model.get("tools"),
       pinning: this.model.get("pinning"),
       keymap: this.model.get("keymap"),
-      newTreeBehavior: this.model.get("new_tree_behavior")
+      newTreeBehavior: this.model.get("new_tree_behavior"),
+      // three-cad-viewer >= 5 hides toolbar features unless explicitly enabled
+      measureTools: true,
+      selectTool: true,
+      explodeTool: true,
+      zebraTool: true,
+      studioTool: false,
+      zscaleTool: false,
+      // measurements are computed by the Python backend, not the built-in mesh backend
+      externalMeasurementBackend: true
     };
   }
 
@@ -240,21 +313,13 @@ export class CadViewerView extends DOMWidgetView {
       ambientIntensity: this.model.get("ambient_intensity"),
       directIntensity: this.model.get("direct_intensity"),
       metalness: this.model.get("metalness"),
-      roughness: this.model.get("roughness"),
-      measureTools: true
+      roughness: this.model.get("roughness")
     };
     this.debug("getRenderOptions", options);
     return options;
   }
 
   getViewerOptions() {
-    let collapseMapping = {
-      1: 1,
-      E: 0,
-      C: 2,
-      R: 3
-    };
-
     const optionsMapping = {
       control: "control",
       up: "up",
@@ -284,16 +349,14 @@ export class CadViewerView extends DOMWidgetView {
       clip_object_colors: "clipObjectColors",
       new_tree_behavior: "newTreeBehavior"
     };
-    var options = {
-      measureTools: true
-    };
+    var options = {};
     for (let key of Object.keys(optionsMapping)) {
       if (this.model.get(key) != null) {
         var jkey = optionsMapping[key];
         if (key == "grid") {
           options[jkey] = this.model.get(key).slice(); // clone the array to ensure changes get detected
         } else if (key == "collapse") {
-          options[jkey] = collapseMapping[this.model.get(key)];
+          options[jkey] = COLLAPSE_MAPPING[this.model.get(key)];
         } else {
           options[jkey] = this.model.get(key);
         }
@@ -334,6 +397,8 @@ export class CadViewerView extends DOMWidgetView {
 
     const displayOptions = this.getDisplayOptions();
     if (this.viewer && this.viewer.ready) {
+      // ignore zero sized rects of hidden or not yet laid out containers,
+      // else 0 gets stored in the model and propagated to resizeCadView
       if (width > 0 && height > 0) {
         if (!displayOptions.glass) {
           width = width - displayOptions.treeWidth;
@@ -360,11 +425,11 @@ export class CadViewerView extends DOMWidgetView {
           height,
           displayOptions.glass
         );
-      }
 
-      this.model.set("cad_width", width);
-      this.model.set("height", height);
-      this.model.save_changes();
+        this.model.set("cad_width", width);
+        this.model.set("height", height);
+        this.model.save_changes();
+      }
     }
   };
 
@@ -388,11 +453,16 @@ export class CadViewerView extends DOMWidgetView {
       this.el.appendChild(container);
 
       let size = container.parentNode.parentNode.getBoundingClientRect();
-      if (displayOptions.height == null) {
+      if (displayOptions.height == null && size.height > 60) {
         this.height = Math.round(size.height) - 60;
         displayOptions.height = this.height;
         this.model.set("height", this.height);
         this.model.save_changes();
+      }
+      if (displayOptions.height == null) {
+        // container not laid out yet; use a sane default until the
+        // ResizeObserver reports the real size
+        displayOptions.height = 500;
       }
 
       if (displayOptions.cadWidth < size.width && this.title != null) {
@@ -420,8 +490,9 @@ export class CadViewerView extends DOMWidgetView {
       }
     }
 
-    this.display.glassMode(displayOptions.glass);
-    this.display.showTools(displayOptions.tools);
+    // Do not call display.glassMode/showTools here: since three-cad-viewer 5
+    // the display is only wired to a viewer in setupUI (end of the Viewer
+    // constructor), which applies glass and tools from the display options
 
     if (this.viewer != null) {
       this.clear();
@@ -436,12 +507,28 @@ export class CadViewerView extends DOMWidgetView {
   }
 
   handleNotification(change) {
+    var changed = false;
     Object.keys(change).forEach((key) => {
       const new_value = change[key]["new"];
-      this.model.set(key, new_value);
-      this.debug(`Setting Python attribute ${key} to`, new_value);
+      if (key === "collapse") {
+        // three-cad-viewer reports CollapseState numbers, the Python trait uses "1"/"R"/"C"/"E"
+        const collapse = COLLAPSE_REVERSE_MAPPING[new_value];
+        if (collapse != null) {
+          this.model.set(key, collapse);
+          changed = true;
+          this.debug(`Setting Python attribute ${key} to`, collapse);
+        }
+      } else if (NOTIFICATION_TRAITS.has(key)) {
+        this.model.set(key, new_value);
+        changed = true;
+        this.debug(`Setting Python attribute ${key} to`, new_value);
+      } else {
+        this.debug(`Ignoring notification for ${key}`, new_value);
+      }
     });
-    this.model.save_changes();
+    if (changed) {
+      this.model.save_changes();
+    }
   }
 
   clear() {
@@ -489,7 +576,7 @@ export class CadViewerView extends DOMWidgetView {
 
   setClipping() {
     if (this.clipSettings.tab != null) {
-      this.viewer.display.selectTabByName(this.clipSettings.tab);
+      this.viewer.setActiveTab(this.clipSettings.tab);
     }
     if (this.clipSettings.clip_intersection != null) {
       this.viewer.setClipIntersection(
@@ -553,17 +640,32 @@ export class CadViewerView extends DOMWidgetView {
     var viewerOptions = this.getViewerOptions();
     timer.split("viewer");
 
-    // set the latest view dimension before rendering
-    this.viewer.cadWidth = this.model.get("cad_width");
-    if (this.viewer.cadWidth == null) {
-      this.viewer.cadWidth = this.width;
+    // set the latest view dimension before rendering; the size properties are
+    // read-only since three-cad-viewer 4, and resizeCadView cannot be called
+    // before render(), hence write the state directly
+    var cadWidth = this.model.get("cad_width");
+    if (cadWidth == null) {
+      cadWidth = this.width;
     }
-    this.viewer.treeWidth = this.model.get("tree_width");
-    this.viewer.height = this.model.get("height");
-    if (this.viewer.height == null) {
-      this.viewer.height = this.height;
+    var height = this.model.get("height");
+    if (height == null) {
+      height = this.height;
     }
-    this.viewer.glass = this.model.get("glass");
+    if (cadWidth != null && cadWidth > 0) {
+      this.viewer.state.set("cadWidth", cadWidth);
+    }
+    if (
+      this.model.get("tree_width") != null &&
+      this.model.get("tree_width") > 0
+    ) {
+      this.viewer.state.set("treeWidth", this.model.get("tree_width"));
+    }
+    if (height != null && height > 0) {
+      this.viewer.state.set("height", height);
+    }
+    if (this.model.get("glass") != null) {
+      this.viewer.state.set("glass", this.model.get("glass"));
+    }
 
     if (resetCamera === "reset") {
       // even if reset is requested, respect the position settings from the object
@@ -629,35 +731,34 @@ export class CadViewerView extends DOMWidgetView {
     }
     this.viewer.render(this.shapes, this.getRenderOptions(), viewerOptions);
 
-    if (resetCamera === "keep" && this.camera_distance != null) {
-      // console.log("camera_distance", this.camera_distance, viewer.camera.camera_distance, viewer.camera.camera_distance/this.camera_distance);
-      viewer.setCameraZoom(
-        ((this.zoom == null ? 1.0 : this.zoom) *
-          viewer.camera.camera_distance) /
-          this.camera_distance
+    if (resetCamera === "keep" && this._camera_distance != null) {
+      this.viewer.setCameraZoom(
+        ((this._zoom == null ? 1.0 : this._zoom) *
+          this.viewer.camera.camera_distance) /
+          this._camera_distance
       );
     }
 
-    this._position = viewer.getCameraPosition();
-    this._quaternion = viewer.getCameraQuaternion();
-    this._target = viewer.controls.getTarget().toArray();
-    this._zoom = viewer.getCameraZoom();
-    this._camera_distance = viewer.camera.camera_distance;
+    this._position = this.viewer.getCameraPosition();
+    this._quaternion = this.viewer.getCameraQuaternion();
+    this._target = this.viewer.getCameraTarget();
+    this._zoom = this.viewer.getCameraZoom();
+    this._camera_distance = this.viewer.camera.camera_distance;
 
     this.clipping = {
       sliders: [
-        viewer.getClipSlider(0),
-        viewer.getClipSlider(1),
-        viewer.getClipSlider(2)
+        this.viewer.getClipSlider(0),
+        this.viewer.getClipSlider(1),
+        this.viewer.getClipSlider(2)
       ],
       normals: [
-        viewer.getClipNormal(0),
-        viewer.getClipNormal(1),
-        viewer.getClipNormal(2)
+        this.viewer.getClipNormal(0),
+        this.viewer.getClipNormal(1),
+        this.viewer.getClipNormal(2)
       ],
-      planeHelpers: viewer.getClipPlaneHelpers(),
-      objectColors: viewer.getObjectColorCaps(),
-      intersection: viewer.getClipIntersection()
+      planeHelpers: this.viewer.getClipPlaneHelpers(),
+      objectColors: this.viewer.getObjectColorCaps(),
+      intersection: this.viewer.getClipIntersection()
     };
 
     timer.split("renderer");
@@ -679,10 +780,7 @@ export class CadViewerView extends DOMWidgetView {
     }
 
     if (this.model.get("explode") != null) {
-      let flag = this.model.get("explode");
-      this.viewer.display.setExplode("", !flag); // workaround
-      this.viewer.display.setExplode("", flag);
-      this.viewer.display.setExplodeCheck(flag);
+      this.viewer.setExplode(this.model.get("explode"));
     }
 
     timer.stop();
@@ -702,11 +800,37 @@ export class CadViewerView extends DOMWidgetView {
     this.model.set("target", target);
   }
 
+  addTrack(track) {
+    // dispatch the (selector, action, times, values) tuples from Python to the
+    // typed track methods of three-cad-viewer >= 4
+    const [selector, action, times, values] = track;
+    switch (action) {
+      case "t":
+        this.viewer.addPositionTrack(selector, times, values);
+        break;
+      case "tx":
+      case "ty":
+      case "tz":
+        this.viewer.addTranslationTrack(selector, action[1], times, values);
+        break;
+      case "q":
+        this.viewer.addQuaternionTrack(selector, times, values);
+        break;
+      case "rx":
+      case "ry":
+      case "rz":
+        this.viewer.addRotationTrack(selector, action[1], times, values);
+        break;
+      default:
+        console.error(`cad-viewer-widget: unknown animation action ${action}`);
+    }
+  }
+
   addTracks(tracks) {
     this.tracks = tracks;
     if (Array.isArray(this.tracks) && this.tracks.length > 0) {
       for (var track of this.tracks) {
-        this.viewer.addAnimationTrack(...track);
+        this.addTrack(track);
       }
     }
   }
@@ -800,17 +924,14 @@ export class CadViewerView extends DOMWidgetView {
         setKey("getBlackEdges", "setBlackEdges", key);
         break;
       case "explode":
-        if (this.model.get("explode") != null) {
-          let flag = change.changed[key];
-          this.viewer.display.setExplode("", flag);
-          this.viewer.display.setExplodeCheck(!flag); // workaround
-          this.viewer.display.setExplodeCheck(flag);
+        if (change.changed[key] != null) {
+          this.viewer.setExplode(change.changed[key]);
         }
         break;
       case "collapse":
         var val = change.changed[key];
         if (["1", "R", "E", "C"].includes(val)) {
-          this.viewer.display.collapseNodes(val);
+          this.viewer.collapseNodes(COLLAPSE_MAPPING[val]);
         }
         break;
       case "tools":
@@ -818,38 +939,44 @@ export class CadViewerView extends DOMWidgetView {
         break;
       case "glass":
         flag = change.changed[key];
-        this.viewer.display.glassMode(flag);
+        this.viewer.glassMode(flag);
         break;
       case "cad_width":
         value = change.changed[key];
-        this.viewer.resizeCadView(
-          value,
-          this.model.get("tree_width"),
-          this.model.get("height"),
-          this.model.get("glass")
-        );
+        if (value > 0) {
+          this.viewer.resizeCadView(
+            value,
+            this.model.get("tree_width"),
+            this.model.get("height"),
+            this.model.get("glass")
+          );
+        }
         break;
       case "tree_width":
         value = change.changed[key];
-        this.viewer.resizeCadView(
-          this.model.get("cad_width"),
-          value,
-          this.model.get("height"),
-          this.model.get("glass")
-        );
+        if (value > 0) {
+          this.viewer.resizeCadView(
+            this.model.get("cad_width"),
+            value,
+            this.model.get("height"),
+            this.model.get("glass")
+          );
+        }
         break;
       case "height":
         value = change.changed[key];
-        this.viewer.resizeCadView(
-          this.model.get("cad_width"),
-          this.model.get("tree_width"),
-          value,
-          this.model.get("glass")
-        );
+        if (value > 0) {
+          this.viewer.resizeCadView(
+            this.model.get("cad_width"),
+            this.model.get("tree_width"),
+            value,
+            this.model.get("glass")
+          );
+        }
         break;
       case "pinning":
         flag = change.changed[key];
-        this.viewer.display.showPinning(flag);
+        this.viewer.showPinning(flag);
         break;
       case "default_edgecolor":
         setKey("getEdgeColor", "setEdgeColor", key);
@@ -887,20 +1014,16 @@ export class CadViewerView extends DOMWidgetView {
         }
         break;
       case "state_updates":
-        var states = change.changed[key];
-        for (var k in states) {
-          // supports leaves only. TODO: extend to full sub trees
-          this.viewer.setState(k, states[k], false);
-        }
+        this.viewer.setStates(change.changed[key]);
         break;
       case "tab":
         value = change.changed[key];
         if (this.activeTab !== value) {
           this.activeTab = value;
-          if (value === "tree" || value == "clip" || value == "material") {
-            this.viewer.display.selectTabByName(value);
+          if (["tree", "clip", "material", "zebra", "studio"].includes(value)) {
+            this.viewer.setActiveTab(value);
           } else {
-            console.error(`cad-viewer-widget: unkonwn tab name ${value}`);
+            console.error(`cad-viewer-widget: unknown tab name ${value}`);
           }
         }
         break;

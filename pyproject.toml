@@ -1,5 +1,5 @@
 [build-system]
-requires = ["hatchling>=1.5.0", "jupyterlab>=4.4.0,<5", "hatch-nodejs-version", "hatch-jupyter-builder>=0.5"]
+requires = ["hatchling>=1.5.0", "jupyterlab>=4.6.2,<5", "hatch-nodejs-version", "hatch-jupyter-builder>=0.5"]
 build-backend = "hatchling.build"
 
 [project]
@@ -21,7 +21,7 @@ classifiers = [
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
 ]
-dependencies = ["ipywidgets~=8.1.5", "jupyterlab~=4.4.0", "pyparsing", "numpy"]
+dependencies = ["ipywidgets~=8.1.5", "jupyterlab~=4.6.2", "pyparsing", "numpy"]
 
 dynamic = ["version", "description", "authors", "urls", "keywords"]
 
@@ -69,7 +69,7 @@ version_cmd = "hatch version"
 
 [tool.jupyter-releaser.hooks]
 before-build-npm = [
-    "python -m pip install 'jupyterlab>=4.4.0,<5'",
+    "python -m pip install 'jupyterlab>=4.6.2,<5'",
     "yarn",
     "yarn build:prod"
 ]
@@ -81,7 +81,7 @@ ignore = ["W002"]
 # bump-my-version settings
 
 [tool.bumpversion]
-current_version = "3.0.2"
+current_version = "4.0.0"
 commit = false
 tag = false
 parse = "(?P<major>\\d+)\\.(?P<minor>\\d+)\\.(?P<patch>\\d+)(?P<release>\\D*)(?P<build>\\d*)"

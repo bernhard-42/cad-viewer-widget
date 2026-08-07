@@ -9,10 +9,10 @@ DEFAULT = None
 class Sidecar(Output):
     _model_name = Unicode("CadViewerSidecarModel").tag(sync=True)
     _model_module = Unicode("cad-viewer-widget").tag(sync=True)
-    _model_module_version = Unicode("3.0.2").tag(sync=True)
+    _model_module_version = Unicode("4.0.0").tag(sync=True)
     _view_name = Unicode("CadViewerSidecarView").tag(sync=True)
     _view_module = Unicode("cad-viewer-widget").tag(sync=True)
-    _view_module_version = Unicode("3.0.2").tag(sync=True)
+    _view_module_version = Unicode("4.0.0").tag(sync=True)
 
     title = Unicode("CadViewer").tag(sync=True)
     anchor = CaselessStrEnum(
@@ -38,6 +38,14 @@ def set_sidecar(title, viewer):
     SIDECARS[title] = viewer
 
 
+def _remove_sidecar(title):
+    global DEFAULT  # pylint: disable=global-statement
+
+    del SIDECARS[title]
+    if DEFAULT == title:
+        DEFAULT = None
+
+
 def get_sidecar(title=None):
     if title is None:
         if DEFAULT is None:
@@ -52,7 +60,7 @@ def get_sidecar(title=None):
         return
 
     if sidecar.disposed:
-        del SIDECARS[title]
+        _remove_sidecar(title)
         # print(f'There is no viewer "{title}"')
         return
 
@@ -69,7 +77,7 @@ def get_sidecars():
             sidecars[title] = viewer
 
     for title in deletions:
-        del SIDECARS[title]
+        _remove_sidecar(title)
 
     return sidecars
 

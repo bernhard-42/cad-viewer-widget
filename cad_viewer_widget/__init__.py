@@ -393,23 +393,21 @@ def show(
     )
 
     if title is None:
-        if get_default_sidecar() is None:
+        if get_default_sidecar() is not None:
+            title = get_default_sidecar()
+            viewer = get_sidecar(title)
+            if viewer is None:
+                # the default sidecar has been closed: clear it and
+                # fall back to a cell viewer
+                _set_default_sidecar(None)
+                title = None
+        if title is None:
             viewer = open_viewer(
                 title=None,
                 anchor=None,
                 pinning=True if pinning is None else pinning,
                 **display_args(kwargs),
             )
-        else:
-            title = get_default_sidecar()
-            viewer = get_sidecar(title)
-            if viewer is None:
-                viewer = open_viewer(
-                    title=title,
-                    anchor=None,
-                    pinning=False if pinning is None else pinning,
-                    **display_args(kwargs),
-                )
     else:
         viewer = get_sidecar(title)
         if viewer is None:

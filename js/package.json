@@ -1,6 +1,6 @@
 {
   "name": "cad-viewer-widget",
-  "version": "3.0.2",
+  "version": "4.0.0",
   "description": "A Jupyter widget to view cad objects",
   "license": "MIT",
   "author": {
@@ -40,11 +40,11 @@
   "dependencies": {
     "@jupyter-widgets/base": "^6.0.10",
     "@jupyter-widgets/jupyterlab-manager": "^5.0.13",
-    "@jupyterlab/apputils": "^4.4.5",
-    "three-cad-viewer": "3.3.4"
+    "@jupyterlab/apputils": "4.6.10",
+    "three-cad-viewer": "5.0.2"
   },
   "devDependencies": {
-    "@jupyterlab/builder": "^4.3.5",
+    "@jupyterlab/builder": "4.5.10",
     "css-loader": "^7.1.2",
     "eslint": "^9.21.0",
     "eslint-config-prettier": "^10.0.2",

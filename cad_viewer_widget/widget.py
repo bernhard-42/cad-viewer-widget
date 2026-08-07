@@ -152,8 +152,8 @@ class CadViewerWidget(
     _model_name = Unicode("CadViewerModel").tag(sync=True)
     _view_module = Unicode("cad-viewer-widget").tag(sync=True)
     _model_module = Unicode("cad-viewer-widget").tag(sync=True)
-    _view_module_version = Unicode("3.0.2").tag(sync=True)
-    _model_module_version = Unicode("3.0.2").tag(sync=True)
+    _view_module_version = Unicode("4.0.0").tag(sync=True)
+    _model_module_version = Unicode("4.0.0").tag(sync=True)
 
     #
     # Internal id
@@ -287,8 +287,8 @@ class CadViewerWidget(
     # Generic UI traits
     #
 
-    tab = Enum(["tree", "clip", "material"], allow_none=True).tag(sync=True)
-    "unicode: Whether to show the navigation tree ('tree'), clipping UI ('clip') or material UI ('material')"
+    tab = Enum(["tree", "clip", "material", "zebra", "studio"], allow_none=True).tag(sync=True)
+    "unicode: Whether to show the navigation tree ('tree'), clipping UI ('clip'), material UI ('material'), zebra UI ('zebra') or studio UI ('studio')"
 
     clip_intersection = Bool(allow_none=True, default_value=None).tag(sync=True)
     "bool: Whether to use intersection clipping (True) or not (False)"
@@ -423,14 +423,14 @@ class CadViewerWidget(
 
     @observe("activeTool")
     def active_tool(self, change):
-        if change["new"]:
+        if change["new"] and self.measure_callback is not None:
             status, result = self.measure_callback(
                 self.id, {"activeTool": change["new"]}
             )
 
     @observe("selectedShapeIDs")
     def selected_shape_ids(self, change):
-        if change["new"]:
+        if change["new"] and self.measure_callback is not None:
             status, result = self.measure_callback(
                 self.id, {"selectedShapeIDs": change["new"]}
             )
@@ -1649,7 +1649,7 @@ class CadViewer:
         """
         return self.widget.tab
 
-    @keymap.setter
+    @tab.setter
     def tab(self, value):
         self.widget.tab = value
 
