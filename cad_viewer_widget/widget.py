@@ -283,6 +283,65 @@ class CadViewerWidget(
     roughness = Float(allow_none=True, default_value=None).tag(sync=True)
     "float: The degree of roughness"
 
+    grid_font_size = Integer(allow_none=True, default_value=None).tag(sync=True)
+    "int: Font size of the grid labels (default=12)"
+
+    zebra_count = Integer(allow_none=True, default_value=None).tag(sync=True)
+    "int: Number of zebra stripes"
+
+    zebra_opacity = Float(allow_none=True, default_value=None).tag(sync=True)
+    "float: Opacity of the zebra stripes"
+
+    zebra_direction = Float(allow_none=True, default_value=None).tag(sync=True)
+    "float: Direction (angle) of the zebra stripes"
+
+    zebra_color_scheme = Enum(
+        ["blackwhite", "colorful", "grayscale"], allow_none=True, default_value=None
+    ).tag(sync=True)
+    "unicode: Color scheme of the zebra stripes ('blackwhite', 'colorful' or 'grayscale')"
+
+    zebra_mapping_mode = Enum(
+        ["reflection", "normal"], allow_none=True, default_value=None
+    ).tag(sync=True)
+    "unicode: Mapping mode of the zebra stripes ('reflection' or 'normal')"
+
+    studio_environment = Unicode(allow_none=True, default_value=None).tag(sync=True)
+    "unicode: Name of the studio environment map preset, e.g. 'studio'"
+
+    studio_env_intensity = Float(allow_none=True, default_value=None).tag(sync=True)
+    "float: Intensity of the studio environment light"
+
+    studio_env_rotation = Float(allow_none=True, default_value=None).tag(sync=True)
+    "float: Rotation of the studio environment in degrees"
+
+    studio_background = Unicode(allow_none=True, default_value=None).tag(sync=True)
+    "unicode: Studio background ('grey', 'darkgrey', 'white', 'gradient', 'gradient-dark', 'environment' or 'transparent')"
+
+    studio_tone_mapping = Enum(
+        ["neutral", "ACES", "none"], allow_none=True, default_value=None
+    ).tag(sync=True)
+    "unicode: Studio tone mapping ('neutral', 'ACES' or 'none')"
+
+    studio_exposure = Float(allow_none=True, default_value=None).tag(sync=True)
+    "float: Studio exposure"
+
+    studio_shadow_intensity = Float(allow_none=True, default_value=None).tag(sync=True)
+    "float: Studio shadow intensity"
+
+    studio_shadow_softness = Float(allow_none=True, default_value=None).tag(sync=True)
+    "float: Studio shadow softness"
+
+    studio_ao_intensity = Float(allow_none=True, default_value=None).tag(sync=True)
+    "float: Studio ambient occlusion intensity"
+
+    studio_texture_mapping = Enum(
+        ["triplanar", "parametric"], allow_none=True, default_value=None
+    ).tag(sync=True)
+    "unicode: Studio texture mapping mode ('triplanar' or 'parametric')"
+
+    studio_4k_env_maps = Bool(allow_none=True, default_value=None).tag(sync=True)
+    "bool: Whether to use 4k studio environment maps"
+
     #
     # Generic UI traits
     #
@@ -580,6 +639,24 @@ class CadViewer:
         zoom_speed=None,
         pan_speed=None,
         rotate_speed=None,
+        grid_font_size=None,
+        zebra_count=None,
+        zebra_opacity=None,
+        zebra_direction=None,
+        zebra_color_scheme=None,
+        zebra_mapping_mode=None,
+        studio_environment=None,
+        studio_env_intensity=None,
+        studio_env_rotation=None,
+        studio_background=None,
+        studio_tone_mapping=None,
+        studio_exposure=None,
+        studio_shadow_intensity=None,
+        studio_shadow_softness=None,
+        studio_ao_intensity=None,
+        studio_texture_mapping=None,
+        studio_4k_env_maps=None,
+        tab=None,
         timeit=False,
         debug=False,
         _is_logo=False,
@@ -876,6 +953,30 @@ class CadViewer:
             self.widget.zoom_speed = zoom_speed
             self.widget.pan_speed = pan_speed
             self.widget.rotate_speed = rotate_speed
+            self.widget.grid_font_size = grid_font_size
+            if zebra_count is not None:
+                self.widget.zebra_count = zebra_count
+            if zebra_opacity is not None:
+                self.widget.zebra_opacity = zebra_opacity
+            if zebra_direction is not None:
+                self.widget.zebra_direction = zebra_direction
+            if zebra_color_scheme is not None:
+                self.widget.zebra_color_scheme = zebra_color_scheme
+            if zebra_mapping_mode is not None:
+                self.widget.zebra_mapping_mode = zebra_mapping_mode
+            self.widget.studio_environment = studio_environment
+            self.widget.studio_env_intensity = studio_env_intensity
+            self.widget.studio_env_rotation = studio_env_rotation
+            self.widget.studio_background = studio_background
+            self.widget.studio_tone_mapping = studio_tone_mapping
+            self.widget.studio_exposure = studio_exposure
+            self.widget.studio_shadow_intensity = studio_shadow_intensity
+            self.widget.studio_shadow_softness = studio_shadow_softness
+            self.widget.studio_ao_intensity = studio_ao_intensity
+            self.widget.studio_texture_mapping = studio_texture_mapping
+            self.widget.studio_4k_env_maps = studio_4k_env_maps
+            if tab is not None:
+                self.widget.tab = tab
             self.widget.timeit = timeit
             self.widget.clip_slider_0 = clip_slider_0
             self.widget.clip_slider_1 = clip_slider_1
@@ -883,9 +984,14 @@ class CadViewer:
             self.widget.clip_normal_0 = clip_normal_0
             self.widget.clip_normal_1 = clip_normal_1
             self.widget.clip_normal_2 = clip_normal_2
-            self.widget.clip_intersection = clip_intersection
-            self.widget.clip_planes = clip_planes
-            self.widget.clip_object_colors = clip_object_colors
+            # like ocp_vscode's viewer, keep the last values of the clip flags
+            # and zebra settings when no new value is given
+            if clip_intersection is not None:
+                self.widget.clip_intersection = clip_intersection
+            if clip_planes is not None:
+                self.widget.clip_planes = clip_planes
+            if clip_object_colors is not None:
+                self.widget.clip_object_colors = clip_object_colors
 
             self.add_tracks(tracks)
 
@@ -990,6 +1096,210 @@ class CadViewer:
     @roughness.setter
     def roughness(self, value):
         self.widget.roughness = value
+
+    @property
+    def grid_font_size(self):
+        """
+        Get or set the CadViewerWidget traitlet `grid_font_size`
+        see [CadViewerWidget.grid_font_size](./widget.html#cad_viewer_widget.widget.CadViewerWidget.grid_font_size)
+        """
+        return self.widget.grid_font_size
+
+    @grid_font_size.setter
+    def grid_font_size(self, value):
+        self.widget.grid_font_size = value
+
+    @property
+    def zebra_count(self):
+        """
+        Get or set the CadViewerWidget traitlet `zebra_count`
+        see [CadViewerWidget.zebra_count](./widget.html#cad_viewer_widget.widget.CadViewerWidget.zebra_count)
+        """
+        return self.widget.zebra_count
+
+    @zebra_count.setter
+    def zebra_count(self, value):
+        self.widget.zebra_count = value
+
+    @property
+    def zebra_opacity(self):
+        """
+        Get or set the CadViewerWidget traitlet `zebra_opacity`
+        see [CadViewerWidget.zebra_opacity](./widget.html#cad_viewer_widget.widget.CadViewerWidget.zebra_opacity)
+        """
+        return self.widget.zebra_opacity
+
+    @zebra_opacity.setter
+    def zebra_opacity(self, value):
+        self.widget.zebra_opacity = value
+
+    @property
+    def zebra_direction(self):
+        """
+        Get or set the CadViewerWidget traitlet `zebra_direction`
+        see [CadViewerWidget.zebra_direction](./widget.html#cad_viewer_widget.widget.CadViewerWidget.zebra_direction)
+        """
+        return self.widget.zebra_direction
+
+    @zebra_direction.setter
+    def zebra_direction(self, value):
+        self.widget.zebra_direction = value
+
+    @property
+    def zebra_color_scheme(self):
+        """
+        Get or set the CadViewerWidget traitlet `zebra_color_scheme`
+        see [CadViewerWidget.zebra_color_scheme](./widget.html#cad_viewer_widget.widget.CadViewerWidget.zebra_color_scheme)
+        """
+        return self.widget.zebra_color_scheme
+
+    @zebra_color_scheme.setter
+    def zebra_color_scheme(self, value):
+        self.widget.zebra_color_scheme = value
+
+    @property
+    def zebra_mapping_mode(self):
+        """
+        Get or set the CadViewerWidget traitlet `zebra_mapping_mode`
+        see [CadViewerWidget.zebra_mapping_mode](./widget.html#cad_viewer_widget.widget.CadViewerWidget.zebra_mapping_mode)
+        """
+        return self.widget.zebra_mapping_mode
+
+    @zebra_mapping_mode.setter
+    def zebra_mapping_mode(self, value):
+        self.widget.zebra_mapping_mode = value
+
+    @property
+    def studio_environment(self):
+        """
+        Get or set the CadViewerWidget traitlet `studio_environment`
+        see [CadViewerWidget.studio_environment](./widget.html#cad_viewer_widget.widget.CadViewerWidget.studio_environment)
+        """
+        return self.widget.studio_environment
+
+    @studio_environment.setter
+    def studio_environment(self, value):
+        self.widget.studio_environment = value
+
+    @property
+    def studio_env_intensity(self):
+        """
+        Get or set the CadViewerWidget traitlet `studio_env_intensity`
+        see [CadViewerWidget.studio_env_intensity](./widget.html#cad_viewer_widget.widget.CadViewerWidget.studio_env_intensity)
+        """
+        return self.widget.studio_env_intensity
+
+    @studio_env_intensity.setter
+    def studio_env_intensity(self, value):
+        self.widget.studio_env_intensity = value
+
+    @property
+    def studio_env_rotation(self):
+        """
+        Get or set the CadViewerWidget traitlet `studio_env_rotation`
+        see [CadViewerWidget.studio_env_rotation](./widget.html#cad_viewer_widget.widget.CadViewerWidget.studio_env_rotation)
+        """
+        return self.widget.studio_env_rotation
+
+    @studio_env_rotation.setter
+    def studio_env_rotation(self, value):
+        self.widget.studio_env_rotation = value
+
+    @property
+    def studio_background(self):
+        """
+        Get or set the CadViewerWidget traitlet `studio_background`
+        see [CadViewerWidget.studio_background](./widget.html#cad_viewer_widget.widget.CadViewerWidget.studio_background)
+        """
+        return self.widget.studio_background
+
+    @studio_background.setter
+    def studio_background(self, value):
+        self.widget.studio_background = value
+
+    @property
+    def studio_tone_mapping(self):
+        """
+        Get or set the CadViewerWidget traitlet `studio_tone_mapping`
+        see [CadViewerWidget.studio_tone_mapping](./widget.html#cad_viewer_widget.widget.CadViewerWidget.studio_tone_mapping)
+        """
+        return self.widget.studio_tone_mapping
+
+    @studio_tone_mapping.setter
+    def studio_tone_mapping(self, value):
+        self.widget.studio_tone_mapping = value
+
+    @property
+    def studio_exposure(self):
+        """
+        Get or set the CadViewerWidget traitlet `studio_exposure`
+        see [CadViewerWidget.studio_exposure](./widget.html#cad_viewer_widget.widget.CadViewerWidget.studio_exposure)
+        """
+        return self.widget.studio_exposure
+
+    @studio_exposure.setter
+    def studio_exposure(self, value):
+        self.widget.studio_exposure = value
+
+    @property
+    def studio_shadow_intensity(self):
+        """
+        Get or set the CadViewerWidget traitlet `studio_shadow_intensity`
+        see [CadViewerWidget.studio_shadow_intensity](./widget.html#cad_viewer_widget.widget.CadViewerWidget.studio_shadow_intensity)
+        """
+        return self.widget.studio_shadow_intensity
+
+    @studio_shadow_intensity.setter
+    def studio_shadow_intensity(self, value):
+        self.widget.studio_shadow_intensity = value
+
+    @property
+    def studio_shadow_softness(self):
+        """
+        Get or set the CadViewerWidget traitlet `studio_shadow_softness`
+        see [CadViewerWidget.studio_shadow_softness](./widget.html#cad_viewer_widget.widget.CadViewerWidget.studio_shadow_softness)
+        """
+        return self.widget.studio_shadow_softness
+
+    @studio_shadow_softness.setter
+    def studio_shadow_softness(self, value):
+        self.widget.studio_shadow_softness = value
+
+    @property
+    def studio_ao_intensity(self):
+        """
+        Get or set the CadViewerWidget traitlet `studio_ao_intensity`
+        see [CadViewerWidget.studio_ao_intensity](./widget.html#cad_viewer_widget.widget.CadViewerWidget.studio_ao_intensity)
+        """
+        return self.widget.studio_ao_intensity
+
+    @studio_ao_intensity.setter
+    def studio_ao_intensity(self, value):
+        self.widget.studio_ao_intensity = value
+
+    @property
+    def studio_texture_mapping(self):
+        """
+        Get or set the CadViewerWidget traitlet `studio_texture_mapping`
+        see [CadViewerWidget.studio_texture_mapping](./widget.html#cad_viewer_widget.widget.CadViewerWidget.studio_texture_mapping)
+        """
+        return self.widget.studio_texture_mapping
+
+    @studio_texture_mapping.setter
+    def studio_texture_mapping(self, value):
+        self.widget.studio_texture_mapping = value
+
+    @property
+    def studio_4k_env_maps(self):
+        """
+        Get or set the CadViewerWidget traitlet `studio_4k_env_maps`
+        see [CadViewerWidget.studio_4k_env_maps](./widget.html#cad_viewer_widget.widget.CadViewerWidget.studio_4k_env_maps)
+        """
+        return self.widget.studio_4k_env_maps
+
+    @studio_4k_env_maps.setter
+    def studio_4k_env_maps(self, value):
+        self.widget.studio_4k_env_maps = value
 
     @property
     def axes(self):

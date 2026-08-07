@@ -213,6 +213,24 @@ def show(
     zoom_speed=None,
     pan_speed=None,
     rotate_speed=None,
+    grid_font_size=None,
+    zebra_count=None,
+    zebra_opacity=None,
+    zebra_direction=None,
+    zebra_color_scheme=None,
+    zebra_mapping_mode=None,
+    studio_environment=None,
+    studio_env_intensity=None,
+    studio_env_rotation=None,
+    studio_background=None,
+    studio_tone_mapping=None,
+    studio_exposure=None,
+    studio_shadow_intensity=None,
+    studio_shadow_softness=None,
+    studio_ao_intensity=None,
+    studio_texture_mapping=None,
+    studio_4k_env_maps=None,
+    tab=None,
     timeit=None,
     debug=None,
 ):
@@ -370,6 +388,26 @@ def show(
     kwargs["zoom_speed"] = preset("zoom_speed", zoom_speed, 0.5)
     kwargs["pan_speed"] = preset("pan_speed", pan_speed, 0.5)
     kwargs["rotate_speed"] = preset("rotate_speed", rotate_speed, 1.0)
+    kwargs["grid_font_size"] = preset("grid_font_size", grid_font_size, 12)
+    # zebra settings keep their last value when not given (like ocp_vscode's viewer)
+    kwargs["zebra_count"] = preset("zebra_count", zebra_count, None)
+    kwargs["zebra_opacity"] = preset("zebra_opacity", zebra_opacity, None)
+    kwargs["zebra_direction"] = preset("zebra_direction", zebra_direction, None)
+    kwargs["zebra_color_scheme"] = preset("zebra_color_scheme", zebra_color_scheme, None)
+    kwargs["zebra_mapping_mode"] = preset("zebra_mapping_mode", zebra_mapping_mode, None)
+    # studio settings reset to the ocp_vscode viewer defaults when not given
+    kwargs["studio_environment"] = preset("studio_environment", studio_environment, "studio")
+    kwargs["studio_env_intensity"] = preset("studio_env_intensity", studio_env_intensity, 1.0)
+    kwargs["studio_env_rotation"] = preset("studio_env_rotation", studio_env_rotation, 0.0)
+    kwargs["studio_background"] = preset("studio_background", studio_background, "environment")
+    kwargs["studio_tone_mapping"] = preset("studio_tone_mapping", studio_tone_mapping, "neutral")
+    kwargs["studio_exposure"] = preset("studio_exposure", studio_exposure, 1.0)
+    kwargs["studio_shadow_intensity"] = preset("studio_shadow_intensity", studio_shadow_intensity, 0.5)
+    kwargs["studio_shadow_softness"] = preset("studio_shadow_softness", studio_shadow_softness, 0.2)
+    kwargs["studio_ao_intensity"] = preset("studio_ao_intensity", studio_ao_intensity, 0.5)
+    kwargs["studio_texture_mapping"] = preset("studio_texture_mapping", studio_texture_mapping, "parametric")
+    kwargs["studio_4k_env_maps"] = preset("studio_4k_env_maps", studio_4k_env_maps, False)
+    kwargs["tab"] = preset("tab", tab, None)
     kwargs["timeit"] = preset("timeit", timeit, False)
     kwargs["debug"] = preset("debug", debug, False)
     if position is not None:
@@ -386,10 +424,11 @@ def show(
     kwargs["clip_normal_0"] = preset("clip_normal_0", clip_normal_0, [-1, 0, 0])
     kwargs["clip_normal_1"] = preset("clip_normal_1", clip_normal_1, [0, -1, 0])
     kwargs["clip_normal_2"] = preset("clip_normal_2", clip_normal_2, [0, 0, -1])
-    kwargs["clip_intersection"] = preset("clip_intersection", clip_intersection, False)
-    kwargs["clip_planes"] = preset("clip_planes", clip_planes, False)
+    # None means: keep the last value (like ocp_vscode's viewer)
+    kwargs["clip_intersection"] = preset("clip_intersection", clip_intersection, None)
+    kwargs["clip_planes"] = preset("clip_planes", clip_planes, None)
     kwargs["clip_object_colors"] = preset(
-        "clip_object_colors", clip_object_colors, False
+        "clip_object_colors", clip_object_colors, None
     )
 
     if title is None:

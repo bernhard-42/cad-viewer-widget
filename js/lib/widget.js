@@ -2,7 +2,6 @@ import { DOMWidgetModel, DOMWidgetView } from "@jupyter-widgets/base";
 
 import { Viewer, Display, Timer, CollapseState } from "three-cad-viewer";
 
-import { decode } from "./serializer.js";
 import { isTolEqual, length, normalize } from "./utils.js";
 import { _module, _version } from "./version.js";
 
@@ -65,8 +64,44 @@ const NOTIFICATION_TRAITS = new Set([
   "clip_normal_2",
   "lastPick",
   "activeTool",
-  "selectedShapeIDs"
+  "selectedShapeIDs",
+  "zebra_count",
+  "zebra_opacity",
+  "zebra_direction",
+  "zebra_color_scheme",
+  "zebra_mapping_mode",
+  "studio_environment",
+  "studio_env_intensity",
+  "studio_env_rotation",
+  "studio_background",
+  "studio_tone_mapping",
+  "studio_exposure",
+  "studio_shadow_intensity",
+  "studio_shadow_softness",
+  "studio_ao_intensity",
+  "studio_texture_mapping",
+  "studio_4k_env_maps"
 ]);
+
+// Traits that map to a plain three-cad-viewer setter for runtime changes
+const RUNTIME_SETTERS = {
+  zebra_count: "setZebraCount",
+  zebra_opacity: "setZebraOpacity",
+  zebra_direction: "setZebraDirection",
+  zebra_color_scheme: "setZebraColorScheme",
+  zebra_mapping_mode: "setZebraMappingMode",
+  studio_environment: "setStudioEnvironment",
+  studio_env_intensity: "setStudioEnvIntensity",
+  studio_env_rotation: "setStudioEnvRotation",
+  studio_background: "setStudioBackground",
+  studio_tone_mapping: "setStudioToneMapping",
+  studio_exposure: "setStudioExposure",
+  studio_shadow_intensity: "setStudioShadowIntensity",
+  studio_shadow_softness: "setStudioShadowSoftness",
+  studio_ao_intensity: "setStudioAOIntensity",
+  studio_texture_mapping: "setStudioTextureMapping",
+  studio_4k_env_maps: "setStudio4kEnvMaps"
+};
 
 export class CadViewerModel extends DOMWidgetModel {
   defaults() {
@@ -126,6 +161,24 @@ export class CadViewerModel extends DOMWidgetModel {
       direct_intensity: null,
       metalness: null,
       roughness: null,
+
+      grid_font_size: null,
+      zebra_count: null,
+      zebra_opacity: null,
+      zebra_direction: null,
+      zebra_color_scheme: null,
+      zebra_mapping_mode: null,
+      studio_environment: null,
+      studio_env_intensity: null,
+      studio_env_rotation: null,
+      studio_background: null,
+      studio_tone_mapping: null,
+      studio_exposure: null,
+      studio_shadow_intensity: null,
+      studio_shadow_softness: null,
+      studio_ao_intensity: null,
+      studio_texture_mapping: null,
+      studio_4k_env_maps: null,
 
       // Generic UI traits
 
@@ -237,6 +290,9 @@ export class CadViewerView extends DOMWidgetView {
       this.model.on("change:center_grid", this.handle_change, this);
       this.model.on("change:clip_object_colors", this.handle_change, this);
       this.model.on("change:measure", this.handle_change, this);
+      for (const key of Object.keys(RUNTIME_SETTERS)) {
+        this.model.on(`change:${key}`, this.handle_change, this);
+      }
 
       this.listenTo(this.model, "msg:custom", this.onCustomMessage.bind(this));
 
@@ -298,7 +354,7 @@ export class CadViewerView extends DOMWidgetView {
       selectTool: true,
       explodeTool: true,
       zebraTool: true,
-      studioTool: false,
+      studioTool: true,
       zscaleTool: false,
       // measurements are computed by the Python backend, not the built-in mesh backend
       externalMeasurementBackend: true
@@ -347,7 +403,24 @@ export class CadViewerView extends DOMWidgetView {
       clip_intersection: "clipIntersection",
       clip_planes: "clipPlaneHelpers",
       clip_object_colors: "clipObjectColors",
-      new_tree_behavior: "newTreeBehavior"
+      new_tree_behavior: "newTreeBehavior",
+      grid_font_size: "gridFontSize",
+      zebra_count: "zebraCount",
+      zebra_opacity: "zebraOpacity",
+      zebra_direction: "zebraDirection",
+      zebra_color_scheme: "zebraColorScheme",
+      zebra_mapping_mode: "zebraMappingMode",
+      studio_environment: "studioEnvironment",
+      studio_env_intensity: "studioEnvIntensity",
+      studio_env_rotation: "studioEnvRotation",
+      studio_background: "studioBackground",
+      studio_tone_mapping: "studioToneMapping",
+      studio_exposure: "studioExposure",
+      studio_shadow_intensity: "studioShadowIntensity",
+      studio_shadow_softness: "studioShadowSoftness",
+      studio_ao_intensity: "studioAOIntensity",
+      studio_texture_mapping: "studioTextureMapping",
+      studio_4k_env_maps: "studio4kEnvMaps"
     };
     var options = {};
     for (let key of Object.keys(optionsMapping)) {
@@ -494,16 +567,19 @@ export class CadViewerView extends DOMWidgetView {
     // the display is only wired to a viewer in setupUI (end of the Viewer
     // constructor), which applies glass and tools from the display options
 
+    // Reuse the viewer across shows like ocp_vscode's viewer does: clear()
+    // tears down the scene but keeps the WebGL context, viewer state and
+    // studio environment cache alive, avoiding the flash of a full teardown
     if (this.viewer != null) {
-      this.clear();
+      this.viewer.clear();
+    } else {
+      this.viewer = new Viewer(
+        this.display,
+        displayOptions,
+        this.handleNotification.bind(this),
+        null
+      );
     }
-
-    this.viewer = new Viewer(
-      this.display,
-      displayOptions,
-      this.handleNotification.bind(this),
-      null
-    );
   }
 
   handleNotification(change) {
@@ -575,7 +651,12 @@ export class CadViewerView extends DOMWidgetView {
   }
 
   setClipping() {
-    if (this.clipSettings.tab != null) {
+    if (
+      this.clipSettings.tab != null &&
+      this.clipSettings.tab !== this.model.get("tab")
+    ) {
+      // only needed for embedding restore; the regular flow passes the tab
+      // into render() via viewerOptions.tab
       this.viewer.setActiveTab(this.clipSettings.tab);
     }
     if (this.clipSettings.clip_intersection != null) {
@@ -612,11 +693,11 @@ export class CadViewerView extends DOMWidgetView {
       return;
     }
 
-    this.shapes = { data: this.model.get("shapes") };
-    decode(this.shapes);
-    this.shapes = this.shapes["data"]["shapes"];
+    // pass the raw {instances, shapes} data to three-cad-viewer, which
+    // decodes the b64 buffers and instance refs natively (like ocp_vscode)
+    this.shapes = this.model.get("shapes");
 
-    const bbox = this.shapes["bb"];
+    const bbox = this.shapes["shapes"]["bb"];
     const center = [
       (bbox.xmax + bbox.xmin) / 2,
       (bbox.ymax + bbox.ymin) / 2,
@@ -634,10 +715,18 @@ export class CadViewerView extends DOMWidgetView {
     const timer = new Timer("addShapes", this.model.get("timeit"));
 
     const resetCamera = this.model.get("reset_camera");
+    // whether an explicit zoom was provided with this call (the trait is set
+    // on every add_shapes, so a non null value means the caller passed one)
+    const newZoom = this.model.get("zoom") != null;
 
     this.tracks = [];
 
     var viewerOptions = this.getViewerOptions();
+    if (this.model.get("tab") != null) {
+      // render directly into the target tab to avoid a CAD-mode flicker
+      viewerOptions.tab = this.model.get("tab");
+      this.activeTab = viewerOptions.tab;
+    }
     timer.split("viewer");
 
     // set the latest view dimension before rendering; the size properties are
@@ -688,7 +777,7 @@ export class CadViewerView extends DOMWidgetView {
         viewerOptions.position = this.model.get("position");
       } else if (this._position) {
         if (resetCamera === "keep") {
-          const camera_distance = 5 * bb_radius;
+          const camera_distance = 2.5 * bb_radius;
 
           var p = [0, 0, 0];
           for (var i = 0; i < 3; i++) {
@@ -731,7 +820,7 @@ export class CadViewerView extends DOMWidgetView {
     }
     this.viewer.render(this.shapes, this.getRenderOptions(), viewerOptions);
 
-    if (resetCamera === "keep" && this._camera_distance != null) {
+    if (!newZoom && resetCamera === "keep" && this._camera_distance != null) {
       this.viewer.setCameraZoom(
         ((this._zoom == null ? 1.0 : this._zoom) *
           this.viewer.camera.camera_distance) /
@@ -885,6 +974,14 @@ export class CadViewerView extends DOMWidgetView {
     var value = null;
     var flag = null;
     this.debug("handle_change:", key, change.changed[key]);
+
+    if (Object.prototype.hasOwnProperty.call(RUNTIME_SETTERS, key)) {
+      if (this.viewer != null && change.changed[key] != null) {
+        this.viewer[RUNTIME_SETTERS[key]](change.changed[key]);
+      }
+      return;
+    }
+
     switch (key) {
       case "zoom":
         setKey("getCameraZoom", "setCameraZoom", key);
