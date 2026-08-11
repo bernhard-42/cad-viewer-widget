@@ -97,6 +97,22 @@ const NOTIFICATION_TRAITS = new Set([
 // Python spelling and is translated here rather than on the way out - the rule
 // is the same as every other client's, applied at the other end.
 const TRAIT_TO_OPTION = {
+    // Render options. These were a second table, inside getRenderOptions - and
+    // a trait in neither is a setting the user can change that the renderer
+    // never hears about.
+    normal_len: "normalLen",
+    default_edgecolor: "edgeColor",
+    default_opacity: "defaultOpacity",
+    ambient_intensity: "ambientIntensity",
+    direct_intensity: "directIntensity",
+    metalness: "metalness",
+    roughness: "roughness",
+
+    // Display options taken from the config rather than passed as geometry.
+    keymap: "keymap",
+    theme: "theme",
+
+    // Viewer options.
     control: "control",
     up: "up",
     tools: "tools",
