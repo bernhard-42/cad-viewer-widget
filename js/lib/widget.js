@@ -1,6 +1,14 @@
 import { DOMWidgetModel, DOMWidgetView } from "@jupyter-widgets/base";
 
 import { Viewer, Display, Timer, CollapseState } from "three-cad-viewer";
+import {
+  addAnimationTrack,
+  animate,
+  applyConfig,
+  buildDisplayOptions,
+  buildRenderOptions,
+  buildViewerOptions
+} from "ocp-viewer-core";
 
 import { isTolEqual, length, normalize } from "./utils.js";
 import { _module, _version } from "./version.js";
@@ -84,24 +92,80 @@ const NOTIFICATION_TRAITS = new Set([
 ]);
 
 // Traits that map to a plain three-cad-viewer setter for runtime changes
-const RUNTIME_SETTERS = {
-  zebra_count: "setZebraCount",
-  zebra_opacity: "setZebraOpacity",
-  zebra_direction: "setZebraDirection",
-  zebra_color_scheme: "setZebraColorScheme",
-  zebra_mapping_mode: "setZebraMappingMode",
-  studio_environment: "setStudioEnvironment",
-  studio_env_intensity: "setStudioEnvIntensity",
-  studio_env_rotation: "setStudioEnvRotation",
-  studio_background: "setStudioBackground",
-  studio_tone_mapping: "setStudioToneMapping",
-  studio_exposure: "setStudioExposure",
-  studio_shadow_intensity: "setStudioShadowIntensity",
-  studio_shadow_softness: "setStudioShadowSoftness",
-  studio_ao_intensity: "setStudioAOIntensity",
-  studio_texture_mapping: "setStudioTextureMapping",
-  studio_4k_env_maps: "setStudio4kEnvMaps"
-};
+// This host's names on the left, the renderer's on the right. An ipywidgets
+// traitlet is one name in both languages, so the config Python sends arrives in
+// Python spelling and is translated here rather than on the way out - the rule
+// is the same as every other client's, applied at the other end.
+const TRAIT_TO_OPTION = {
+    control: "control",
+    up: "up",
+    tools: "tools",
+    glass: "glass",
+    axes: "axes",
+    axes0: "axes0",
+    grid: "grid",
+    ortho: "ortho",
+    ticks: "ticks",
+    collapse: "collapse",
+    transparent: "transparent",
+    black_edges: "blackEdges",
+    timeit: "timeit",
+    zoom_speed: "zoomSpeed",
+    pan_speed: "panSpeed",
+    rotate_speed: "rotateSpeed",
+    center_grid: "centerGrid",
+    clip_slider_0: "clipSlider0",
+    clip_slider_1: "clipSlider1",
+    clip_slider_2: "clipSlider2",
+    clip_normal_0: "clipNormal0",
+    clip_normal_1: "clipNormal1",
+    clip_normal_2: "clipNormal2",
+    clip_intersection: "clipIntersection",
+    clip_planes: "clipPlaneHelpers",
+    clip_object_colors: "clipObjectColors",
+    new_tree_behavior: "newTreeBehavior",
+    grid_font_size: "gridFontSize",
+    zebra_count: "zebraCount",
+    zebra_opacity: "zebraOpacity",
+    zebra_direction: "zebraDirection",
+    zebra_color_scheme: "zebraColorScheme",
+    zebra_mapping_mode: "zebraMappingMode",
+    studio_environment: "studioEnvironment",
+    studio_env_intensity: "studioEnvIntensity",
+    studio_env_rotation: "studioEnvRotation",
+    studio_background: "studioBackground",
+    studio_tone_mapping: "studioToneMapping",
+    studio_exposure: "studioExposure",
+    studio_shadow_intensity: "studioShadowIntensity",
+    studio_shadow_softness: "studioShadowSoftness",
+    studio_ao_intensity: "studioAOIntensity",
+    studio_texture_mapping: "studioTextureMapping",
+    studio_4k_env_maps: "studio4kEnvMaps"
+    };;
+
+// The keys the shared dispatch applies by calling a setter, as opposed to the
+// ones this widget handles itself below. A set rather than a table now: which
+// setter each one becomes is `ocp-viewer-core`'s answer.
+const RUNTIME_SETTERS = Object.fromEntries(
+  [
+    "zebra_count",
+    "zebra_opacity",
+    "zebra_direction",
+    "zebra_color_scheme",
+    "zebra_mapping_mode",
+    "studio_environment",
+    "studio_env_intensity",
+    "studio_env_rotation",
+    "studio_background",
+    "studio_tone_mapping",
+    "studio_exposure",
+    "studio_shadow_intensity",
+    "studio_shadow_softness",
+    "studio_ao_intensity",
+    "studio_texture_mapping",
+    "studio_4k_env_maps"
+  ].map((trait) => [trait, true])
+);
 
 export class CadViewerModel extends DOMWidgetModel {
   defaults() {
@@ -338,103 +402,60 @@ export class CadViewerView extends DOMWidgetView {
     }
   }
 
+  /**
+   * The traits this widget holds, in the names the renderer knows them by.
+   *
+   * The one place this host's spelling is translated. Everything below works in
+   * renderer names, as the shared code does.
+   */
+  traitsAsConfig() {
+    const config = {};
+    for (const trait of Object.keys(TRAIT_TO_OPTION)) {
+      const value = this.model.get(trait);
+      if (value == null) {
+        continue;
+      }
+      if (trait === "grid") {
+        // Cloned, or a change to the array is not detected as one
+        config[TRAIT_TO_OPTION[trait]] = value.slice();
+      } else if (trait === "collapse") {
+        config[TRAIT_TO_OPTION[trait]] = COLLAPSE_MAPPING[value];
+      } else {
+        config[TRAIT_TO_OPTION[trait]] = value;
+      }
+    }
+    return config;
+  }
+
   getDisplayOptions() {
-    return {
-      cadWidth: this.model.get("cad_width"),
-      height: this.model.get("height"),
-      treeWidth: this.model.get("tree_width"),
-      theme: this.model.get("theme"),
-      glass: this.model.get("glass"),
-      tools: this.model.get("tools"),
+    // The defaults are the core's; what is passed here is what this surface
+    // differs on - a sidecar is sized by the caller, and it has the studio
+    // tool where a panel does not.
+    return buildDisplayOptions(this.traitsAsConfig(), {
       pinning: this.model.get("pinning"),
-      keymap: this.model.get("keymap"),
-      newTreeBehavior: this.model.get("new_tree_behavior"),
-      // three-cad-viewer >= 5 hides toolbar features unless explicitly enabled
       measureTools: true,
       selectTool: true,
       explodeTool: true,
       zebraTool: true,
       studioTool: true,
       zscaleTool: false,
-      // measurements are computed by the Python backend, not the built-in mesh backend
+      // measurements are computed by the Python backend, not the built-in one
       externalMeasurementBackend: true
-    };
+    }, {
+      cadWidth: this.model.get("cad_width"),
+      height: this.model.get("height"),
+      treeWidth: this.model.get("tree_width")
+    });
   }
 
   getRenderOptions() {
-    var options = {
-      normalLen: this.model.get("normal_len"),
-      edgeColor: this.model.get("default_edgecolor"),
-      defaultOpacity: this.model.get("default_opacity"),
-      ambientIntensity: this.model.get("ambient_intensity"),
-      directIntensity: this.model.get("direct_intensity"),
-      metalness: this.model.get("metalness"),
-      roughness: this.model.get("roughness")
-    };
+    const options = buildRenderOptions(this.traitsAsConfig());
     this.debug("getRenderOptions", options);
     return options;
   }
 
   getViewerOptions() {
-    const optionsMapping = {
-      control: "control",
-      up: "up",
-      tools: "tools",
-      glass: "glass",
-      axes: "axes",
-      axes0: "axes0",
-      grid: "grid",
-      ortho: "ortho",
-      ticks: "ticks",
-      collapse: "collapse",
-      transparent: "transparent",
-      black_edges: "blackEdges",
-      timeit: "timeit",
-      zoom_speed: "zoomSpeed",
-      pan_speed: "panSpeed",
-      rotate_speed: "rotateSpeed",
-      center_grid: "centerGrid",
-      clip_slider_0: "clipSlider0",
-      clip_slider_1: "clipSlider1",
-      clip_slider_2: "clipSlider2",
-      clip_normal_0: "clipNormal0",
-      clip_normal_1: "clipNormal1",
-      clip_normal_2: "clipNormal2",
-      clip_intersection: "clipIntersection",
-      clip_planes: "clipPlaneHelpers",
-      clip_object_colors: "clipObjectColors",
-      new_tree_behavior: "newTreeBehavior",
-      grid_font_size: "gridFontSize",
-      zebra_count: "zebraCount",
-      zebra_opacity: "zebraOpacity",
-      zebra_direction: "zebraDirection",
-      zebra_color_scheme: "zebraColorScheme",
-      zebra_mapping_mode: "zebraMappingMode",
-      studio_environment: "studioEnvironment",
-      studio_env_intensity: "studioEnvIntensity",
-      studio_env_rotation: "studioEnvRotation",
-      studio_background: "studioBackground",
-      studio_tone_mapping: "studioToneMapping",
-      studio_exposure: "studioExposure",
-      studio_shadow_intensity: "studioShadowIntensity",
-      studio_shadow_softness: "studioShadowSoftness",
-      studio_ao_intensity: "studioAOIntensity",
-      studio_texture_mapping: "studioTextureMapping",
-      studio_4k_env_maps: "studio4kEnvMaps"
-    };
-    var options = {};
-    for (let key of Object.keys(optionsMapping)) {
-      if (this.model.get(key) != null) {
-        var jkey = optionsMapping[key];
-        if (key == "grid") {
-          options[jkey] = this.model.get(key).slice(); // clone the array to ensure changes get detected
-        } else if (key == "collapse") {
-          options[jkey] = COLLAPSE_MAPPING[this.model.get(key)];
-        } else {
-          options[jkey] = this.model.get(key);
-        }
-      }
-    }
+    const options = buildViewerOptions(this.traitsAsConfig());
     this.debug("getViewerOptions", options);
     return options;
   }
@@ -890,48 +911,25 @@ export class CadViewerView extends DOMWidgetView {
   }
 
   addTrack(track) {
-    // dispatch the (selector, action, times, values) tuples from Python to the
-    // typed track methods of three-cad-viewer >= 4
-    const [selector, action, times, values] = track;
-    switch (action) {
-      case "t":
-        this.viewer.addPositionTrack(selector, times, values);
-        break;
-      case "tx":
-      case "ty":
-      case "tz":
-        this.viewer.addTranslationTrack(selector, action[1], times, values);
-        break;
-      case "q":
-        this.viewer.addQuaternionTrack(selector, times, values);
-        break;
-      case "rx":
-      case "ry":
-      case "rz":
-        this.viewer.addRotationTrack(selector, action[1], times, values);
-        break;
-      default:
-        console.error(`cad-viewer-widget: unknown animation action ${action}`);
-    }
+    addAnimationTrack(this.viewer, track, (action) =>
+      console.error(`cad-viewer-widget: unknown animation action ${action}`)
+    );
   }
 
   addTracks(tracks) {
-    this.tracks = tracks;
-    if (Array.isArray(this.tracks) && this.tracks.length > 0) {
-      for (var track of this.tracks) {
-        this.addTrack(track);
-      }
+    this.tracks = Array.isArray(tracks) ? tracks : [];
+    for (const track of this.tracks) {
+      this.addTrack(track);
     }
   }
 
   animate() {
-    const speed = this.model.get("animation_speed");
-    const duration = Math.max(
-      ...this.tracks.map((track) => Math.max(...track[2]))
+    // Explode is turned off first, and the duration taken from the longest
+    // track - both the shared answer, so that an animation runs the same
+    // length here as in any other client.
+    animate(this.viewer, this.tracks, this.model.get("animation_speed"), (action) =>
+      console.error(`cad-viewer-widget: unknown animation action ${action}`)
     );
-    if (speed > 0) {
-      this.viewer.initAnimation(duration, speed);
-    }
   }
 
   clearAnimation() {
@@ -975,9 +973,15 @@ export class CadViewerView extends DOMWidgetView {
     var flag = null;
     this.debug("handle_change:", key, change.changed[key]);
 
+    // The zebra and studio families, through the dispatch every client shares.
+    // They arrive under this host's names, so the key is translated first -
+    // the same conversion `traitsAsConfig` does, for one key.
     if (Object.prototype.hasOwnProperty.call(RUNTIME_SETTERS, key)) {
       if (this.viewer != null && change.changed[key] != null) {
-        this.viewer[RUNTIME_SETTERS[key]](change.changed[key]);
+        applyConfig(this.viewer, { [TRAIT_TO_OPTION[key]]: change.changed[key] }, {
+          onUnknown: (unknown) =>
+            console.error(`No setter for '${unknown}' in ocp-viewer-core`)
+        });
       }
       return;
     }
