@@ -1,4 +1,4 @@
-.PHONY: clean_notebooks bump dist release create-release install upload docs
+.PHONY: clean_notebooks bump check dist release create-release install upload docs
 
 PYCACHE := $(shell find . -name '__pycache__')
 EGGS := $(wildcard *.egg-info)
@@ -40,6 +40,12 @@ else
 	@echo "Provide part=major|minor|patch|release|build and optionally version=x.y.z..."
 	exit 1
 endif
+
+# The traitlets cannot be generated - ipywidgets needs each one declared with
+# its type - so they are checked instead, against ocp-viewer-core's vocabulary.
+# Needs the environment the widget is installed in, for ocp_viewer_core.
+check:
+	@python check_traits.py
 
 # Dist commands
 
