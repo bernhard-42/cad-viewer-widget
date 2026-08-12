@@ -6,11 +6,10 @@ import {
   animate,
   applyConfig,
   buildDisplayOptions,
-  buildRenderOptions,
-  buildViewerOptions
+  createRenderer
 } from "ocp-viewer-core";
 
-import { isTolEqual, length, normalize } from "./utils.js";
+import { isTolEqual } from "./utils.js";
 import { _module, _version } from "./version.js";
 
 import "../style/index.css";
@@ -97,7 +96,7 @@ const NOTIFICATION_TRAITS = new Set([
 // Python spelling and is translated here rather than on the way out - the rule
 // is the same as every other client's, applied at the other end.
 const TRAIT_TO_OPTION = {
-    // Render options. These were a second table, inside getRenderOptions - and
+    // Render options. These were a second table, inside the widget's own
     // a trait in neither is a setting the user can change that the renderer
     // never hears about.
     normal_len: "normalLen",
@@ -156,8 +155,25 @@ const TRAIT_TO_OPTION = {
     studio_shadow_softness: "studioShadowSoftness",
     studio_ao_intensity: "studioAOIntensity",
     studio_texture_mapping: "studioTextureMapping",
-    studio_4k_env_maps: "studio4kEnvMaps"
-    };;
+    studio_4k_env_maps: "studio4kEnvMaps",
+
+    // Camera, geometry and per-show control. None of these is picked up by
+    // the three option builders - VIEWER_OPTION_KEYS names none of them - but
+    // `traitsAsConfig` is also what the shared renderer and the shared setter
+    // dispatch are handed, and both steer by exactly these. A trait absent
+    // from this table is not read at all, which is the whole failure mode
+    // this table exists to prevent.
+    position: "position",
+    quaternion: "quaternion",
+    target: "target",
+    zoom: "zoom",
+    reset_camera: "resetCamera",
+    explode: "explode",
+    tab: "tab",
+    cad_width: "cadWidth",
+    tree_width: "treeWidth",
+    height: "height"
+  };
 
 // The keys the shared dispatch applies by calling a setter, as opposed to the
 // ones this widget handles itself below. A set rather than a table now: which
@@ -405,11 +421,14 @@ export class CadViewerView extends DOMWidgetView {
       //   this.addShapes();
       // }
 
-      this._position = null;
-      this._quaternion = null;
-      this._target = null;
-      this._zoom = null;
-      this._camera_distance = null;
+      // The viewer's own state, as the renderer reports it: what
+      // `createRenderer` reads to carry a camera over and writes back after a
+      // render. Held apart from the traits deliberately - `handleNotification`
+      // writes the camera into the traits too, so a trait is both what the
+      // caller asked for and what the viewer last did, and `keep` needs those
+      // two to stay separate. One object, created once, because the renderer
+      // captures it by reference.
+      this._status = {};
       this._clipping = null;
 
       window.getCadViewers = App.getCadViewers;
@@ -462,18 +481,6 @@ export class CadViewerView extends DOMWidgetView {
       height: this.model.get("height"),
       treeWidth: this.model.get("tree_width")
     });
-  }
-
-  getRenderOptions() {
-    const options = buildRenderOptions(this.traitsAsConfig());
-    this.debug("getRenderOptions", options);
-    return options;
-  }
-
-  getViewerOptions() {
-    const options = buildViewerOptions(this.traitsAsConfig());
-    this.debug("getViewerOptions", options);
-    return options;
   }
 
   dispose() {
@@ -616,6 +623,25 @@ export class CadViewerView extends DOMWidgetView {
         this.handleNotification.bind(this),
         null
       );
+
+      // One renderer per viewer, as the page hosts build one per page. It
+      // holds the previous render's camera distance, which the zoom
+      // correction needs, so it must outlive a single show - built here in
+      // the branch that creates the viewer, and not when one is reused.
+      //
+      // No `resize`: this host writes its dimensions into the viewer state
+      // just before rendering, because its size properties are read-only and
+      // `resizeCadView` cannot be called before the first render.
+      this.renderer = createRenderer({
+        viewer: this.viewer,
+        status: this._status,
+        overrides: {},
+        sendStatus: () => this.publishCamera(),
+        // Passed unconditionally: `debug()` decides at call time whether to
+        // print, so capturing the flag here would freeze whatever it was when
+        // the viewer was built.
+        debug: (label, value) => this.debug(label, value)
+      });
     }
   }
 
@@ -734,36 +760,22 @@ export class CadViewerView extends DOMWidgetView {
     // decodes the b64 buffers and instance refs natively (like ocp_vscode)
     this.shapes = this.model.get("shapes");
 
-    const bbox = this.shapes["shapes"]["bb"];
-    const center = [
-      (bbox.xmax + bbox.xmin) / 2,
-      (bbox.ymax + bbox.ymin) / 2,
-      (bbox.zmax + bbox.zmin) / 2
-    ];
-    let bb_radius = Math.max(
-      Math.sqrt(
-        Math.pow(bbox.xmax - bbox.xmin, 2) +
-          Math.pow(bbox.ymax - bbox.ymin, 2) +
-          Math.pow(bbox.zmax - bbox.zmin, 2)
-      ),
-      length(center)
-    );
-
     const timer = new Timer("addShapes", this.model.get("timeit"));
-
-    const resetCamera = this.model.get("reset_camera");
-    // whether an explicit zoom was provided with this call (the trait is set
-    // on every add_shapes, so a non null value means the caller passed one)
-    const newZoom = this.model.get("zoom") != null;
 
     this.tracks = [];
 
-    var viewerOptions = this.getViewerOptions();
-    if (this.model.get("tab") != null) {
-      // render directly into the target tab to avoid a CAD-mode flicker
-      viewerOptions.tab = this.model.get("tab");
-      this.activeTab = viewerOptions.tab;
+    // The traits in the names the renderer knows them by. One config, and it
+    // is what the shared renderer steers by: the camera keys, resetCamera,
+    // the tab, and everything the option builders pick out of it.
+    const config = this.traitsAsConfig();
+
+    if (config.tab != null) {
+      // Recorded before the render, which is where the tab is applied: the
+      // scene is built in the target tab rather than painted in CAD mode and
+      // switched.
+      this.activeTab = config.tab;
     }
+
     timer.split("viewer");
 
     // set the latest view dimension before rendering; the size properties are
@@ -793,83 +805,11 @@ export class CadViewerView extends DOMWidgetView {
       this.viewer.state.set("glass", this.model.get("glass"));
     }
 
-    if (resetCamera === "reset") {
-      // even if reset is requested, respect the position settings from the object
-
-      if (this.model.get("zoom") !== undefined) {
-        viewerOptions.zoom = this.model.get("zoom");
-      }
-      if (this.model.get("position") !== undefined) {
-        viewerOptions.position = this.model.get("position");
-      }
-      if (this.model.get("quaternion") !== undefined) {
-        viewerOptions.quaternion = this.model.get("quaternion");
-      }
-      if (this.model.get("target") !== undefined) {
-        viewerOptions.target = this.model.get("target");
-      }
-      this._camera_distance = null;
-    } else {
-      if (this.model.get("position")) {
-        viewerOptions.position = this.model.get("position");
-      } else if (this._position) {
-        if (resetCamera === "keep") {
-          const camera_distance = 2.5 * bb_radius;
-
-          var p = [0, 0, 0];
-          for (var i = 0; i < 3; i++) {
-            p[i] = this._position[i] - this._target[i];
-          }
-          p = normalize(p);
-          var offset = resetCamera === "keep" ? this._target : [0, 0, 0];
-          for (var i = 0; i < 3; i++) {
-            p[i] = p[i] * camera_distance + offset[i];
-          }
-        } else {
-          // center
-          var p = [0, 0, 0];
-          for (var i = 0; i < 3; i++) {
-            p[i] = this._position[i] - this._target[i] + center[i];
-          }
-          this._target = center;
-        }
-      }
-      viewerOptions.position = p;
-      this._position = viewerOptions.position;
-
-      if (this.model.get("quaternion")) {
-        viewerOptions.quaternion = this.model.get("quaternion");
-      } else if (this._quaternion) {
-        viewerOptions.quaternion = this._quaternion;
-      }
-
-      if (this.model.get("target")) {
-        viewerOptions.target = this.model.get("target");
-      } else if (this._target) {
-        viewerOptions.target = this._target;
-      }
-
-      if (this.model.get("zoom")) {
-        viewerOptions.zoom = this.model.get("zoom");
-      } else if (this._zoom) {
-        viewerOptions.zoom = this._zoom;
-      }
-    }
-    this.viewer.render(this.shapes, this.getRenderOptions(), viewerOptions);
-
-    if (!newZoom && resetCamera === "keep" && this._camera_distance != null) {
-      this.viewer.setCameraZoom(
-        ((this._zoom == null ? 1.0 : this._zoom) *
-          this.viewer.camera.camera_distance) /
-          this._camera_distance
-      );
-    }
-
-    this._position = this.viewer.getCameraPosition();
-    this._quaternion = this.viewer.getCameraQuaternion();
-    this._target = this.viewer.getCameraTarget();
-    this._zoom = this.viewer.getCameraZoom();
-    this._camera_distance = this.viewer.camera.camera_distance;
+    // Drawing the model and deciding where the camera ends up is the shared
+    // policy: what `keep` means when the model underneath has changed, and
+    // the zoom correction that goes with it. It reads and writes `_status`,
+    // and calls `publishCamera` when it has settled.
+    this.renderer.render(this.shapes, config);
 
     this.clipping = {
       sliders: [
@@ -889,13 +829,6 @@ export class CadViewerView extends DOMWidgetView {
 
     timer.split("renderer");
 
-    this.model.set("position", this._position);
-    this.model.set("quaternion", this._quaternion);
-    this.model.set("target", this._target);
-    this.model.set("zoom", this._zoom);
-
-    this.model.save_changes();
-
     this.setClipping();
 
     // add animation tracks if exist
@@ -905,6 +838,10 @@ export class CadViewerView extends DOMWidgetView {
       this.animate();
     }
 
+    // After the tracks, because `animate` turns explode off before it starts -
+    // both transform the same objects. The shared renderer turns explode on
+    // for a truthy config value; this is also what turns it off again, which
+    // it deliberately does not do.
     if (this.model.get("explode") != null) {
       this.viewer.setExplode(this.model.get("explode"));
     }
@@ -913,6 +850,23 @@ export class CadViewerView extends DOMWidgetView {
 
     return true;
   }
+
+  /**
+   * Hand the camera the renderer settled on back to Python.
+   *
+   * `createRenderer`'s `sendStatus` hook: where the page hosts put a snapshot
+   * on the wire, this host writes four traits and lets ipywidgets sync them.
+   * Only the four - the rest of the status is the renderer's working state and
+   * has no traitlet behind it.
+   */
+  publishCamera() {
+    this.model.set("position", this._status.position);
+    this.model.set("quaternion", this._status.quaternion);
+    this.model.set("target", this._status.target);
+    this.model.set("zoom", this._status.zoom);
+    this.model.save_changes();
+  }
+
 
   updateCamera() {
     var zoom = this.viewer.getCameraZoom();
@@ -1003,21 +957,25 @@ export class CadViewerView extends DOMWidgetView {
     }
 
     switch (key) {
+      // The four camera cases write the renderer's picture back as well as
+      // the viewer's: a camera moved from Python between two shows is what the
+      // next `keep` has to carry over, and the renderer reads that from
+      // `_status` rather than from the traits.
       case "zoom":
         setKey("getCameraZoom", "setCameraZoom", key);
-        this._zoom = this.viewer.getCameraZoom();
+        this._status.zoom = this.viewer.getCameraZoom();
         break;
       case "position":
         setKey("getCameraPosition", "setCameraPosition", key, null, false);
-        this._position = this.viewer.getCameraPosition();
+        this._status.position = this.viewer.getCameraPosition();
         break;
       case "quaternion":
         setKey("getCameraQuaternion", "setCameraQuaternion", key);
-        this._quaternion = this.viewer.getCameraQuaternion();
+        this._status.quaternion = this.viewer.getCameraQuaternion();
         break;
       case "target":
         setKey("getCameraTarget", "setCameraTarget", key);
-        this._target = this.viewer.getCameraTarget();
+        this._status.target = this.viewer.getCameraTarget();
         break;
       case "axes":
         setKey("getAxes", "setAxes", key);
