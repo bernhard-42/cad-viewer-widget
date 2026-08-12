@@ -231,6 +231,7 @@ def show(
     studio_texture_mapping=None,
     studio_4k_env_maps=None,
     tab=None,
+    analysis_tool=None,
     timeit=None,
     debug=None,
 ):
@@ -408,6 +409,7 @@ def show(
     kwargs["studio_texture_mapping"] = preset("studio_texture_mapping", studio_texture_mapping, "parametric")
     kwargs["studio_4k_env_maps"] = preset("studio_4k_env_maps", studio_4k_env_maps, False)
     kwargs["tab"] = preset("tab", tab, None)
+    kwargs["analysis_tool"] = preset("analysis_tool", analysis_tool, None)
     kwargs["timeit"] = preset("timeit", timeit, False)
     kwargs["debug"] = preset("debug", debug, False)
     if position is not None:

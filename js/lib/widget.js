@@ -170,6 +170,7 @@ const TRAIT_TO_OPTION = {
     reset_camera: "resetCamera",
     explode: "explode",
     tab: "tab",
+    analysis_tool: "analysisTool",
     cad_width: "cadWidth",
     tree_width: "treeWidth",
     height: "height"
@@ -180,6 +181,7 @@ const TRAIT_TO_OPTION = {
 // setter each one becomes is `ocp-viewer-core`'s answer.
 const RUNTIME_SETTERS = Object.fromEntries(
   [
+    "analysis_tool",
     "zebra_count",
     "zebra_opacity",
     "zebra_direction",
@@ -279,6 +281,7 @@ export class CadViewerModel extends DOMWidgetModel {
       // Generic UI traits
 
       tab: null,
+      analysis_tool: null,
       clip_intersection: null,
       clip_object_colors: null,
       clip_planes: null,

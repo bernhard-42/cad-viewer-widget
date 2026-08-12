@@ -60,10 +60,6 @@ NO_TRAIT = {
     "render_normals": "sent as the `normal_len` trait, computed by the tessellator",
     "show_parent": "Python-side: decides what `show` collects",
     "show_locals": "Python-side: decides what `show` collects",
-    "analysis_tool": (
-        "applied by a call after the render, not by a trait - "
-        "jupyter_cadquery's send_data runs viewer.display.setTool"
-    ),
 }
 
 # Traitlets that are not config keys, and why.

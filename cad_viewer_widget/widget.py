@@ -349,6 +349,11 @@ class CadViewerWidget(
     tab = Enum(["tree", "clip", "material", "zebra", "studio"], allow_none=True).tag(sync=True)
     "unicode: Whether to show the navigation tree ('tree'), clipping UI ('clip'), material UI ('material'), zebra UI ('zebra') or studio UI ('studio')"
 
+    analysis_tool = Enum(
+        ["properties", "distance", "select", "off"], allow_none=True
+    ).tag(sync=True)
+    "unicode: Which analysis tool to activate ('properties', 'distance', 'select') or 'off'"
+
     clip_intersection = Bool(allow_none=True, default_value=None).tag(sync=True)
     "bool: Whether to use intersection clipping (True) or not (False)"
 
@@ -657,6 +662,7 @@ class CadViewer:
         studio_texture_mapping=None,
         studio_4k_env_maps=None,
         tab=None,
+        analysis_tool=None,
         timeit=False,
         debug=False,
         _is_logo=False,
@@ -977,6 +983,7 @@ class CadViewer:
             self.widget.studio_4k_env_maps = studio_4k_env_maps
             if tab is not None:
                 self.widget.tab = tab
+            self.widget.analysis_tool = analysis_tool
             self.widget.timeit = timeit
             self.widget.clip_slider_0 = clip_slider_0
             self.widget.clip_slider_1 = clip_slider_1
@@ -1744,6 +1751,18 @@ class CadViewer:
         """
 
         return self.widget.lastPick
+
+    @property
+    def analysis_tool(self):
+        """
+        Get or set the CadViewerWidget traitlet `analysis_tool`
+        see [CadViewerWidget.analysis_tool](./widget.html#cad_viewer_widget.widget.CadViewerWidget.analysis_tool)
+        """
+        return self.widget.analysis_tool
+
+    @analysis_tool.setter
+    def analysis_tool(self, value):
+        self.widget.analysis_tool = value
 
     @property
     def orbit_control(self):

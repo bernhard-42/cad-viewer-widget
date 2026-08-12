@@ -202,6 +202,7 @@ def viewer_args(config):
             "studio_texture_mapping",
             "studio_4k_env_maps",
             "tab",
+            "analysis_tool",
             "timeit",
             "debug",
         ]
