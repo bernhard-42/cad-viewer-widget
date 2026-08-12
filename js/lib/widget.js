@@ -108,7 +108,7 @@ const TRAIT_TO_OPTION = {
     roughness: "roughness",
 
     // Display options taken from the config rather than passed as geometry.
-    keymap: "keymap",
+    modifier_keys: "keymap",
     theme: "theme",
 
     // Viewer options.
@@ -225,7 +225,7 @@ export class CadViewerModel extends DOMWidgetModel {
       theme: null,
       pinning: null,
       new_tree_behavior: null,
-      keymap: null,
+      modifier_keys: null,
 
       // View traits
 

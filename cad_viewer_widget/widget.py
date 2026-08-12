@@ -196,7 +196,7 @@ class CadViewerWidget(
     # Viewer traits
     #
 
-    keymap = Dict(Tuple(Unicode(), Unicode()), allow_none=True).tag(sync=True)
+    modifier_keys = Dict(Tuple(Unicode(), Unicode()), allow_none=True).tag(sync=True)
     "dict: Mapping of the modifier keys, defaults to {'shift': 'shiftKey', 'ctrl': 'ctrlKey', 'meta': 'metaKey'}"
 
     shapes = Dict(allow_none=True).tag(sync=True, to_json=to_json)
@@ -1794,16 +1794,16 @@ class CadViewer:
             raise TypeError(f"Unknown type {type(value)} for collapse")
 
     @property
-    def keymap(self):
+    def modifier_keys(self):
         """
-        Get or set the CadViewerWidget traitlet `keymap`
-        see [CadViewerWidget.keymap](./widget.html#cad_viewer_widget.widget.CadViewerWidget.keymap)
+        Get or set the CadViewerWidget traitlet `modifier_keys`
+        see [CadViewerWidget.modifier_keys](./widget.html#cad_viewer_widget.widget.CadViewerWidget.modifier_keys)
         """
-        return self.widget.keymap
+        return self.widget.modifier_keys
 
-    @keymap.setter
-    def keymap(self, value):
-        self.widget.keymap = value
+    @modifier_keys.setter
+    def modifier_keys(self, value):
+        self.widget.modifier_keys = value
 
     @property
     def new_tree_behavior(self):
@@ -2187,7 +2187,7 @@ class CadViewer:
         if all:
             result.update(
                 {
-                    "keymap": self.widget.keymap,
+                    "modifier_keys": self.widget.modifier_keys,
                     "shapes": self.widget.shapes,
                     "normal_len": self.widget.normal_len,
                     "timeit": self.widget.timeit,
@@ -2264,7 +2264,7 @@ class CadViewer:
                 rotate_speed:       {self.widget.rotate_speed}
                 animation_speed:    {self.widget.animation_speed}
                 lastPick:           {self.widget.lastPick}
-                keymap:             {self.widget.keymap}
+                modifier_keys:      {self.widget.modifier_keys}
                 new_tree_behavior:  {self.widget.new_tree_behavior}
 
                             INTERNAL
