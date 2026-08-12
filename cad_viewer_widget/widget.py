@@ -226,8 +226,8 @@ class CadViewerWidget(
     ortho = Bool(allow_none=True, default_value=None).tag(sync=True)
     "bool: Whether to use orthographic view (True) or perspective view (False)"
 
-    control = Unicode().tag(sync=True)
-    "unicode: Whether to use trackball controls ('trackball') or orbit controls ('orbit')"
+    orbit_control = Bool(allow_none=True).tag(sync=True)
+    "bool: Whether to use orbit controls (True) or trackball controls (False)"
 
     up = Unicode().tag(sync=True)
     "unicode: Whether camera up direction is Z ('Z') or Y ('Y') or the legacy Z orientation ('L')"
@@ -566,7 +566,7 @@ class CadViewer:
             anchor=anchor,
             new_tree_behavior=new_tree_behavior,
             up="Z",
-            control="trackball",
+            orbit_control=False,
             id=id_,
         )
         self.widget.test_func = None
@@ -610,7 +610,7 @@ class CadViewer:
         tools=None,
         glass=None,
         new_tree_behavior=None,
-        control=None,
+        orbit_control=None,
         up=None,
         ortho=True,
         axes=None,
@@ -685,7 +685,7 @@ class CadViewer:
             Whether to show CAD tools (True) or not (False)
         glass : bool, default: None
             Whether to use glass mode (True) or not (False)
-        control : string, default 'trackball'
+        orbit_control : bool, default None
             Whether to use trackball controls ('trackball') or orbit controls ('orbit')
         up : string, default 'Z'
             Whether camera up direction is Z ('Z') or Y ('Y') or the lagacy Z orientation ('L')
@@ -893,12 +893,12 @@ class CadViewer:
         }
         """
 
-        if control == "orbit" and quaternion is not None:
+        if orbit_control is True and quaternion is not None:
             raise ValueError(
                 "Camera quaternion cannot be used with Orbit camera control"
             )
 
-        if control == "trackball" and position is not None and quaternion is None:
+        if orbit_control is False and position is not None and quaternion is None:
             raise ValueError(
                 "For Trackball camera control, position paramater also needs quaternion parameter"
             )
@@ -928,7 +928,7 @@ class CadViewer:
             self.widget.metalness = metalness
             self.widget.roughness = roughness
             self.widget.normal_len = normal_len
-            self.widget.control = control
+            self.widget.orbit_control = orbit_control
             self.widget.up = up
             if tools is not None:
                 self.widget.tools = tools
@@ -1717,7 +1717,7 @@ class CadViewer:
 
     @quaternion.setter
     def quaternion(self, value):
-        if self.widget.control == "orbit":
+        if self.widget.orbit_control is True:
             print("quaternion controlled internally for orbit control")
         else:
             self.widget.quaternion = value
@@ -1746,13 +1746,13 @@ class CadViewer:
         return self.widget.lastPick
 
     @property
-    def control(self):
+    def orbit_control(self):
         """
-        Get or set the CadViewerWidget traitlet `control`
-        see [CadViewerWidget.control](./widget.html#cad_viewer_widget.widget.CadViewerWidget.control)
+        Get or set the CadViewerWidget traitlet `orbit_control`
+        see [CadViewerWidget.orbit_control](./widget.html#cad_viewer_widget.widget.CadViewerWidget.orbit_control)
         """
 
-        return self.widget.control
+        return self.widget.orbit_control
 
     @property
     def up(self):
@@ -1990,7 +1990,7 @@ class CadViewer:
             The rotation angle in degrees
         """
 
-        if self.control != "trackball":
+        if self.orbit_control is not False:
             raise NameError("rotateX only works for trackball control")
         self.execute("viewer.controls.rotateX", (angle,))
 
@@ -2004,7 +2004,7 @@ class CadViewer:
             The rotation angle in degrees
         """
 
-        if self.control != "trackball":
+        if self.orbit_control is not False:
             raise NameError("rotateY only works for trackball control")
         self.execute("viewer.controls.rotateY", (angle,))
 
@@ -2018,7 +2018,7 @@ class CadViewer:
             The rotation angle in degrees
         """
 
-        if self.control != "trackball":
+        if self.orbit_control is not False:
             raise NameError("rotateZ only works for trackball control")
         self.execute("viewer.controls.rotateZ", (angle,))
 
@@ -2032,7 +2032,7 @@ class CadViewer:
             The rotation angle in degrees
         """
 
-        if self.control != "orbit":
+        if self.orbit_control is not True:
             raise NameError("rotateUp only works for orbit control")
         self.execute("viewer.controls.rotateUp", (angle,))
 
@@ -2046,7 +2046,7 @@ class CadViewer:
             The rotation angle in degrees
         """
 
-        if self.control != "orbit":
+        if self.orbit_control is not True:
             raise NameError("rotateLeft only works for orbit control")
         self.execute("viewer.controls.rotateLeft", (angle,))
 
@@ -2152,7 +2152,7 @@ class CadViewer:
             "tools": self.widget.tools,
             "glass": self.widget.glass,
             "ortho": self.widget.ortho,
-            "control": self.widget.control,
+            "orbit_control": self.widget.orbit_control,
             "up": self.widget.up,
             "axes": self.widget.axes,
             "axes0": self.widget.axes0,
@@ -2234,7 +2234,7 @@ class CadViewer:
                 tools:              {self.widget.tools}
                 glass:              {self.widget.glass}
                 ortho:              {self.widget.ortho}
-                control:            {self.widget.control}
+                orbit_control:      {self.widget.orbit_control}
                 up:                 {self.widget.up}
                 axes:               {self.widget.axes}
                 axes0:              {self.widget.axes0}

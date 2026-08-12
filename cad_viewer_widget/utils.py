@@ -152,7 +152,7 @@ def viewer_args(config):
             "metalness",
             "roughness",
             "normal_len",
-            "control",
+            "orbit_control",
             "up",
             "tools",
             "glass",

@@ -112,7 +112,7 @@ const TRAIT_TO_OPTION = {
     theme: "theme",
 
     // Viewer options.
-    control: "control",
+    orbit_control: "control",
     up: "up",
     tools: "tools",
     glass: "glass",
@@ -238,7 +238,7 @@ export class CadViewerModel extends DOMWidgetModel {
       glass: null,
 
       ortho: null,
-      control: null,
+      orbit_control: null,
       up: null,
       axes: null,
       axes0: null,
@@ -455,6 +455,13 @@ export class CadViewerView extends DOMWidgetView {
         config[TRAIT_TO_OPTION[trait]] = value.slice();
       } else if (trait === "collapse") {
         config[TRAIT_TO_OPTION[trait]] = COLLAPSE_MAPPING[value];
+      } else if (trait === "orbit_control") {
+        // A boolean in Python and a name in the renderer, so the mapping cannot
+        // carry it - the same shape as collapse above. Python converted this on
+        // the way in until the trait was called `control` and held the name
+        // already; now the trait is the Python spelling and the conversion
+        // belongs here, at the boundary, like every other one.
+        config[TRAIT_TO_OPTION[trait]] = value ? "orbit" : "trackball";
       } else {
         config[TRAIT_TO_OPTION[trait]] = value;
       }

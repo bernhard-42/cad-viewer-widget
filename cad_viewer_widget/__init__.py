@@ -185,7 +185,7 @@ def show(
     #
     # add_shapes options
     up=None,
-    control=None,
+    orbit_control=None,
     ortho=None,
     axes=None,
     axes0=None,
@@ -260,7 +260,7 @@ def show(
         transparent:       Show objects transparent (default=False)
         default_opacity:   Opacity value for transparent objects (default=0.5)
         black_edges:       Show edges in black color (default=False)
-        control:           Mouse control use "orbit" control instead of "trackball" control (default="trackball")
+        orbit_control:     Use orbit controls (True) instead of trackball controls (False) (default=False)
         collapse:          "1": collapse all single leaf nodes,
                            "R": expand root only,
                            "C": collapse all nodes,
@@ -372,7 +372,7 @@ def show(
     kwargs["direct_intensity"] = preset("direct_intensity", direct_intensity, 1.1)
     kwargs["metalness"] = preset("metalness", metalness, 0.3)
     kwargs["roughness"] = preset("roughness", roughness, 0.65)
-    kwargs["control"] = preset("control", control, "trackball")
+    kwargs["orbit_control"] = preset("orbit_control", orbit_control, False)
     kwargs["up"] = preset("up", up, "Z")
     kwargs["ortho"] = preset("ortho", ortho, True)
     kwargs["axes"] = preset("axes", axes, False)
