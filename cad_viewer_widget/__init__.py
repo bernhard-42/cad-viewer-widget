@@ -461,6 +461,18 @@ def show(
     if kwargs.get("theme") is not None and viewer.widget.theme != kwargs["theme"]:
         viewer.theme = kwargs["theme"]
 
+    # `modifier_keys` goes the same way and for the same reason, one step
+    # further along: `open_viewer` has no such parameter, so it cannot reach the
+    # constructor at all, and `display_args`/`viewer_args` both filtered it out
+    # - so `~/.jcq_config`'s modifier keys applied nowhere, ever. The trait now
+    # has a route because `apply.js` has a `keymap` setter, which is what makes
+    # `isApplicable("keymap")` true and enrols the trait in the shared dispatch.
+    if (
+        kwargs.get("modifier_keys") is not None
+        and viewer.widget.modifier_keys != kwargs["modifier_keys"]
+    ):
+        viewer.modifier_keys = kwargs["modifier_keys"]
+
     # print(dict(sorted(viewer_args(kwargs).items())))
     viewer.add_shapes(shapes, tracks, **viewer_args(kwargs))
     return viewer
