@@ -196,7 +196,12 @@ class CadViewerWidget(
     # Viewer traits
     #
 
-    modifier_keys = Dict(Tuple(Unicode(), Unicode()), allow_none=True).tag(sync=True)
+    # `Dict(value_trait)` constrains the *values*, and a keymap's values are
+    # single DOM property names - {"shift": "shiftKey"} - not pairs. Declared
+    # as tuples this trait could never be set from any host, since all three
+    # store strings and so does the renderer's own default; nothing noticed
+    # while no code path reached the trait at all.
+    modifier_keys = Dict(Unicode(), allow_none=True).tag(sync=True)
     "dict: Mapping of the modifier keys, defaults to {'shift': 'shiftKey', 'ctrl': 'ctrlKey', 'meta': 'metaKey'}"
 
     shapes = Dict(allow_none=True).tag(sync=True, to_json=to_json)
