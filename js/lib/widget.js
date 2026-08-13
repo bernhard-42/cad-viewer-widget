@@ -6,7 +6,9 @@ import {
   animate,
   applyConfig,
   buildDisplayOptions,
-  createRenderer
+  createRenderer,
+  currentValue,
+  isApplicable
 } from "ocp-viewer-core";
 
 import { isTolEqual } from "./utils.js";
@@ -175,31 +177,30 @@ const TRAIT_TO_OPTION = {
     tree_width: "treeWidth",
     height: "height"
   };
-
-// The keys the shared dispatch applies by calling a setter, as opposed to the
-// ones this widget handles itself below. A set rather than a table now: which
-// setter each one becomes is `ocp-viewer-core`'s answer.
-const RUNTIME_SETTERS = Object.fromEntries(
-  [
-    "analysis_tool",
-    "zebra_count",
-    "zebra_opacity",
-    "zebra_direction",
-    "zebra_color_scheme",
-    "zebra_mapping_mode",
-    "studio_environment",
-    "studio_env_intensity",
-    "studio_env_rotation",
-    "studio_background",
-    "studio_tone_mapping",
-    "studio_exposure",
-    "studio_shadow_intensity",
-    "studio_shadow_softness",
-    "studio_ao_intensity",
-    "studio_texture_mapping",
-    "studio_4k_env_maps"
-  ].map((trait) => [trait, true])
+// The traits the shared dispatch can apply, derived rather than listed. A trait
+// qualifies when the renderer option it maps to has a setter in the core, which
+// `isApplicable` answers - so a setter added there arrives here without anyone
+// remembering to add it, which is what the hand-written list this replaces kept
+// failing to do: it held the zebra and studio families and nothing else,
+// because they were simply the two added last.
+const APPLIED_TRAITS = Object.keys(TRAIT_TO_OPTION).filter((trait) =>
+  isApplicable(TRAIT_TO_OPTION[trait])
 );
+
+// Traits that are this widget's own business rather than viewer settings: the
+// ipywidgets lifecycle, the animation tracks, and the two that carry a payload
+// in from Python. These are the whole of what `handle_change` still switches on.
+// The camera options, whose value the renderer also keeps in `_status`.
+const CAMERA_OPTIONS = ["zoom", "position", "quaternion", "target"];
+
+const HOST_TRAITS = [
+  "tracks",
+  "state_updates",
+  "pinning",
+  "debug",
+  "disposed",
+  "measure"
+];
 
 export class CadViewerModel extends DOMWidgetModel {
   defaults() {
@@ -346,50 +347,14 @@ export class CadViewerView extends DOMWidgetView {
       super.render();
 
       this.model.on("change:initialize", this.clearOrAddShapes, this);
-      this.model.on("change:tracks", this.handle_change, this);
-      this.model.on("change:position", this.handle_change, this);
-      this.model.on("change:quaternion", this.handle_change, this);
-      this.model.on("change:target", this.handle_change, this);
-      this.model.on("change:zoom", this.handle_change, this);
-      this.model.on("change:axes", this.handle_change, this);
-      this.model.on("change:grid", this.handle_change, this);
-      this.model.on("change:axes0", this.handle_change, this);
-      this.model.on("change:ortho", this.handle_change, this);
-      this.model.on("change:explode", this.handle_change, this);
-      this.model.on("change:transparent", this.handle_change, this);
-      this.model.on("change:black_edges", this.handle_change, this);
-      this.model.on("change:collapse", this.handle_change, this);
-      this.model.on("change:tools", this.handle_change, this);
-      this.model.on("change:glass", this.handle_change, this);
-      this.model.on("change:cad_width", this.handle_change, this);
-      this.model.on("change:tree_width", this.handle_change, this);
-      this.model.on("change:height", this.handle_change, this);
-      this.model.on("change:pinning", this.handle_change, this);
-      this.model.on("change:default_edgecolor", this.handle_change, this);
-      this.model.on("change:default_opacity", this.handle_change, this);
-      this.model.on("change:ambient_intensity", this.handle_change, this);
-      this.model.on("change:direct_intensity", this.handle_change, this);
-      this.model.on("change:metalness", this.handle_change, this);
-      this.model.on("change:roughness", this.handle_change, this);
-      this.model.on("change:zoom_speed", this.handle_change, this);
-      this.model.on("change:pan_speed", this.handle_change, this);
-      this.model.on("change:rotate_speed", this.handle_change, this);
-      this.model.on("change:state_updates", this.handle_change, this);
-      this.model.on("change:tab", this.handle_change, this);
-      this.model.on("change:clip_intersection", this.handle_change, this);
-      this.model.on("change:clip_planes", this.handle_change, this);
-      this.model.on("change:clip_normal_0", this.handle_change, this);
-      this.model.on("change:clip_normal_1", this.handle_change, this);
-      this.model.on("change:clip_normal_2", this.handle_change, this);
-      this.model.on("change:clip_slider_0", this.handle_change, this);
-      this.model.on("change:clip_slider_1", this.handle_change, this);
-      this.model.on("change:clip_slider_2", this.handle_change, this);
-      this.model.on("change:debug", this.handle_change, this);
-      this.model.on("change:disposed", this.handle_change, this);
-      this.model.on("change:center_grid", this.handle_change, this);
-      this.model.on("change:clip_object_colors", this.handle_change, this);
-      this.model.on("change:measure", this.handle_change, this);
-      for (const key of Object.keys(RUNTIME_SETTERS)) {
+
+      // Every other trait goes to the same handler, so the list is a loop over
+      // the two that already say which traits exist: the ones the shared
+      // dispatch can apply, and the ones this widget handles itself. Written
+      // out, it was 44 lines that had to be remembered whenever a trait was
+      // added - and `up`, `theme` and `reset_camera` show what happens when it
+      // is not, since all three were declared, mapped, and heard by nobody.
+      for (const key of [...APPLIED_TRAITS, ...HOST_TRAITS]) {
         this.model.on(`change:${key}`, this.handle_change, this);
       }
 
@@ -921,26 +886,6 @@ export class CadViewerView extends DOMWidgetView {
   }
 
   handle_change(change) {
-    const setKey = (getter, setter, key, arg = null, arg2 = null) => {
-      if (this.viewer == null) return;
-
-      const value = change.changed[key];
-      const oldValue =
-        arg == null ? this.viewer[getter]() : this.viewer[getter](arg);
-      if (!isTolEqual(oldValue, value)) {
-        this.debug(`Setting Javascript attribute ${key} to`, value);
-        if (arg == null && arg2 == null) {
-          this.viewer[setter](value, true);
-        } else if (arg != null && arg2 != null) {
-          this.viewer[setter](arg, value, arg2, true);
-        } else if (arg != null) {
-          this.viewer[setter](arg, value, true);
-        } else if (arg2 != null) {
-          this.viewer[setter](value, arg2, true);
-        }
-      }
-    };
-
     const key = Object.keys(change.changed)[0];
 
     if (this.init) {
@@ -948,203 +893,16 @@ export class CadViewerView extends DOMWidgetView {
       return;
     }
 
-    var tracks = "";
-    var value = null;
-    var flag = null;
-    this.debug("handle_change:", key, change.changed[key]);
+    const value = change.changed[key];
+    this.debug("handle_change:", key, value);
 
-    // The zebra and studio families, through the dispatch every client shares.
-    // They arrive under this host's names, so the key is translated first -
-    // the same conversion `traitsAsConfig` does, for one key.
-    if (Object.prototype.hasOwnProperty.call(RUNTIME_SETTERS, key)) {
-      if (this.viewer != null && change.changed[key] != null) {
-        applyConfig(this.viewer, { [TRAIT_TO_OPTION[key]]: change.changed[key] }, {
-          onUnknown: (unknown) =>
-            console.error(`No setter for '${unknown}' in ocp-viewer-core`)
-        });
-      }
-      return;
-    }
-
+    // This widget's own business first - lifecycle, animation, and the two
+    // traits that carry a payload in from Python. Nothing here is a viewer
+    // setting, so none of it belongs in the shared dispatch.
     switch (key) {
-      // The four camera cases write the renderer's picture back as well as
-      // the viewer's: a camera moved from Python between two shows is what the
-      // next `keep` has to carry over, and the renderer reads that from
-      // `_status` rather than from the traits.
-      case "zoom":
-        setKey("getCameraZoom", "setCameraZoom", key);
-        this._status.zoom = this.viewer.getCameraZoom();
-        break;
-      case "position":
-        setKey("getCameraPosition", "setCameraPosition", key, null, false);
-        this._status.position = this.viewer.getCameraPosition();
-        break;
-      case "quaternion":
-        setKey("getCameraQuaternion", "setCameraQuaternion", key);
-        this._status.quaternion = this.viewer.getCameraQuaternion();
-        break;
-      case "target":
-        setKey("getCameraTarget", "setCameraTarget", key);
-        this._status.target = this.viewer.getCameraTarget();
-        break;
-      case "axes":
-        setKey("getAxes", "setAxes", key);
-        break;
-      case "grid":
-        setKey("getGrids", "setGrids", key);
-        break;
-      case "center_grid":
-        this.viewer.setGridCenter(change.changed[key]);
-        break;
-      case "axes0":
-        setKey("getAxes0", "setAxes0", key);
-        break;
-      case "ortho":
-        setKey("getOrtho", "switchCamera", key);
-        break;
-      case "transparent":
-        setKey("getTransparent", "setTransparent", key);
-        break;
-      case "black_edges":
-        setKey("getBlackEdges", "setBlackEdges", key);
-        break;
-      case "explode":
-        if (change.changed[key] != null) {
-          this.viewer.setExplode(change.changed[key]);
-        }
-        break;
-      case "collapse":
-        var val = change.changed[key];
-        if (["1", "R", "E", "C"].includes(val)) {
-          this.viewer.collapseNodes(COLLAPSE_MAPPING[val]);
-        }
-        break;
-      case "tools":
-        setKey("getTools", "showTools", key);
-        break;
-      case "glass":
-        flag = change.changed[key];
-        this.viewer.glassMode(flag);
-        break;
-      case "cad_width":
-        value = change.changed[key];
-        if (value > 0) {
-          this.viewer.resizeCadView(
-            value,
-            this.model.get("tree_width"),
-            this.model.get("height"),
-            this.model.get("glass")
-          );
-        }
-        break;
-      case "tree_width":
-        value = change.changed[key];
-        if (value > 0) {
-          this.viewer.resizeCadView(
-            this.model.get("cad_width"),
-            value,
-            this.model.get("height"),
-            this.model.get("glass")
-          );
-        }
-        break;
-      case "height":
-        value = change.changed[key];
-        if (value > 0) {
-          this.viewer.resizeCadView(
-            this.model.get("cad_width"),
-            this.model.get("tree_width"),
-            value,
-            this.model.get("glass")
-          );
-        }
-        break;
-      case "pinning":
-        flag = change.changed[key];
-        this.viewer.showPinning(flag);
-        break;
-      case "default_edgecolor":
-        setKey("getEdgeColor", "setEdgeColor", key);
-        break;
-      case "default_opacity":
-        setKey("getOpacity", "setOpacity", key);
-        break;
-      case "ambient_intensity":
-        setKey("getAmbientLight", "setAmbientLight", key, null, true);
-        break;
-      case "direct_intensity":
-        setKey("getDirectLight", "setDirectLight", key, null, true);
-        break;
-      case "metalness":
-        setKey("getMetalness", "setMetalness", key, null, true);
-        break;
-      case "roughness":
-        setKey("getRoughness", "setRoughness", key, null, true);
-        break;
-      case "zoom_speed":
-        setKey("getZoomSpeed", "setZoomSpeed", key);
-        break;
-      case "pan_speed":
-        setKey("getPanSpeed", "setPanSpeed", key);
-        break;
-      case "rotate_speed":
-        setKey("getRotateSpeed", "setRotateSpeed", key);
-        break;
-      case "tracks":
-        tracks = this.model.get("tracks");
-        if (tracks == "") {
-          this.clearAnimation();
-        } else {
-          this.addTracks(tracks);
-        }
-        break;
-      case "state_updates":
-        this.viewer.setStates(change.changed[key]);
-        break;
-      case "tab":
-        value = change.changed[key];
-        if (this.activeTab !== value) {
-          this.activeTab = value;
-          if (["tree", "clip", "material", "zebra", "studio"].includes(value)) {
-            this.viewer.setActiveTab(value);
-          } else {
-            console.error(`cad-viewer-widget: unknown tab name ${value}`);
-          }
-        }
-        break;
-      case "clip_intersection":
-        setKey("getClipIntersection", "setClipIntersection", key);
-        break;
-      case "clip_planes":
-        setKey("getClipPlaneHelpers", "setClipPlaneHelpers", key);
-        break;
-      case "clip_normal_0":
-        const slider_0 = this.viewer.getClipSlider(0);
-        setKey("getClipNormal", "setClipNormal", key, 0, slider_0);
-        break;
-      case "clip_normal_1":
-        const slider_1 = this.viewer.getClipSlider(1);
-        setKey("getClipNormal", "setClipNormal", key, 1, slider_1);
-        break;
-      case "clip_normal_2":
-        const slider_2 = this.viewer.getClipSlider(2);
-        setKey("getClipNormal", "setClipNormal", key, 2, slider_2);
-        break;
-      case "clip_slider_0":
-        setKey("getClipSlider", "setClipSlider", key, 0);
-        break;
-      case "clip_slider_1":
-        setKey("getClipSlider", "setClipSlider", key, 1);
-        break;
-      case "clip_slider_2":
-        setKey("getClipSlider", "setClipSlider", key, 2);
-        break;
-      case "clip_object_colors":
-        this.viewer.setClipObjectColorCaps(change.changed[key]);
-        break;
       case "debug":
-        this._debug = change.changed[key];
-        break;
+        this._debug = value;
+        return;
       case "disposed":
         if (this.title != null) {
           const sidecar = App.getSidecar(this.title);
@@ -1158,10 +916,101 @@ export class CadViewerView extends DOMWidgetView {
         } else {
           this.dispose();
         }
+        return;
+      case "tracks":
+        if (this.model.get("tracks") == "") {
+          this.clearAnimation();
+        } else {
+          this.addTracks(this.model.get("tracks"));
+        }
+        return;
+      default:
         break;
+    }
+
+    if (this.viewer == null) {
+      return;
+    }
+
+    switch (key) {
+      case "state_updates":
+        this.viewer.setStates(value);
+        return;
+      case "pinning":
+        this.viewer.showPinning(value);
+        return;
       case "measure":
-        this.viewer.handleBackendResponse(change.changed[key]);
+        this.viewer.handleBackendResponse(value);
+        return;
+      default:
         break;
+    }
+
+    // Everything else is a viewer setting, and one dispatch applies all of
+    // them. What used to be forty-odd cases reading a getter, comparing and
+    // setting is the `accept` hook below; which setter each key becomes is the
+    // core's answer, and no longer restated here.
+    const option = TRAIT_TO_OPTION[key];
+    if (option === undefined || value == null) {
+      return;
+    }
+
+    // The two conversions the key mapping cannot carry, because they change the
+    // value and not the name. Same pair `traitsAsConfig` handles.
+    let converted = value;
+    if (key === "collapse") {
+      if (!["1", "R", "E", "C"].includes(value)) {
+        return;
+      }
+      converted = COLLAPSE_MAPPING[value];
+    } else if (key === "orbit_control") {
+      converted = value ? "orbit" : "trackball";
+    } else if (key === "tab") {
+      // The tab notifies when it changes, which comes back as this trait - so
+      // without a guard, setting it would answer itself for ever.
+      if (this.activeTab === value) {
+        return;
+      }
+      this.activeTab = value;
+    }
+
+    applyConfig(this.viewer, { [option]: converted }, {
+      // Every setter that takes the flag gets `true`: a change that arrived
+      // from Python has to be reported back, or the two halves drift.
+      notify: true,
+
+      // Only set what is not already set. `currentValue` is undefined for a key
+      // the viewer cannot be asked - explode and the tab are actions rather
+      // than state - and that reads as "apply it", which is what the cases
+      // this replaces did for exactly those keys.
+      accept: (optionKey, next) => {
+        const current = currentValue(this.viewer, optionKey);
+        return current === undefined || !isTolEqual(current, next);
+      },
+
+      // A viewport dimension is a resize, and only this host knows the other
+      // two - it reads them from the traits, as each of the three cases did.
+      resize: (optionKey, next) => {
+        if (!(next > 0)) {
+          return;
+        }
+        this.viewer.resizeCadView(
+          optionKey === "cadWidth" ? next : this.model.get("cad_width"),
+          optionKey === "treeWidth" ? next : this.model.get("tree_width"),
+          optionKey === "height" ? next : this.model.get("height"),
+          this.model.get("glass")
+        );
+      },
+
+      onUnknown: (unknown) =>
+        console.error(`cad-viewer-widget: no setter for '${unknown}' in ocp-viewer-core`)
+    });
+
+    // The camera keys keep the renderer's picture in step as well as the
+    // viewer's: a camera moved from Python between two shows is what the next
+    // `keep` carries over, and `createRenderer` reads that from `_status`.
+    if (CAMERA_OPTIONS.includes(option)) {
+      this._status[option] = currentValue(this.viewer, option);
     }
   }
 

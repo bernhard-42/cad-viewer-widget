@@ -2906,7 +2906,7 @@ object-assign@^4.0.1, object-assign@^4.1.1:
 
 ocp-viewer-core@./ocp-viewer-core-v0.1.0.tgz:
   version "0.1.0"
-  resolved "./ocp-viewer-core-v0.1.0.tgz#975ac19918c2cf417d872814566c7e0d07babfe1"
+  resolved "./ocp-viewer-core-v0.1.0.tgz#97627542a1b9af0841d0e297f457c52fbb084243"
 
 once@^1.3.0:
   version "1.4.0"
