@@ -230,7 +230,7 @@ class CadViewerWidget(
     "bool: Whether to use orbit controls (True) or trackball controls (False)"
 
     up = Unicode().tag(sync=True)
-    "unicode: Whether camera up direction is Z ('Z') or Y ('Y') or the legacy Z orientation ('L')"
+    "unicode: Whether camera up direction is Z ('Z') or Y ('Y')"
 
     axes = Bool(allow_none=True, default_value=None).tag(sync=True)
     "bool: Whether to show coordinate axes (True) or not (False)"
@@ -694,7 +694,7 @@ class CadViewer:
         orbit_control : bool, default None
             Whether to use trackball controls ('trackball') or orbit controls ('orbit')
         up : string, default 'Z'
-            Whether camera up direction is Z ('Z') or Y ('Y') or the lagacy Z orientation ('L')
+            Whether camera up direction is Z ('Z') or Y ('Y')
         axes : bool, default False
             Whether to show coordinate axes (True) or not (False)
         axes0 : bool, default False
@@ -909,8 +909,8 @@ class CadViewer:
                 "For Trackball camera control, position paramater also needs quaternion parameter"
             )
 
-        if up not in ["Z", "Y", "L"]:
-            raise ValueError(f"Camera up value '{up}' can only be Y or Z or L")
+        if up not in ["Z", "Y"]:
+            raise ValueError(f"Camera up value '{up}' can only be Y or Z")
 
         if grid is None:
             grid = [False, False, False]
@@ -1781,6 +1781,21 @@ class CadViewer:
         """
 
         return self.widget.up
+
+    @property
+    def theme(self):
+        """
+        Get or set the CadViewerWidget traitlet `theme`
+
+        "light", "dark", or "browser" to follow the surface.
+        see [CadViewerWidget.theme](./widget.html#cad_viewer_widget.widget.CadViewerWidget.theme)
+        """
+
+        return self.widget.theme
+
+    @theme.setter
+    def theme(self, value):
+        self.widget.theme = value
 
     @property
     def pinning(self):

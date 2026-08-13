@@ -322,11 +322,6 @@ def show(
                     f"Parameter 'anchor' cannot be changed after sidecar with title '{title}' has been openend"
                 )
                 anchor = viewer.widget.anchor
-            if theme is not None and viewer.widget.theme != theme:
-                warn(
-                    f"Parameter 'theme' cannot be changed after sidecar with title '{title}' has been openend"
-                )
-                theme = viewer.widget.theme
             if pinning:
                 warn("Pinning not suported for sidecar views")
             if glass is not None and viewer.glass != glass:
@@ -455,6 +450,17 @@ def show(
             viewer = open_viewer(
                 title=title, pinning=pinning, anchor=anchor, **display_args(kwargs)
             )
+    # A theme change can be applied now, and this is the first point where the
+    # viewer is known however it was found - named, defaulted, or just opened.
+    # It used to warn and discard, because the theme only ever reached
+    # `new Display`, which runs once per sidecar; `applyConfig` has a `theme`
+    # setter now and the shared page re-applies it on every show. Doing it here
+    # rather than in the `title is not None` branch above is the whole point:
+    # Jupyter CadQuery passes `title=None` unless a sidecar is named, so the
+    # common path never went through that branch.
+    if kwargs.get("theme") is not None and viewer.widget.theme != kwargs["theme"]:
+        viewer.theme = kwargs["theme"]
+
     # print(dict(sorted(viewer_args(kwargs).items())))
     viewer.add_shapes(shapes, tracks, **viewer_args(kwargs))
     return viewer

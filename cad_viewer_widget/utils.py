@@ -140,6 +140,19 @@ def display_args(config):
 
 
 def viewer_args(config):
+    """The `add_shapes` keywords a config carries.
+
+    One translation, and it is the reason this is not a plain filter: a config
+    speaks the renderer's `control`, holding "orbit" or "trackball", and
+    `add_shapes` takes `orbit_control`, a boolean. Both callers hand this a
+    config that has been through `_convert` or is a stored splash, and neither
+    carries `orbit_control` - so without this the trait is never set,
+    `traitsAsConfig` omits `control` entirely, and three-cad-viewer falls back
+    to its own default, which is "orbit".
+    """
+    if config.get("control") is not None and "orbit_control" not in config:
+        config = {**config, "orbit_control": config["control"] == "orbit"}
+
     return {
         k: v
         for k, v in config.items()
