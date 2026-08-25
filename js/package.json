@@ -40,7 +40,7 @@
   "dependencies": {
     "@jupyter-widgets/base": "^6.0.10",
     "@jupyter-widgets/jupyterlab-manager": "^5.0.13",
-    "ocp-viewer-core": "./ocp-viewer-core-v0.1.0.tgz",
+    "ocp-viewer-core": "1.0.1",
     "three-cad-viewer": "../../three-cad-viewer/three-cad-viewer-v5.0.3.tgz"
   },
   "devDependencies": {

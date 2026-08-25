@@ -632,6 +632,15 @@ export class CadViewerView extends DOMWidgetView {
           changed = true;
           this.debug(`Setting Python attribute ${key} to`, collapse);
         }
+      } else if (key === "selected") {
+        // A Select-tool selection lands in the system clipboard. The browser
+        // holds the clipboard, and the selection click supplies the user
+        // activation the clipboard API requires.
+        if (Array.isArray(new_value) && new_value.length > 0) {
+          navigator.clipboard?.writeText(new_value.join(",")).catch((error) => {
+            console.warn("cad-viewer-widget: selection not copied to clipboard:", error);
+          });
+        }
       } else if (NOTIFICATION_TRAITS.has(key)) {
         this.model.set(key, new_value);
         changed = true;
