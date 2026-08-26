@@ -3473,9 +3473,10 @@ terser@^5.31.1:
     commander "^2.20.0"
     source-map-support "~0.5.20"
 
-three-cad-viewer@../../three-cad-viewer/three-cad-viewer-v5.0.3.tgz:
+three-cad-viewer@5.0.3:
   version "5.0.3"
-  resolved "../../three-cad-viewer/three-cad-viewer-v5.0.3.tgz#ad4c194794b6440b35ee31e1e79992ea9f538ccc"
+  resolved "https://registry.yarnpkg.com/three-cad-viewer/-/three-cad-viewer-5.0.3.tgz#645ee04d8d5e72f026a128bc2bd043b469065d60"
+  integrity sha512-aeCc9C7bv6P/VbrqlykhXY6Oht9u7D5YBRiNWRIHmOaMhJQIINNRRUgLyCON9JzvmDDlpH+CSrA22Omx2NtaiQ==
   dependencies:
     n8ao "1.10.1"
     postprocessing "6.39.0"
