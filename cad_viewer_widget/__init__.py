@@ -173,6 +173,7 @@ def show(
     tools=None,
     pinning=None,
     new_tree_behavior=True,
+    modifier_keys=None,
     #
     # render options
     normal_len=None,
@@ -252,6 +253,8 @@ def show(
         pinning:           Allow replacing the CAD View by a canvas screenshot (default=True in cells, else False)
         new_tree_behavior: Whether to  hide the complete shape when clicking on the eye (True, default) or only
                            the faces (False)
+        modifier_keys:     Mapping of the modifier keys, e.g. {"shift": "shiftKey", "ctrl": "ctrlKey", "meta": "metaKey"}
+                           (default=None, i.e. keep the viewer's current mapping)
 
     - Viewer
         axes:              Show axes (default=False)
@@ -358,6 +361,7 @@ def show(
     kwargs["aspect_ratio"] = preset("aspect_ratio", aspect_ratio, 0.75)
 
     kwargs["new_tree_behavior"] = preset("new_tree_behavior", new_tree_behavior, True)
+    kwargs["modifier_keys"] = preset("modifier_keys", modifier_keys, None)
     kwargs["theme"] = preset("theme", theme, "browser")
     kwargs["normal_len"] = preset("normal_len", normal_len, 0)
     kwargs["default_edgecolor"] = preset(
