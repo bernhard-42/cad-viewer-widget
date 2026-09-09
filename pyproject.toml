@@ -1,5 +1,10 @@
 [build-system]
-requires = ["hatchling>=1.5.0", "jupyterlab>=4.6.2,<5", "hatch-nodejs-version", "hatch-jupyter-builder>=0.5"]
+requires = [
+    "hatchling>=1.5.0",
+    "jupyterlab>=4.6.2,<5",
+    "hatch-nodejs-version",
+    "hatch-jupyter-builder>=0.5",
+]
 build-backend = "hatchling.build"
 
 [project]
@@ -7,7 +12,7 @@ name = "cad_viewer_widget"
 version = "4.1.0"
 readme = "README.md"
 license = { file = "LICENSE" }
-requires-python = ">=3.8"
+requires-python = ">=3.10"
 classifiers = [
     "Framework :: Jupyter",
     "Framework :: Jupyter :: JupyterLab",
@@ -21,8 +26,15 @@ classifiers = [
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
 ]
-dependencies = ["ipywidgets~=8.1.5", "jupyterlab~=4.6.2", "pyparsing", "numpy"]
+dependencies = [
+    "ipywidgets>=8.1.5, <8.2",
+    "jupyterlab>=4.6.2, <4.8",
+    "numpy",
+    "orjson",
+    "pyparsing",
+]
 
 dynamic = ["description", "authors", "urls", "keywords"]
 
@@ -68,7 +80,7 @@ version_cmd = "hatch version"
 before-build-npm = [
     "python -m pip install 'jupyterlab>=4.6.2,<5'",
     "yarn",
-    "yarn build:prod"
+    "yarn build:prod",
 ]
 before-build-python = ["yarn clean"]
 
