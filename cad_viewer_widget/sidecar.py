@@ -92,12 +92,45 @@ def set_default(title):
     DEFAULT = title
 
 
+def close_viewer_widgets(viewer):
+    """Close a viewer's widgets and their comms, not only its Javascript.
+
+    `viewer.close()` sets `disposed`, which is a message to the browser; the
+    kernel-side widgets survive it, comms and all. Closing them here is what
+    keeps a session flat: reopening a title used to leave the previous
+    `Sidecar`, its `CadViewerWidget` and both `Layout`s alive - four widgets per
+    call, measured as 4, 8, 12, 16 - and that comm churn is what makes the
+    Jupyter server's ZMQ race likely, whose symptom is a cell stuck at `[*]`
+    with an idle kernel.
+
+    Every step is guarded: a half-built viewer must not stop the rest going.
+    """
+    try:
+        viewer.close()  # the Javascript side disposes
+    except Exception:  # noqa: BLE001  # pylint: disable=broad-except
+        pass
+
+    for widget in (getattr(viewer, "sidecar", None), getattr(viewer, "widget", None)):
+        if widget is None:
+            continue
+        # The `Layout` goes too: a widget with a comm of its own, which
+        # `Widget.close()` leaves open because layouts can be shared. These are
+        # not - each was made for the widget being closed here.
+        for w in (widget, getattr(widget, "layout", None)):
+            if w is None:
+                continue
+            try:
+                w.close()
+            except Exception:  # noqa: BLE001  # pylint: disable=broad-except
+                pass
+
+
 def close_sidecars():
     global SIDECARS  # pylint: disable=global-statement
     global DEFAULT  # pylint: disable=global-statement
 
-    for title, sidecar in get_sidecars().items():
-        sidecar.close()
+    for title, viewer in list(get_sidecars().items()):
+        close_viewer_widgets(viewer)
         print(f'Closed viewer "{title}"')
 
     SIDECARS = {}
@@ -105,7 +138,11 @@ def close_sidecars():
 
 
 def close_sidecar(title):
-    sidecar = SIDECARS.get(title)
-    if sidecar is not None:
-        sidecar.close()
+    viewer = SIDECARS.get(title)
+    if viewer is not None:
+        close_viewer_widgets(viewer)
+        # The entry went too far the other way before: the viewer was disposed
+        # in the browser and left in `SIDECARS`, so `show(viewer=title)` still
+        # found it and drew into a panel that was gone.
+        _remove_sidecar(title)
         print(f'Closed viewer "{title}"')

@@ -12,6 +12,7 @@ from .sidecar import (
     set_sidecar,
     close_sidecars,
     close_sidecar,
+    close_viewer_widgets,
     get_default as get_default_sidecar,
     set_default as _set_default_sidecar,
 )
@@ -148,6 +149,12 @@ def open_viewer(
         viewer.widget.image_id = image_id
         error = None
     else:
+        # Reopening a title replaces what is there, so the previous viewer's
+        # widgets go with it - see `_close_viewer` for what leaking them costs.
+        previous = get_sidecar(title)
+        if previous is not None:
+            close_viewer_widgets(previous)
+
         out = Sidecar(title=title, anchor=anchor)
         with out:
             try:
@@ -171,6 +178,10 @@ def open_viewer(
                 error = ex
 
         if error is None:
+            # Kept so the next `open_viewer` for this title can close it: the
+            # sidecar is a widget of its own and nothing else holds a reference.
+            viewer.sidecar = out
+
             out.resize_sidebar(cad_width + (0 if glass else tree_width) + 12)
 
             set_sidecar(title, viewer)
