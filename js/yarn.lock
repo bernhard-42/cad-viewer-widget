@@ -2904,10 +2904,10 @@ object-assign@^4.0.1, object-assign@^4.1.1:
   resolved "https://registry.yarnpkg.com/object-assign/-/object-assign-4.1.1.tgz#2109adc7965887cfc05cbbd442cac8bfbb360863"
   integrity sha512-rJgTQnkUnH1sFw8yT6VSU3zD3sWmu6sZhIseY8VX+GRu3P6F7Fu+JNDoXfklElbLJSnc3FUQHVe4cU5hj+BcUg==
 
-ocp-viewer-core@1.0.3:
-  version "1.0.3"
-  resolved "https://registry.yarnpkg.com/ocp-viewer-core/-/ocp-viewer-core-1.0.3.tgz#455fd51f8a294f533ea2448c22d8e98f5c7ddf4a"
-  integrity sha512-zaMg0vr1Yz6gtcXgOuwH3BcFebd3drRJn3NLt2K8n33gKYeC/Qmi/qF69IlBuAWwUKumzpUuFif/xxuWxSBZsw==
+ocp-viewer-core@1.0.4:
+  version "1.0.4"
+  resolved "https://registry.yarnpkg.com/ocp-viewer-core/-/ocp-viewer-core-1.0.4.tgz#8ff4270285328c8f7bb9bd341a180e09de81801b"
+  integrity sha512-JmpRetzkqNujj8MFLOTpIZADYB58o8ilQGFfaobVrbLNnvV663y3fW/ubWfu6QfOtLpx4LSGNhmP62o6bFN4cg==
 
 once@^1.3.0:
   version "1.4.0"
@@ -3473,10 +3473,10 @@ terser@^5.31.1:
     commander "^2.20.0"
     source-map-support "~0.5.20"
 
-three-cad-viewer@5.0.5:
-  version "5.0.5"
-  resolved "https://registry.yarnpkg.com/three-cad-viewer/-/three-cad-viewer-5.0.5.tgz#751eb0f0d6fadf928fbc42646b2b31cffc49d946"
-  integrity sha512-jyoaagVxIJnNytZPDcKuHe+dapR1zCwIAnlwfcSksl+U9LlssTpUpSXrLDkBcSbZJNqj4hUWvfvRcvvptInhLw==
+three-cad-viewer@5.0.6:
+  version "5.0.6"
+  resolved "https://registry.yarnpkg.com/three-cad-viewer/-/three-cad-viewer-5.0.6.tgz#4b684b5e74bcda2575deb73ddec6e657dd05f8c5"
+  integrity sha512-57SaH0r2Wa1Dd2+L0dgWiDTdd2bVequ5ac0Zgk3+KcVegmjbsPUjHs0T8LGe8Ul4vyRe5YIQU12zWyuVE1k04Q==
   dependencies:
     n8ao "1.10.1"
     postprocessing "6.39.0"
