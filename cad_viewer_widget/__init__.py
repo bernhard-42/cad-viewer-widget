@@ -79,12 +79,19 @@ MESSAGES = {
 }
 
 
+# What a viewer falls back to when the caller says nothing. Named because the
+# sidecar path has to tell "not given" from "given the same as the default",
+# which a literal in the signature cannot.
+DEFAULT_CAD_WIDTH = 800
+DEFAULT_HEIGHT = 600
+
+
 def open_viewer(
     title=None,
     anchor="right",
-    cad_width=800,
+    cad_width=None,
     tree_width=250,
-    height=600,
+    height=None,
     aspect_ratio=None,
     theme="browser",
     glass=True,
@@ -92,8 +99,28 @@ def open_viewer(
     pinning=True,
     default=True,
 ):
+    # In a sidecar `cad_width` and `height` are a shape rather than a size: the
+    # panel decides the size, and the ResizeObserver writes both traits back on
+    # the first layout. A caller who names *both* has described a proportion,
+    # and that becomes the aspect ratio. One of the two on its own does not -
+    # the other half would be a default nobody asked for - so the viewer fills
+    # the panel, which is what naming a single dimension turned out to feel
+    # like. A cell viewer is untouched by any of this: there the two are the
+    # size, exactly as given, and no resize ever revisits them.
+    if title not in (None, "") and cad_width is not None and height is not None:
+        implied = height / cad_width
+        if aspect_ratio is None:
+            aspect_ratio = implied
+        elif abs(aspect_ratio - implied) > 1e-9:
+            warn(
+                f"aspect_ratio={aspect_ratio} wins over cad_width={cad_width} "
+                f"and height={height}, which describe {implied:.4g}"
+            )
 
-    if cad_width is not None and cad_width < 780:
+    cad_width = DEFAULT_CAD_WIDTH if cad_width is None else cad_width
+    height = DEFAULT_HEIGHT if height is None else height
+
+    if cad_width < 780:
         cad_width = 780
         print("`cad_width` cannot be smaller than 780, setting to 780")
 
@@ -448,13 +475,40 @@ def show(
                 title=None,
                 anchor=None,
                 pinning=True if pinning is None else pinning,
-                **display_args(kwargs),
+                **{
+                    **display_args(kwargs),
+                # What the caller said, not what `preset` filled in above: a
+                # sidecar takes its size from its panel, and `open_viewer` tells
+                # "given" from "defaulted" by these sentinels. Handing it the
+                # presets' 800x600 made every sidecar `show` opened derive that
+                # aspect ratio, where `open_viewer` with no arguments fills the
+                # panel. `aspect_ratio` travels here too - `display_args` does
+                # not carry it, so an explicit one never reached the viewer.
+                "cad_width": cad_width,
+                "height": height,
+                "aspect_ratio": aspect_ratio,
+                },
             )
     else:
         viewer = get_sidecar(title)
         if viewer is None:
             viewer = open_viewer(
-                title=title, pinning=pinning, anchor=anchor, **display_args(kwargs)
+                title=title,
+                pinning=pinning,
+                anchor=anchor,
+                **{
+                    **display_args(kwargs),
+                # What the caller said, not what `preset` filled in above: a
+                # sidecar takes its size from its panel, and `open_viewer` tells
+                # "given" from "defaulted" by these sentinels. Handing it the
+                # presets' 800x600 made every sidecar `show` opened derive that
+                # aspect ratio, where `open_viewer` with no arguments fills the
+                # panel. `aspect_ratio` travels here too - `display_args` does
+                # not carry it, so an explicit one never reached the viewer.
+                "cad_width": cad_width,
+                "height": height,
+                "aspect_ratio": aspect_ratio,
+                },
             )
     # A theme change can be applied now, and this is the first point where the
     # viewer is known however it was found - named, defaulted, or just opened.
