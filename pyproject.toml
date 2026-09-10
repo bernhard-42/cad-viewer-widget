@@ -29,9 +29,17 @@ classifiers = [
     "Programming Language :: Python :: 3.14",
 ]
 dependencies = [
-    "ipywidgets>=8.1.5, <8.2",
-    "jupyterlab>=4.6.2, <4.8",
-    "numpy",
+    # The floors are the oldest combination that has been run. The caps are
+    # where the contract stops being known: this widget's JavaScript requires
+    # `@jupyter-widgets/base ^6.0.10`, and base 6.x is what ipywidgets 8.x
+    # ships - every ipywidgets major so far has brought a different base major
+    # (7.x had base 4.x; base 5.x never had a final release), so 9 is the line,
+    # whatever number it carries. For JupyterLab it is the plugin and
+    # federation API at 5; inside 4.x nothing this package imports moves,
+    # since the only JupyterLab package it imports is none at all.
+    "ipywidgets>=8.1.5, <9",
+    "jupyterlab>=4.6.2, <5",
+    "numpy>=2.0",
     "orjson",
     "pyparsing",
 ]
