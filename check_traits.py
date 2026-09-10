@@ -76,7 +76,7 @@ NOT_A_CONFIG_KEY = {
     "measure": "widget: the measurement result handed back",
     "measure_callback": "widget: a Callable, not synced",
     "animation_speed": "widget: animation playback speed",
-    "aspect_ratio": "widget: sizes a cell viewer",
+    "aspect_ratio": "widget: optional fixed aspect for a sidecar",
     # The sidecar keywords. In the show superset because every host accepts
     # them, but not in the config vocabulary, because only this host has a
     # sidecar to name, place and pin.

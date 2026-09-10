@@ -548,7 +548,7 @@ class CadViewer:
         cad_width=800,
         height=600,
         tree_width=240,
-        aspect_ratio=0.75,
+        aspect_ratio=None,
         theme="browser",
         glass=False,
         tools=True,
@@ -925,9 +925,6 @@ class CadViewer:
 
         # set shapes to None so that the same object can be shown again
         self.widget.shapes = None
-
-        if self.widget.aspect_ratio is None:
-            self.widget.aspect_ratio = 0.75
 
         with self.widget.hold_trait_notifications():
             self.widget.shapes = shapes

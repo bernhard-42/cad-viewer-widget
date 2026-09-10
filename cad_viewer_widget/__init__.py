@@ -85,7 +85,7 @@ def open_viewer(
     cad_width=800,
     tree_width=250,
     height=600,
-    aspect_ratio=0.75,
+    aspect_ratio=None,
     theme="browser",
     glass=True,
     tools=True,
@@ -358,7 +358,9 @@ def show(
     kwargs["height"] = preset("height", height, 600)
     kwargs["cad_width"] = preset("cad_width", cad_width, 800)
     kwargs["tree_width"] = preset("tree_width", tree_width, 250)
-    kwargs["aspect_ratio"] = preset("aspect_ratio", aspect_ratio, 0.75)
+    # No default: a sidecar fills the panel it is given, and an aspect
+    # ratio is a deliberate constraint on that rather than the norm.
+    kwargs["aspect_ratio"] = preset("aspect_ratio", aspect_ratio, None)
 
     kwargs["new_tree_behavior"] = preset("new_tree_behavior", new_tree_behavior, True)
     kwargs["modifier_keys"] = preset("modifier_keys", modifier_keys, None)

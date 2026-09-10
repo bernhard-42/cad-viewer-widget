@@ -97,6 +97,11 @@ const NOTIFICATION_TRAITS = new Set([
 // traitlet is one name in both languages, so the config Python sends arrives in
 // Python spelling and is translated here rather than on the way out - the rule
 // is the same as every other client's, applied at the other end.
+// The narrowest the whole viewer goes - tree included, as in the core's
+// page host. Python refuses a `cad_width` below this at construction; here it
+// is what a shrinking sidecar is allowed to squeeze the layout down to.
+const MIN_TOTAL_WIDTH = 780;
+
 const TRAIT_TO_OPTION = {
     // Render options. These were a second table, inside the widget's own
     // a trait in neither is a setting the user can change that the renderer
@@ -492,11 +497,16 @@ export class CadViewerView extends DOMWidgetView {
       // ignore zero sized rects of hidden or not yet laid out containers,
       // else 0 gets stored in the model and propagated to resizeCadView
       if (width > 0 && height > 0) {
-        if (!displayOptions.glass) {
-          width = width - displayOptions.treeWidth;
-        }
-
-        width = Math.max(780, width - 12);
+        // The minimum is on the *total* width, not on the canvas. With the
+        // tree beside the canvas rather than over it, the canvas is floored at
+        // what is left of the minimum once the tree has its width; flooring
+        // the canvas itself made every sidecar narrower than 780 + treeWidth
+        // overflow by construction - measured as a 1030px wide layout in an
+        // 810px panel, the canvas clipped at the panel's edge. The core's
+        // `normalizeWidth` in page.js takes the tree off the floor the same
+        // way, so the two hosts now agree.
+        const reserved = displayOptions.glass ? 0 : displayOptions.treeWidth;
+        width = Math.max(MIN_TOTAL_WIDTH - reserved, width - reserved - 12);
         height = height - 60;
         const aspect_ratio = this.model.get("aspect_ratio");
 
@@ -1014,6 +1024,24 @@ export class CadViewerView extends DOMWidgetView {
       onUnknown: (unknown) =>
         console.error(`cad-viewer-widget: no setter for '${unknown}' in ocp-viewer-core`)
     });
+
+    // Leaving glass mode moves the tree out of the canvas's row, and
+    // three-cad-viewer's `glassMode` re-lays out with the `cadWidth` it was
+    // given: the viewer grows by `treeWidth` where the canvas should have
+    // shrunk by it - measured as 1056px of viewer inside an 810px sidecar
+    // panel, the canvas shifted right and clipped. `tools` reserves the tree
+    // the same way. Only this host knows how much room there is, so this host
+    // puts it back, exactly as a drag of the sidecar would.
+    //
+    // Sidecars only, like the ResizeObserver: in a cell viewer `cad_width` is
+    // the canvas width the caller asked for and the total is allowed to grow.
+    if (
+      (key === "glass" || key === "tools") &&
+      this.title != null &&
+      this.container != null
+    ) {
+      this.resize(this.container.parentNode.parentNode.getBoundingClientRect());
+    }
 
     // The camera keys keep the renderer's picture in step as well as the
     // viewer's: a camera moved from Python between two shows is what the next
