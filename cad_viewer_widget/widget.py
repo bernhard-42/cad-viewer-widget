@@ -392,10 +392,17 @@ class CadViewerWidget(
     clip_object_colors = Bool(allow_none=True, default_value=None).tag(sync=True)
     "bool: Whether to show colored clipping caps in object color (True) or not (False)"
 
+    # The three modes plus the seven preset views: one vocabulary, the one
+    # the shared renderer reads. It was the modes alone, so a preset view
+    # raised TraitError here while `render.js` and `apply.js` both took it,
+    # and every caller had to translate "top" into "reset" plus a `set_camera`
+    # call afterwards.
     reset_camera = Enum(
-        ["reset", "keep", "center"], allow_none=True, default_value=None
+        ["reset", "keep", "center", "iso", "top", "bottom", "left", "right", "rear", "front"],
+        allow_none=True,
+        default_value=None,
     ).tag(sync=True)
-    "Enum Camera: Whether to reset camera (reset) or not (keep or center keep orientation but center the camera)"
+    "Enum Camera: Whether to reset camera (reset) or not (keep or center keep orientation but center the camera), or a preset view (iso, top, bottom, left, right, rear, front)"
 
     position = Tuple(Float(), Float(), Float(), allow_none=True).tag(sync=True)
     "tuple: Position of the camera as a 3-dim tuple of float (x,y,z)"
@@ -1690,6 +1697,29 @@ class CadViewer:
     #
 
     @property
+    def reset_camera(self):
+        """
+        Get or set the CadViewerWidget traitlet `reset_camera`
+        see [CadViewerWidget.reset_camera](./widget.html#cad_viewer_widget.widget.CadViewerWidget.reset_camera)
+
+        Setting it is a command, not a state change: "reset" moves the camera
+        to iso and refits, a view name moves it there, and "keep" or "center"
+        do nothing to a running viewer.
+        """
+
+        return self.widget.reset_camera
+
+    @reset_camera.setter
+    def reset_camera(self, value):
+        # Pulsed through None, because traitlets sends nothing for a value
+        # that has not changed - and after any show the trait already holds
+        # "reset", so a plain assignment reached the browser every second
+        # time at best. The browser ignores the None (`handle_change` returns
+        # on a null value) and acts on the value that follows it.
+        self.widget.reset_camera = None
+        self.widget.reset_camera = value
+
+    @property
     def zoom(self):
         """
         Get or set the CadViewerWidget traitlet `zoom`
@@ -2219,6 +2249,22 @@ class CadViewer:
             "rotate_speed": self.widget.rotate_speed,
             "animation_speed": self.widget.animation_speed,
             "lastPick": self.widget.lastPick,
+            "zebra_count": self.widget.zebra_count,
+            "zebra_opacity": self.widget.zebra_opacity,
+            "zebra_direction": self.widget.zebra_direction,
+            "zebra_color_scheme": self.widget.zebra_color_scheme,
+            "zebra_mapping_mode": self.widget.zebra_mapping_mode,
+            "studio_environment": self.widget.studio_environment,
+            "studio_env_intensity": self.widget.studio_env_intensity,
+            "studio_env_rotation": self.widget.studio_env_rotation,
+            "studio_background": self.widget.studio_background,
+            "studio_tone_mapping": self.widget.studio_tone_mapping,
+            "studio_exposure": self.widget.studio_exposure,
+            "studio_shadow_intensity": self.widget.studio_shadow_intensity,
+            "studio_shadow_softness": self.widget.studio_shadow_softness,
+            "studio_ao_intensity": self.widget.studio_ao_intensity,
+            "studio_texture_mapping": self.widget.studio_texture_mapping,
+            "studio_4k_env_maps": self.widget.studio_4k_env_maps,
         }
         if all:
             result.update(

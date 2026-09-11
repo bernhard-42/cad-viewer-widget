@@ -35,7 +35,14 @@ const COLLAPSE_REVERSE_MAPPING = {
 
 // Notification keys of three-cad-viewer that are forwarded to Python;
 // each name must match a traitlet on CadViewerWidget. All other keys
-// (e.g. zebra_*, studio_*, holroyd, selected) are ignored.
+// (e.g. holroyd, relative_time) are ignored; `selected` and `collapse`
+// are handled by name below.
+//
+// The zebra and studio families were left out when they arrived, so a
+// slider moved in either tab never reached the kernel: `status()` answered
+// with what Python last sent, and the next show put that back. The page
+// hosts record every notification, and `keys.CONFIG` carries these into
+// the next show - this list is where the widget host has to say the same.
 const NOTIFICATION_TRAITS = new Set([
   "position",
   "quaternion",
@@ -73,6 +80,22 @@ const NOTIFICATION_TRAITS = new Set([
   "clip_normal_2",
   "lastPick",
   "activeTool",
+  "zebra_count",
+  "zebra_opacity",
+  "zebra_direction",
+  "zebra_color_scheme",
+  "zebra_mapping_mode",
+  "studio_environment",
+  "studio_env_intensity",
+  "studio_env_rotation",
+  "studio_background",
+  "studio_tone_mapping",
+  "studio_exposure",
+  "studio_shadow_intensity",
+  "studio_shadow_softness",
+  "studio_ao_intensity",
+  "studio_texture_mapping",
+  "studio_4k_env_maps",
   "selectedShapeIDs",
   "zebra_count",
   "zebra_opacity",
@@ -337,6 +360,8 @@ export class CadViewerView extends DOMWidgetView {
     this.lastZoom = null;
     this.empty = true;
     this.activeTab = "";
+    this._clearing = false;
+    this._rendering = false;
     this.display = null;
     this.viewer = null;
   }
@@ -600,7 +625,19 @@ export class CadViewerView extends DOMWidgetView {
     // tears down the scene but keeps the WebGL context, viewer state and
     // studio environment cache alive, avoiding the flash of a full teardown
     if (this.viewer != null) {
-      this.viewer.clear();
+      // Not a user change, so not reported. clear() resets the active tab to
+      // "tree" (three-cad-viewer does that to leave Studio mode cleanly) and
+      // notifies it like a click, and the notification wrote "tree" into the
+      // model while the kernel, busy with the same show, still held "clip":
+      // its `widget.tab = "clip"` was a no-op, `traitsAsConfig` then read the
+      // model, and every show landed on Tree. A render follows this clear at
+      // once and reports the tab it actually lands on.
+      this._clearing = true;
+      try {
+        this.viewer.clear();
+      } finally {
+        this._clearing = false;
+      }
     } else {
       this.viewer = new Viewer(
         this.display,
@@ -630,11 +667,59 @@ export class CadViewerView extends DOMWidgetView {
     }
   }
 
+  /**
+   * A report of `key` waiting in ipywidgets' send buffer is obsolete once the
+   * kernel sets `key` itself.
+   *
+   * The frontend allows one in-flight message to the kernel; until the kernel
+   * answers idle - never before the running cell ends - every further report
+   * is merged into `_msg_buffer`. So in one cell
+   *
+   *     show(...)
+   *     set_viewer_config(tab="clip")
+   *
+   * the render's `tab: "tree"` is buffered, the kernel's "clip" arrives and is
+   * applied, the viewer complies, and its own confirming set is filtered as
+   * equal to the kernel's value - while the buffer still says "tree". When
+   * the cell ends the buffer flushes and the kernel's trait is overwritten
+   * with a value the viewer left a second ago: the next show went to Tree.
+   * Only the first run after a kernel start, because afterwards the render's
+   * report is no diff and nothing is buffered - which is what made it look
+   * like a race. The camera keys go the same way.
+   *
+   * The page hosts have no throttle and no merge. Here, a kernel update is
+   * recognised by the state lock the model holds while applying it, and the
+   * buffered report for that key is dropped. Both fields are the model's own
+   * internals (@jupyter-widgets/base 6, `_state_lock` and `_msg_buffer`);
+   * nothing public exposes the buffer.
+   */
+  dropStaleReport(key) {
+    const lock = this.model._state_lock;
+    const buffer = this.model._msg_buffer;
+    if (lock == null || buffer == null) {
+      return;
+    }
+    if (
+      Object.prototype.hasOwnProperty.call(lock, key) &&
+      Object.prototype.hasOwnProperty.call(buffer, key)
+    ) {
+      this.debug("Dropping buffered report superseded by the kernel:", key, buffer[key]);
+      delete buffer[key];
+    }
+  }
+
   handleNotification(change) {
+    if (this._clearing) {
+      this.debug("Ignoring notification while clearing", change);
+      return;
+    }
     var changed = false;
     Object.keys(change).forEach((key) => {
       const new_value = change[key]["new"];
-      if (key === "collapse") {
+      if (key === "tab" && this._rendering) {
+        // `addShapes` reports the landed tab after the render; see there.
+        this.debug("Ignoring tab notification while rendering", new_value);
+      } else if (key === "collapse") {
         // three-cad-viewer reports CollapseState numbers, the Python trait uses "1"/"R"/"C"/"E"
         const collapse = COLLAPSE_REVERSE_MAPPING[new_value];
         if (collapse != null) {
@@ -803,7 +888,23 @@ export class CadViewerView extends DOMWidgetView {
     // policy: what `keep` means when the model underneath has changed, and
     // the zoom correction that goes with it. It reads and writes `_status`,
     // and calls `publishCamera` when it has settled.
-    this.renderer.render(this.shapes, config);
+    // The tab is reported once, after the render, as the tab the render
+    // landed on. During the render three-cad-viewer notifies "tree" from its
+    // initial state snapshot - straight to the callback, past `checkChanges`,
+    // so `lastNotification` is not updated - and the landing on `config.tab`
+    // that follows is then compared against a stale `lastNotification` and
+    // may not be notified at all. The kernel was left holding "tree" while the
+    // viewer sat on Clip, and the next show went to Tree.
+    this._rendering = true;
+    try {
+      this.renderer.render(this.shapes, config);
+    } finally {
+      this._rendering = false;
+    }
+    const landedTab = this.viewer.state.get("activeTab");
+    this.activeTab = landedTab;
+    this.model.set("tab", landedTab);
+    this.model.save_changes();
 
     this.clipping = {
       sliders: [
@@ -906,6 +1007,8 @@ export class CadViewerView extends DOMWidgetView {
 
   handle_change(change) {
     const key = Object.keys(change.changed)[0];
+
+    this.dropStaleReport(key);
 
     if (this.init) {
       this.debug("Ignore message");
