@@ -412,13 +412,6 @@ export class CadViewerView extends DOMWidgetView {
       // find and remove old cell viewers, e.g. when run the same cell
       App.cleanupCellViewers();
 
-      // TODO: needed for embedding?
-      // this.showViewer();
-
-      // if (this.model.get("shapes") != "") {
-      //   this.addShapes();
-      // }
-
       // The viewer's own state, as the renderer reports it: what
       // `createRenderer` reads to carry a camera over and writes back after a
       // render. Held apart from the traits deliberately - `handleNotification`
@@ -432,6 +425,25 @@ export class CadViewerView extends DOMWidgetView {
       window.getCadViewers = App.getCadViewers;
       window.currentCadViewer = this;
       this.model.rendered = true;
+
+      // A model that already holds a finished show is a saved state: an
+      // HTML export, a notebook converted with its widget state, or a page
+      // reloaded over a live kernel. Nothing will ever flip `initialize`
+      // for it - that is Python's `add_shapes` talking to a live view - so
+      // the view draws what the state holds. A live show is not this: its
+      // view is created by the display message, which precedes the trait
+      // updates, so it starts with no shapes and takes the `initialize`
+      // route.
+      //
+      // Once displayed, not now: the embed manager renders a view before
+      // attaching it, and a scene built into a detached element stays
+      // empty - the canvas exists, the tree and the model do not.
+      if (this.model.get("shapes") != null && this.model.get("initialize") === false) {
+        this.displayed.then(() => {
+          this.showViewer();
+          this.addShapes();
+        });
+      }
     }
   }
 
@@ -579,7 +591,12 @@ export class CadViewerView extends DOMWidgetView {
       }
       this.el.appendChild(container);
 
-      let size = container.parentNode.parentNode.getBoundingClientRect();
+      // The embed manager renders a view before attaching it to the page,
+      // so the output area may not exist yet; a saved state carries its
+      // own cad_width and height and needs no measurement.
+      const outputArea = this.el.parentNode;
+      let size =
+        outputArea != null ? outputArea.getBoundingClientRect() : { width: 0, height: 0 };
       if (displayOptions.height == null && size.height > 60) {
         this.height = Math.round(size.height) - 60;
         displayOptions.height = this.height;
@@ -837,7 +854,14 @@ export class CadViewerView extends DOMWidgetView {
 
     // pass the raw {instances, shapes} data to three-cad-viewer, which
     // decodes the b64 buffers and instance refs natively (like ocp_vscode)
-    this.shapes = this.model.get("shapes");
+    //
+    // A copy, because the renderer decodes in place: b64 strings become
+    // typed arrays and instance refs become the arrays they point to. The
+    // model must keep the wire format, since the model is what JupyterLab
+    // saves as the notebook's widget state - saved after a render, the typed
+    // arrays came back as `{"0": .., "1": ..}` objects and every mesh in the
+    // converted HTML had zero vertices (jupyter-cadquery#109).
+    this.shapes = structuredClone(this.model.get("shapes"));
 
     const timer = new Timer("addShapes", this.model.get("timeit"));
 

@@ -2135,29 +2135,31 @@ class CadViewer:
         filename (str): The name of the HTML file to export. Default is "cadquery.html".
         title (str): The title of the HTML document. Default is "CadQuery".
 
-        Raises:
-        RuntimeError: If the widget is displayed in a sidecar.
-
         Notes:
-        - This method temporarily disables pinning while exporting the HTML.
         - The state of the widget is captured and embedded in the HTML file.
+        - A sidecar viewer is exported as a cell viewer of the same size: the
+          page has no JupyterLab to hang a sidecar on.
+        - The page loads the widget's JavaScript from the npm registry, at
+          the version this package declares, so it needs the matching
+          `cad-viewer-widget` release to be published there.
         """
-        if not (self.widget.title is None or self.widget.title == ""):
-            raise RuntimeError(
-                "Export_html does not work with sidecar. Show the object again in a cell viewer"
-            )
+        state = dependency_state(self.widget)
 
-        pinning = self.pinning
-        self.pinning = False
+        # The exported page renders what the state says. Three traits describe
+        # this widget's place in JupyterLab rather than the view: a sidecar
+        # title would make the page look up a sidecar it cannot have, and
+        # pinning is a JupyterLab affordance. Cleared in the copy, not on the
+        # live widget, which stays where it is.
+        widget_state = state[self.widget.model_id]["state"]
+        for trait in ("title", "anchor", "pinning"):
+            widget_state.pop(trait, None)
 
         embed_minimal_html(
             filename,
             title=title,
             views=[self.widget],
-            state=dependency_state(self.widget),
+            state=state,
         )
-
-        self.pinning = pinning
 
     #
     # Custom message handling
