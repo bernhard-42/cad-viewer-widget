@@ -50,10 +50,9 @@ To release a new version of cad_viewer_widget on PyPI:
    make upload_js
    ```
 
-8.
+8. Push and create the GitHub release (needs `gh auth login` once)
 
    ```shell
-   # Set github token
-   make create-release   
+   make create-release
    ```
 

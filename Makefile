@@ -64,11 +64,22 @@ release:
 	git diff-index --quiet HEAD || git commit -m "Latest release: $(CURRENT_VERSION)"
 	git tag -a v$(CURRENT_VERSION) -m "Latest release: $(CURRENT_VERSION)"
 
+# Push, then a GitHub release under the tag `release` made, carrying what
+# PyPI got. No `--target`: the tag exists and says which commit, whichever
+# branch the release was cut from. Both files must exist in dist/ - `make
+# dist` builds them - or nothing is pushed.
 create-release:
-	@github-release release -u bernhard-42 -r cad-viewer-widget -t v$(CURRENT_VERSION) -n cad-viewer-widget-$(CURRENT_VERSION)
-	@sleep 2
-	@github-release upload  -u bernhard-42 -r cad-viewer-widget -t v$(CURRENT_VERSION) -n cad_viewer_widget-$(CURRENT_VERSION).tar.gz -f dist/cad_viewer_widget-$(CURRENT_VERSION).tar.gz
-	@github-release upload  -u bernhard-42 -r cad-viewer-widget -t v$(CURRENT_VERSION) -n cad_viewer_widget-$(CURRENT_VERSION)-py3-none-any.whl -f dist/cad_viewer_widget-$(CURRENT_VERSION)-py3-none-any.whl
+	@for f in dist/cad_viewer_widget-$(CURRENT_VERSION)-py3-none-any.whl \
+	         dist/cad_viewer_widget-$(CURRENT_VERSION).tar.gz; do \
+	    test -f $$f || { echo "missing $$f - run make dist first"; exit 1; }; \
+	done
+	@git push
+	@git push --tags
+	@gh release create v$(CURRENT_VERSION) \
+	    "dist/cad_viewer_widget-$(CURRENT_VERSION)-py3-none-any.whl#Python $(CURRENT_VERSION) - wheel (PyPI)" \
+	    "dist/cad_viewer_widget-$(CURRENT_VERSION).tar.gz#Python $(CURRENT_VERSION) - source (PyPI)" \
+	    --title "cad-viewer-widget $(CURRENT_VERSION)" \
+	    --notes "$(CURRENT_VERSION) on PyPI and npm. See the commit log."
 
 install: dist
 	@echo "=> Installing cad-viewer-widget"
