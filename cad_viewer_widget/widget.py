@@ -22,6 +22,7 @@ from traitlets import (
     Bool,
     Enum,
     Callable,
+    Union,
     observe,
 )
 from IPython.display import HTML, update_display
@@ -219,8 +220,14 @@ class CadViewerWidget(
     # pylint: disable=line-too-long
     "unicode: Serialized list of animation track arrays, see [AnimationTrack.to_array](/widget.html#cad_viewer_widget.widget.AnimationTrack.to_array)"
 
-    timeit = Bool(allow_none=True, default_value=None).tag(sync=True)
-    "bool: Whether to output timing info to the browser console (True) or not (False)"
+    # A level 0-3 on the Python side (`show(timeit=2)`), a flag in the browser,
+    # where any level other than 0 switches the timers on. It was Bool alone,
+    # and a level raised TraitError in the one host whose show goes through a
+    # trait.
+    timeit = Union([Bool(), Integer()], allow_none=True, default_value=None).tag(
+        sync=True
+    )
+    "bool or int: Whether to output timing info to the browser console (True, or a level 1-3) or not (False, 0)"
 
     tools = Bool(allow_none=True, default_value=None).tag(sync=True)
     "bool: Whether to show CAD tools (True) or not (False)"
@@ -753,8 +760,8 @@ class CadViewer:
             Speed of panning with the mouse
         rotate_speed : float, default 1.0
             Speed of rotation with the mouse
-        timeit : bool, default False
-            Whether to output timing info to the browser console (True) or not (False)
+        timeit : bool or int, default False
+            Whether to output timing info to the browser console (True, or a level 1-3) or not (False, 0)
 
         Examples
         --------
