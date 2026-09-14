@@ -7,8 +7,10 @@ import {
   applyConfig,
   buildDisplayOptions,
   createRenderer,
+  currentStates,
   currentValue,
-  isApplicable
+  isApplicable,
+  restoreStates
 } from "ocp-viewer-core";
 
 import { isTolEqual } from "./utils.js";
@@ -263,6 +265,7 @@ export class CadViewerModel extends DOMWidgetModel {
       shapes: null,
       states: null,
       state_updates: null,
+      requested_states: null,
       tracks: null,
       timeit: null,
       tools: null,
@@ -362,6 +365,7 @@ export class CadViewerView extends DOMWidgetView {
     this.activeTab = "";
     this._clearing = false;
     this._rendering = false;
+    this._oldStates = null;
     this.display = null;
     this.viewer = null;
   }
@@ -794,6 +798,12 @@ export class CadViewerView extends DOMWidgetView {
         this.lastZoom = this.viewer.getCameraZoom();
         this.lastTarget = this.viewer.getCameraTarget();
       }
+      // What the tree shows and hides, read before `showViewer` clears the
+      // scene: `addShapes` puts it back for whatever survives into the new
+      // model, as the page hosts do. Without this a part hidden by a click
+      // came back with the next show - the clear wiped the tree's state and
+      // nothing restored it.
+      this._oldStates = currentStates(this.viewer);
       this.showViewer();
     } else {
       this.addShapes();
@@ -939,6 +949,19 @@ export class CadViewerView extends DOMWidgetView {
     this.activeTab = landedTab;
     this.model.set("tab", landedTab);
     this.model.save_changes();
+
+    // What the show asked for wins; otherwise the user's prior visibility
+    // choices are restored for whatever survived into the new model - one
+    // batched setStates either way, as the page hosts do it. The request is
+    // its own trait: `states` is the viewer's report, and the render has just
+    // rewritten it with the new model's all-visible tree.
+    restoreStates(
+      this.viewer,
+      this.shapes.shapes,
+      this._oldStates,
+      this.model.get("requested_states")
+    );
+    this._oldStates = null;
 
     this.clipping = {
       sliders: [

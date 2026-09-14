@@ -271,6 +271,7 @@ def show(
     studio_4k_env_maps=None,
     tab=None,
     analysis_tool=None,
+    states=None,
     timeit=None,
     debug=None,
 ):
@@ -341,6 +342,11 @@ def show(
         direct_intensity:  Intensity of direct light (default=1.10)
         metalness:         Metalness property of the default material (default=0.30)
         roughness:         Roughness property of the default material (default=0.65)
+
+    - Tree
+        states:            Visibility to apply after the render, {path: (faces, edges)} with 0/1 each,
+                           for the paths it names; the other paths keep what they showed before
+                           (default=None, i.e. restore what the previous show had hidden)
 
     - Debug
         debug:             Show debug statements to the VS Code browser console (default=False)
@@ -448,6 +454,7 @@ def show(
     kwargs["studio_texture_mapping"] = preset("studio_texture_mapping", studio_texture_mapping, "parametric")
     kwargs["studio_4k_env_maps"] = preset("studio_4k_env_maps", studio_4k_env_maps, False)
     kwargs["tab"] = preset("tab", tab, None)
+    kwargs["states"] = states
     kwargs["analysis_tool"] = preset("analysis_tool", analysis_tool, None)
     kwargs["timeit"] = preset("timeit", timeit, False)
     kwargs["debug"] = preset("debug", debug, False)

@@ -216,6 +216,16 @@ class CadViewerWidget(
     # pylint: disable=line-too-long
     "dict: Updates to the state of the nested cad objects, key = object path, value = 2-dim tuple of 0/1 (hidden/visible) for object and edges"
 
+    # Not `states`: that trait is the viewer's report of what the tree shows,
+    # and after a render it holds the new model's all-visible tree - so it
+    # cannot also carry what the caller asked for. This one is read once, at
+    # the render, and applied over the restored choices, as `config.states`
+    # is in the page hosts.
+    requested_states = Dict(
+        Tuple(Integer(), Integer()), allow_none=True, default_value=None
+    ).tag(sync=True)
+    "dict: The states `show(states=...)` asked for, applied after the render; None when it asked for none"
+
     tracks = List(allow_none=True).tag(sync=True)
     # pylint: disable=line-too-long
     "unicode: Serialized list of animation track arrays, see [AnimationTrack.to_array](/widget.html#cad_viewer_widget.widget.AnimationTrack.to_array)"
@@ -682,6 +692,7 @@ class CadViewer:
         studio_4k_env_maps=None,
         tab=None,
         analysis_tool=None,
+        states=None,
         timeit=False,
         debug=False,
         _is_logo=False,
@@ -732,6 +743,8 @@ class CadViewer:
             Collapse CAD tree (1: collapse nodes with single leaf, 2: collapse all nodes)
         normal_Len : int, default 0
             If > 0, the vertex normals will be rendered with the length given be this parameter
+        states : dict, default None
+            Visibility to apply after the render, {path: (faces, edges)} with 0/1 each; None restores what the previous show had hidden
         default_edgecolor : string, default "#707070"
             The default edge color in web format, e.g. '#707070'
         default_opacity : float, default 0.5
@@ -999,6 +1012,9 @@ class CadViewer:
             self.widget.studio_4k_env_maps = studio_4k_env_maps
             if tab is not None:
                 self.widget.tab = tab
+            # Every show, None included: what an earlier show asked for must
+            # not be applied to this one.
+            self.widget.requested_states = states
             self.widget.analysis_tool = analysis_tool
             self.widget.timeit = timeit
             self.widget.clip_slider_0 = clip_slider_0
