@@ -542,8 +542,18 @@ export class CadViewerView extends DOMWidgetView {
         // 810px panel, the canvas clipped at the panel's edge. The core's
         // `normalizeWidth` in page.js takes the tree off the floor the same
         // way, so the two hosts now agree.
-        const reserved = displayOptions.glass ? 0 : displayOptions.treeWidth;
-        width = Math.max(MIN_TOTAL_WIDTH - reserved, width - reserved - 12);
+        //
+        // The tree takes its width only when it is shown beside the canvas:
+        // not in glass mode, and not with the tools off, which hides it. And
+        // the layout's own margins and borders come to 20px, the same figure
+        // the page hosts' `normalizeWidth` reserves; 12 left the toolbar 2px
+        // wider than the panel, and on Windows, where a scrollbar takes
+        // space, that overflow put a scrollbar into the panel, which shrank
+        // the observed box, which resized the viewer, which moved the
+        // scrollbar - the sidecar flickered in a loop.
+        const reserved =
+          displayOptions.glass || !displayOptions.tools ? 0 : displayOptions.treeWidth;
+        width = Math.max(MIN_TOTAL_WIDTH - reserved, width - reserved - 20);
         height = height - 60;
         const aspect_ratio = this.model.get("aspect_ratio");
 

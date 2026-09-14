@@ -14,6 +14,14 @@
   top: 0px !important;
 }
 
+/* The viewer is sized to the panel by the ResizeObserver; whatever is left
+   over is clipped, never scrolled. A scrollbar would take space where they do
+   (Windows), shrink the box the observer watches, and resize the viewer into
+   a loop. */
+.cvw-sidecar .jp-OutputArea-output {
+  overflow: hidden;
+}
+
 .cvw-sidecar>.lm-Widget>.jp-OutputPrompt {
   width: 0px !important;
   flex: 0 0 0;
