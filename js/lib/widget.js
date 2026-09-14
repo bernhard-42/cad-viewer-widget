@@ -495,8 +495,11 @@ export class CadViewerView extends DOMWidgetView {
       zebraTool: true,
       studioTool: true,
       zscaleTool: false,
-      // measurements are computed by the Python backend, not the built-in one
-      externalMeasurementBackend: true
+      // Measurements are computed by the Python backend - when there is one.
+      // A model without a live comm has no kernel behind it: the html-manager
+      // embed of `export_html`, or a widget whose kernel is gone. There the
+      // renderer's own mesh measurement is the one that can answer.
+      externalMeasurementBackend: this.model.comm_live === true
     }, {
       cadWidth: this.model.get("cad_width"),
       height: this.model.get("height"),
