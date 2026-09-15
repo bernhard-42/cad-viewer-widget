@@ -153,8 +153,8 @@ class CadViewerWidget(
     _model_name = Unicode("CadViewerModel").tag(sync=True)
     _view_module = Unicode("cad-viewer-widget").tag(sync=True)
     _model_module = Unicode("cad-viewer-widget").tag(sync=True)
-    _view_module_version = Unicode("4.1.4").tag(sync=True)
-    _model_module_version = Unicode("4.1.4").tag(sync=True)
+    _view_module_version = Unicode("4.1.5").tag(sync=True)
+    _model_module_version = Unicode("4.1.5").tag(sync=True)
 
     #
     # Internal id
@@ -2125,7 +2125,11 @@ class CadViewer:
           the version this package declares, so it needs the matching
           `cad-viewer-widget` release to be published there.
         """
-        state = dependency_state(self.widget)
+        # Every trait, defaults included. ipywidgets drops the traits that sit at
+        # their Python default, and the page fills the gap with the JavaScript
+        # model's default, which is `null` for all of them - a null `control`
+        # let three-cad-viewer pick orbit for every export made with trackball.
+        state = dependency_state(self.widget, drop_defaults=False)
 
         # The exported page renders what the state says. Three traits describe
         # this widget's place in JupyterLab rather than the view: a sidecar
