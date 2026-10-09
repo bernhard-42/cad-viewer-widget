@@ -60,6 +60,7 @@ NO_TRAIT = {
     "render_normals": "sent as the `normal_len` trait, computed by the tessellator",
     "show_parent": "Python-side: decides what `show` collects",
     "show_locals": "Python-side: decides what `show` collects",
+    "python_enumeration": "tessellation: names the objects, consumed by ocp_tessellate, never sent",
 }
 
 # Traitlets that are not config keys, and why.
@@ -73,6 +74,7 @@ NOT_A_CONFIG_KEY = {
     "shapes": "widget: the model itself, not a setting for it",
     "tracks": "widget: animation tracks",
     "state_updates": "widget: incremental tree-state updates",
+    "requested_states": "widget: the states `show(states=...)` asked for, applied once after the render",
     "measure": "widget: the measurement result handed back",
     "measure_callback": "widget: a Callable, not synced",
     "animation_speed": "widget: animation playback speed",
