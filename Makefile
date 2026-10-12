@@ -83,7 +83,7 @@ create-release:
 
 install: dist
 	@echo "=> Installing cad-viewer-widget"
-	@pip install --upgrade .
+	@uv pip install --upgrade .
 
 check_dist:
 	@twine check dist/*
