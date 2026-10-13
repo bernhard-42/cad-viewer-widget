@@ -68,18 +68,21 @@ release:
 # PyPI got. No `--target`: the tag exists and says which commit, whichever
 # branch the release was cut from. Both files must exist in dist/ - `make
 # dist` builds them - or nothing is pushed.
+# Only this release's tag is pushed: the local v3.0.0 is an annotated tag while
+# GitHub's is a lightweight one on the same commit, so `git push --tags` is
+# rejected and would stop the target before the release is created.
 create-release:
 	@for f in dist/cad_viewer_widget-$(CURRENT_VERSION)-py3-none-any.whl \
 	         dist/cad_viewer_widget-$(CURRENT_VERSION).tar.gz; do \
 	    test -f $$f || { echo "missing $$f - run make dist first"; exit 1; }; \
 	done
-	@git push
-	@git push --tags
+	@git push origin master
+	@git push origin v$(CURRENT_VERSION)
 	@gh release create v$(CURRENT_VERSION) \
 	    "dist/cad_viewer_widget-$(CURRENT_VERSION)-py3-none-any.whl#Python $(CURRENT_VERSION) - wheel (PyPI)" \
 	    "dist/cad_viewer_widget-$(CURRENT_VERSION).tar.gz#Python $(CURRENT_VERSION) - source (PyPI)" \
 	    --title "cad-viewer-widget $(CURRENT_VERSION)" \
-	    --notes "$(CURRENT_VERSION) on PyPI and npm. See the commit log."
+	    --notes "$(CURRENT_VERSION) on PyPI and npm. See CHANGELOG.md."
 
 install: dist
 	@echo "=> Installing cad-viewer-widget"
