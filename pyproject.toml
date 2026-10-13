@@ -56,7 +56,6 @@ exclude = [".github", "binder", "examples", "docs", "notebooks", ".[a-z]*"]
 
 [tool.hatch.build.targets.wheel.shared-data]
 "cad_viewer_widget/labextension" = "share/jupyter/labextensions/cad-viewer-widget"
-"install.json" = "share/jupyter/labextensions/cad-viewer-widget/install.json"
 
 [tool.hatch.build.hooks.version]
 path = "cad_viewer_widget/_version.py"
