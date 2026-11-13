@@ -10,7 +10,8 @@ import {
   currentStates,
   currentValue,
   isApplicable,
-  restoreStates
+  restoreStates,
+  selectionText
 } from "ocp-viewer-core";
 
 import { isTolEqual } from "./utils.js";
@@ -71,6 +72,11 @@ const NOTIFICATION_TRAITS = new Set([
   "zoom_speed",
   "pan_speed",
   "rotate_speed",
+  "cursor_pivot",
+  "zoom_to_cursor",
+  // three-cad-viewer 5.2: the user's own changes (keys, dropdown) and the
+  // reset to "none" every render reports come back into the trait.
+  "shape_filter",
   "clip_intersection",
   "clip_planes",
   "clip_object_colors",
@@ -160,6 +166,9 @@ const TRAIT_TO_OPTION = {
     zoom_speed: "zoomSpeed",
     pan_speed: "panSpeed",
     rotate_speed: "rotateSpeed",
+    cursor_pivot: "cursorPivot",
+    zoom_to_cursor: "zoomToCursor",
+    shape_filter: "shapeFilter",
     center_grid: "centerGrid",
     clip_slider_0: "clipSlider0",
     clip_slider_1: "clipSlider1",
@@ -334,6 +343,8 @@ export class CadViewerModel extends DOMWidgetModel {
       zoom_speed: null,
       pan_speed: null,
       rotate_speed: null,
+      cursor_pivot: null,
+      zoom_to_cursor: null,
       animation_speed: null,
 
       // Read only traitlets
@@ -764,9 +775,12 @@ export class CadViewerView extends DOMWidgetView {
       } else if (key === "selected") {
         // A Select-tool selection lands in the system clipboard. The browser
         // holds the clipboard, and the selection click supplies the user
-        // activation the clipboard API requires.
-        if (Array.isArray(new_value) && new_value.length > 0) {
-          navigator.clipboard?.writeText(new_value.join(",")).catch((error) => {
+        // activation the clipboard API requires. The text is the core's, the
+        // same the page hosts copy; an empty selection has none, so the
+        // clipboard is kept then.
+        const text = selectionText(new_value);
+        if (text !== null) {
+          navigator.clipboard?.writeText(text).catch((error) => {
             console.warn("cad-viewer-widget: selection not copied to clipboard:", error);
           });
         }

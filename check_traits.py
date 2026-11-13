@@ -61,6 +61,11 @@ NO_TRAIT = {
     "show_parent": "Python-side: decides what `show` collects",
     "show_locals": "Python-side: decides what `show` collects",
     "python_enumeration": "tessellation: names the objects, consumed by ocp_tessellate, never sent",
+    # The agent's actions (ocp_viewer_core.keys.AGENT), sent only by the core's
+    # private agent methods. Agent mode exists only in build123d Studio.
+    "agent_highlight": "agent: Studio only, not a setting of this viewer",
+    "clear_selection": "agent: Studio only, not a setting of this viewer",
+    "selection": "agent: Studio only, not a setting of this viewer",
 }
 
 # Traitlets that are not config keys, and why.

@@ -197,6 +197,8 @@ def viewer_args(config):
             "zoom_speed",
             "pan_speed",
             "rotate_speed",
+            "cursor_pivot",
+            "zoom_to_cursor",
             "grid_font_size",
             "zebra_count",
             "zebra_opacity",

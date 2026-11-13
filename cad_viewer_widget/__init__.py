@@ -252,6 +252,8 @@ def show(
     zoom_speed=None,
     pan_speed=None,
     rotate_speed=None,
+    cursor_pivot=None,
+    zoom_to_cursor=None,
     grid_font_size=None,
     zebra_count=None,
     zebra_opacity=None,
@@ -335,6 +337,11 @@ def show(
         pan_speed:         Speed of mouse panning (default=1)
         rotate_speed:      Speed of mouse rotate (default=1)
         zoom_speed:        Speed of mouse zoom (default=1)
+        cursor_pivot:      Rotate around the point under the cursor, or around the centre of the
+                           visible objects when the drag starts on the background; False rotates
+                           around the camera target (default=True)
+        zoom_to_cursor:    Zoom towards the cursor with the wheel and trackpad pinch; False zooms
+                           towards the centre of the view (default=True)
 
     - Renderer
         default_edgecolor: Default mesh color (default=(128, 128, 128))
@@ -434,6 +441,8 @@ def show(
     kwargs["zoom_speed"] = preset("zoom_speed", zoom_speed, 0.5)
     kwargs["pan_speed"] = preset("pan_speed", pan_speed, 0.5)
     kwargs["rotate_speed"] = preset("rotate_speed", rotate_speed, 1.0)
+    kwargs["cursor_pivot"] = preset("cursor_pivot", cursor_pivot, True)
+    kwargs["zoom_to_cursor"] = preset("zoom_to_cursor", zoom_to_cursor, True)
     kwargs["grid_font_size"] = preset("grid_font_size", grid_font_size, 12)
     # zebra settings keep their last value when not given (like ocp_vscode's viewer)
     kwargs["zebra_count"] = preset("zebra_count", zebra_count, None)

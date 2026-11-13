@@ -153,8 +153,8 @@ class CadViewerWidget(
     _model_name = Unicode("CadViewerModel").tag(sync=True)
     _view_module = Unicode("cad-viewer-widget").tag(sync=True)
     _model_module = Unicode("cad-viewer-widget").tag(sync=True)
-    _view_module_version = Unicode("4.2.0").tag(sync=True)
-    _model_module_version = Unicode("4.2.0").tag(sync=True)
+    _view_module_version = Unicode("4.3.0").tag(sync=True)
+    _model_module_version = Unicode("4.3.0").tag(sync=True)
 
     #
     # Internal id
@@ -444,6 +444,15 @@ class CadViewerWidget(
     rotate_speed = Float(allow_none=True).tag(sync=True)
     "float: Speed of rotation with the mouse"
 
+    cursor_pivot = Bool(allow_none=True, default_value=None).tag(sync=True)
+    "bool: Whether to rotate around the point under the cursor"
+
+    zoom_to_cursor = Bool(allow_none=True, default_value=None).tag(sync=True)
+    "bool: Whether the wheel and trackpad pinch zoom towards the cursor"
+
+    shape_filter = Unicode(allow_none=True, default_value=None).tag(sync=True)
+    "unicode: Which kind a pick and a select-tool click take: 'none', 'vertex', 'edge', 'face' or 'solid'. Reset to 'none' for every new model"
+
     animation_speed = Float(allow_none=True).tag(sync=True)
     "float: Animation speed"
 
@@ -673,6 +682,8 @@ class CadViewer:
         zoom_speed=None,
         pan_speed=None,
         rotate_speed=None,
+        cursor_pivot=None,
+        zoom_to_cursor=None,
         grid_font_size=None,
         zebra_count=None,
         zebra_opacity=None,
@@ -773,6 +784,12 @@ class CadViewer:
             Speed of panning with the mouse
         rotate_speed : float, default 1.0
             Speed of rotation with the mouse
+        cursor_pivot : bool, default True
+            Whether to rotate around the point under the cursor, or around the centre of the visible
+            objects when the drag starts on the background; False rotates around the camera target
+        zoom_to_cursor : bool, default True
+            Whether the wheel and trackpad pinch zoom towards the cursor; False zooms towards the
+            centre of the view
         timeit : bool or int, default False
             Whether to output timing info to the browser console (True, or a level 1-3) or not (False, 0)
 
@@ -988,6 +1005,8 @@ class CadViewer:
             self.widget.zoom_speed = zoom_speed
             self.widget.pan_speed = pan_speed
             self.widget.rotate_speed = rotate_speed
+            self.widget.cursor_pivot = cursor_pivot
+            self.widget.zoom_to_cursor = zoom_to_cursor
             self.widget.grid_font_size = grid_font_size
             if zebra_count is not None:
                 self.widget.zebra_count = zebra_count
@@ -1703,6 +1722,45 @@ class CadViewer:
         self.widget.rotate_speed = value
 
     @property
+    def cursor_pivot(self):
+        """
+        Get or set the CadViewerWidget traitlet `cursor_pivot`
+        see [CadViewerWidget.cursor_pivot](./widget.html#cad_viewer_widget.widget.CadViewerWidget.cursor_pivot)
+        """
+
+        return self.widget.cursor_pivot
+
+    @cursor_pivot.setter
+    def cursor_pivot(self, value):
+        self.widget.cursor_pivot = value
+
+    @property
+    def zoom_to_cursor(self):
+        """
+        Get or set the CadViewerWidget traitlet `zoom_to_cursor`
+        see [CadViewerWidget.zoom_to_cursor](./widget.html#cad_viewer_widget.widget.CadViewerWidget.zoom_to_cursor)
+        """
+
+        return self.widget.zoom_to_cursor
+
+    @zoom_to_cursor.setter
+    def zoom_to_cursor(self, value):
+        self.widget.zoom_to_cursor = value
+
+    @property
+    def shape_filter(self):
+        """
+        Get or set the CadViewerWidget traitlet `shape_filter`
+        see [CadViewerWidget.shape_filter](./widget.html#cad_viewer_widget.widget.CadViewerWidget.shape_filter)
+        """
+
+        return self.widget.shape_filter
+
+    @shape_filter.setter
+    def shape_filter(self, value):
+        self.widget.shape_filter = value
+
+    @property
     def zoom_speed(self):
         """
         Get or set the CadViewerWidget traitlet `zoom_speed`
@@ -2242,6 +2300,9 @@ class CadViewer:
             "zoom_speed": self.widget.zoom_speed,
             "pan_speed": self.widget.pan_speed,
             "rotate_speed": self.widget.rotate_speed,
+            "cursor_pivot": self.widget.cursor_pivot,
+            "zoom_to_cursor": self.widget.zoom_to_cursor,
+            "shape_filter": self.widget.shape_filter,
             "animation_speed": self.widget.animation_speed,
             "lastPick": self.widget.lastPick,
             "zebra_count": self.widget.zebra_count,
@@ -2339,6 +2400,9 @@ class CadViewer:
                 zoom_speed:         {self.widget.zoom_speed}
                 pan_speed:          {self.widget.pan_speed}
                 rotate_speed:       {self.widget.rotate_speed}
+                cursor_pivot:       {self.widget.cursor_pivot}
+                zoom_to_cursor:     {self.widget.zoom_to_cursor}
+                shape_filter:       {self.widget.shape_filter}
                 animation_speed:    {self.widget.animation_speed}
                 lastPick:           {self.widget.lastPick}
                 modifier_keys:      {self.widget.modifier_keys}
