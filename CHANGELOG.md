@@ -5,7 +5,7 @@ Up to 4.1.5 the release notes are the commit log.
 ## unreleased
 
 - **Features**
-    - **three-cad-viewer 5.2.0** (was 5.1.3)
+    - **three-cad-viewer 5.2.1** (was 5.1.3)
         - A rotate drag that starts on the model turns the camera around the point under the cursor, one that starts on the background around the centre of the visible objects. The wheel, trackpad pinch and middle-button drag zoom towards the cursor. Both are on by default. The camera target moves with the pivot; Reset and Recenter put it back
         - A double-click picks what the hover highlights: it follows the topology filter (All / Vertex / Edge / Face / Solid), and the bounding box wraps the picked face or edge. A vertex gets a marker, and the info panel names the picked element and shows a vertex's coordinates. A second double-click on the same element removes the box
         - `lastPick` has the new fields `component`, the full path of what was picked, and `point`, the world coordinates of the double-clicked point, and it is sent on every double-click
@@ -19,6 +19,7 @@ Up to 4.1.5 the release notes are the commit log.
     - `lastPick.boundingBox` and `lastPick.boundingSphere` describe the picked face, edge or vertex, no longer its object; a vertex has a box of size zero. With the filter on Solid, for hide and isolate, for objects that are faces, edges or vertices themselves, and for clicks in the tree they are the object's box as before (three-cad-viewer 5.2.0)
     - Geometry types in the status line and the properties panel read `B-spline surface` instead of `bspline` or `BSplineSurface`, and `Surface of revolution` instead of `surface of revolution` (three-cad-viewer 5.2.0)
     - A selection copied with the select tool keeps the indices for one object and one kind, e.g. `6,16,7,17`; with several objects or kinds it is one labelled line per object and kind, `# <object path> <kind>` followed by its indices (ocp-viewer-core 1.2.0)
+    - Trackball: holding `a`, `s` or `d` no longer changes a drag to rotate, zoom or pan; these keys also reacted to typing elsewhere on the page, and `a` and `s` changed the shape filter at the same time (three-cad-viewer 5.2.1)
 
 - **Fixes**
     - Toolbar tooltips and the grid menu are no longer cut off at the toolbar's bottom edge in Safari and other WebKit browsers ([three-cad-viewer#47](https://github.com/bernhard-42/three-cad-viewer/pull/47), three-cad-viewer 5.2.0)
@@ -28,6 +29,7 @@ Up to 4.1.5 the release notes are the commit log.
     - The help names the filter key for all object types correctly, `a`, and shows scrollbars only when it doesn't fit (three-cad-viewer 5.2.0)
     - The topology filter keys `a` / `v` / `e` / `f` / `s` and the select tool's Escape and Backspace act only when the viewer has focus: Cmd-V, or a `v` typed elsewhere such as in a notebook cell, no longer sets the filter to Vertex, and Backspace in a text field no longer removes a selected element (three-cad-viewer 5.2.0)
     - The measurement panel stays fully inside the viewer when it reopens at its previous position after a new model, a smaller viewer or a larger result (three-cad-viewer 5.2.0)
+    - Escape with the filter dropdown open closes only the dropdown; the next Escape clears the selection or stops the animation. It used to clear the selection as well, and without a tool it did not close the dropdown (three-cad-viewer 5.2.1)
 
 ## v4.2.0 (2026-10-13)
 
