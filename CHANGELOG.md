@@ -2,7 +2,7 @@
 
 Up to 4.1.5 the release notes are the commit log.
 
-## unreleased
+## v4.3.0 (2026-11-20)
 
 - **Features**
     - **three-cad-viewer 5.2.1** (was 5.1.3)
